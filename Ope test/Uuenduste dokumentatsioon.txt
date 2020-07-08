@@ -1,2 +1,0 @@
-Versioon 1.0
-	Bakalaurusetöö lõppseis - lisatud vajalikud teksti- ja skriptifailid.
