@@ -20,9 +20,9 @@
 hs_err_pid*
 
 # Database files
-#*.db
+*.db
 # Log file
-#*.log
+*.log
 
 # Result files
 tulemus.txt
