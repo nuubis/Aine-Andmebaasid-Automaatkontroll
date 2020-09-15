@@ -1,9 +1,6 @@
 # Compiled class file
 *.class
 
-# Log file
-*.log
-
 # BlueJ files
 *.ctxt
 
@@ -23,7 +20,9 @@
 hs_err_pid*
 
 # Database files
-*.db
+#*.db
+# Log file
+#*.log
 
 # Result files
 tulemus.txt
