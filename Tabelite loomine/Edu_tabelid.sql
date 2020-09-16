@@ -51,6 +51,7 @@ PersonsId INTEGER NOT NULL,
 Responsible SMALLINT);
 
 CREATE TABLE Course(
+/* Created by Martti Kakk */
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
 FacultyId INTEGER NOT NULL,
@@ -149,6 +150,7 @@ CREATE VIEW v_oigusteaduskonna_inimesed AS
 SELECT * FROM person WHERE facultyId = 2;
 
 CREATE VIEW v_oigusteaduskonna_inimesed_mini
+/* Created by Martti Kakk */
 (eesnimi,perenimi) AS
 SELECT FirstName, LastName
 FROM person WHERE facultyId = 2;
@@ -171,6 +173,7 @@ ORDER BY f.Name;
 
 // Vaadete loomine (ise)
 create view v_persons_atleast_4eap (FirstName, LastName) as
+/* Created by Martti Kakk */
 select distinct FirstName, LastName from person, course, faculty, registration 
 where Person.FacultyId = faculty.id
 and registration.courseid = course.id
@@ -180,6 +183,7 @@ and faculty.name = 'Matemaatika-informaatikateaduskond'
 and course.eap > 3;
 
 create view v_mostA(FirstName, LastName, NrOfA) as
+/* Created by Martti Kakk */
 select distinct FirstName, LastName, count(*) as NrOfA
 from Person join Faculty on Person.facultyId = Faculty.id
 join Course on Course.FacultyId = Faculty.id
@@ -191,6 +195,7 @@ and Course.GradeType = 'Eksam'
 group by FirstName, LastName;
 
 create view v_andmebaasideTeooria(PersonId, FirstName, LastName) as
+/* Created by Martti Kakk */
 select distinct person.id, FirstName, LastName from Person
 join faculty on person.facultyId = faculty.id
 join registration on registration.PersonId = Person.Id
@@ -198,6 +203,7 @@ join course on course.facultyId = faculty.id
 where course.name = 'Andmebaaside teooria';
 
 create view v_top40A(FirstName, LastName, nrOfA) as
+/* Created by Martti Kakk */
 select TOP 40 FirstName, LastName, count(*) as NrOfA from Person
 key join registration
 where FinalGrade = 'A'
@@ -205,6 +211,7 @@ group by FirstName, LastName
 order by NrOfA desc;
 
 create view v_top30Students(FirstName, LastName, AverageGrade) as
+/* Created by Martti Kakk */
 select top 30 FirstName, LastName, 
 avg(case FinalGrade 
     when 'A' then 5
