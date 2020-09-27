@@ -1,23 +1,24 @@
 // Delete if exists
 // Tabelid
-if exists (select * from systable where table_name = 'Faculty') 							then drop table faculty endif;
-if exists (select * from systable where table_name = 'Person') 								then drop table person endif;
-if exists (select * from systable where table_name = 'Registration') 						then drop table registration endif;
-if exists (select * from systable where table_name = 'Lecturer') 							then drop table Lecturer endif;
-if exists (select * from systable where table_name = 'Course') 								then drop table course endif;
+if exists (select * from systable where table_name = 'Institutes') 							then drop table Institutes endif;
+if exists (select * from systable where table_name = 'Persons') 								then drop table Persons endif;
+if exists (select * from systable where table_name = 'Registrations') 						then drop table Registrations endif;
+if exists (select * from systable where table_name = 'Lecturers') 							then drop table Lecturers endif;
+if exists (select * from systable where table_name = 'Courses') 								then drop table Courses endif;
 // Vaated
 if exists (select * from systable where table_name = 'v_oigusteaduskonna_inimesed') 		then drop view v_oigusteaduskonna_inimesed endif;
 if exists (select * from systable where table_name = 'v_oigusteaduskonna_inimesed_mini') 	then drop view v_oigusteaduskonna_inimesed_mini endif;
-if exists (select * from systable where table_name = 'v_persons_faculty') 					then drop view v_persons_faculty endif;
-if exists (select * from systable where table_name = 'v_faculty_deans') 					then drop view v_faculty_deans endif;
-if exists (select * from systable where table_name = 'v_faculty_deans') 					then drop view v_faculty_deans endif;
+if exists (select * from systable where table_name = 'v_persons_Institute') 					then drop view v_persons_Institute endif;
+if exists (select * from systable where table_name = 'v_Institute_deans') 					then drop view v_Institute_deans endif;
+if exists (select * from systable where table_name = 'v_Institute_deans') 					then drop view v_Institute_deans endif;
 if exists (select * from systable where table_name = 'v_persons_atleast_4eap') 				then drop view v_persons_atleast_4eap endif;
 if exists (select * from systable where table_name = 'v_mostA') 							then drop view v_mostA endif;
 if exists (select * from systable where table_name = 'v_andmebaasideTeooria') 				then drop view v_andmebaasideTeooria endif;
 if exists (select * from systable where table_name = 'v_top40A') 							then drop view v_top40A endif;
 if exists (select * from systable where table_name = 'v_top30Students') 					then drop view v_top30Students endif;
+
 // Tabelite loomine (antud)
-CREATE TABLE Faculty(
+CREATE TABLE Institutes(
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
 Name VARCHAR(50) NOT NULL,
@@ -27,185 +28,182 @@ ViceDeanId INTEGER,
 UNIQUE(Name)
 );
 
-CREATE TABLE Person(
+CREATE TABLE Persons(
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
 FirstName VARCHAR(30) NOT NULL,
 LastName VARCHAR(30) NOT NULL,
-FacultyId INTEGER NOT NULL,
+InstituteId INTEGER NOT NULL,
 SSN VARCHAR(11),
 UNIQUE(FirstName,LastName));
 
-CREATE TABLE Registration(
+CREATE TABLE Registrations(
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
 CourseId INTEGER NOT NULL,
 PersonId INTEGER NOT NULL,
 FinalGrade VARCHAR(1));
 
-CREATE TABLE Lecturer(
+CREATE TABLE Lecturers(
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
-CoursesId INTEGER,
-PersonsId INTEGER NOT NULL,
+CourseId INTEGER,
+PersonId INTEGER NOT NULL,
 Responsible SMALLINT);
 
-CREATE TABLE Course(
-/* Created by Martti Kakk */
+CREATE TABLE Courses(
 Id INTEGER NOT NULL DEFAULT
 AUTOINCREMENT PRIMARY KEY,
-FacultyId INTEGER NOT NULL,
+InstituteId INTEGER NOT NULL,
 Name VARCHAR(50) NOT NULL,
 Code VARCHAR(20),
 EAP INTEGER,
 GradeType VARCHAR(8));
 
 // Andmete sisestamine (antud)
-INPUT INTO Person FROM 'C:\TEMP\person.txt' FORMAT ASCII DELIMITED BY '\x09';
+INPUT INTO Persons FROM 'C:\TEMP\Persons.txt' FORMAT ASCII DELIMITED BY '\x09';
 
-INPUT INTO Faculty FROM 'C:\TEMP\faculty.txt' FORMAT ASCII DELIMITED BY '\x09';
+INPUT INTO Institutes FROM 'C:\TEMP\Institutes.txt' FORMAT ASCII DELIMITED BY '\x09';
 
 -- Ise
-INPUT INTO Registration FROM 'C:\TEMP\registrations.txt' FORMAT ASCII DELIMITED BY '\x09';
+INPUT INTO Registrations FROM 'C:\TEMP\registrations.txt' FORMAT ASCII DELIMITED BY '\x09';
 
-INPUT INTO Lecturer FROM 'C:\TEMP\lecturers.txt' FORMAT ASCII DELIMITED BY '\x09';
+INPUT INTO Lecturers FROM 'C:\TEMP\lecturers.txt' FORMAT ASCII DELIMITED BY '\x09';
 
-INPUT INTO Course FROM 'C:\TEMP\course.txt' FORMAT ASCII DELIMITED BY '\x09';
+INPUT INTO Courses FROM 'C:\TEMP\Courses.txt' FORMAT ASCII DELIMITED BY '\x09';
 
 // Andmete sisestus vol2
-INSERT INTO Course VALUES (101,9,'Sissejuhatusinformaatikasse','MTAT.05.074',3,'Arvestus');
+INSERT INTO Courses VALUES (101,9,'Sissejuhatus informaatikasse','MTAT.05.074',3,'Arvestus');
 
-INSERT INTO registration
-(CourseId,PersonId,FinalGrade)
-SELECT 101, p.id, NULL
-FROM Course as c
-JOIN Registration as r ON (c.Id = r.CourseId)
-JOIN Person as p ON (r.PersonId = p.Id)
-WHERE c.Name = 'Sissejuhatus ettevõttemajandusse';
+insert into Registrations (CourseId, PersonId, FinalGrade)
+select 101, p.id, NULL from Courses as c
+join Registrations as r on c.id = r.courseid
+join Persons as p on r.PersonId = p.id
+where c.name = 'Sissejuhatus ettevõttemajandusse';
 
 //andmete sisestus (ise)
-insert into course (FacultyId, Name, Code, EAP, GradeType) values(9,'Andmebaaside teooria', 'MTAT.03.998',6 ,'Arvestus');
+insert into Courses (InstituteId, Name, Code, EAP, GradeType) values(9,'Andmebaaside teooria', 'MTAT.03.998',6 ,'Arvestus');
 
-INSERT INTO registration
+INSERT INTO Registrations
 (CourseId,PersonId,FinalGrade)
-SELECT c.id, p.id, r.FinalGrade
-FROM Course as c
-JOIN Registration as r ON (c.Id = r.CourseId)
-JOIN Person as p ON (r.PersonId = p.Id)
-WHERE c.Name = 'Andmebaasid'
-and r.FinalGrade = 'A';
+SELECT c.id, p.id, null
+FROM Courses as c
+JOIN Registrations as r ON (c.Id = r.CourseId)
+JOIN Persons as p ON (r.PersonId = p.Id)
+WHERE c.Name = 'Andmebaasid';
+
 
 // Välisvõtmete loomine (antud)
-ALTER TABLE Registration ADD CONSTRAINT
+ALTER TABLE Registrations ADD CONSTRAINT
 fk_registration_person FOREIGN KEY (PersonId)
-REFERENCES Person (Id) ON DELETE
+REFERENCES Persons (Id) ON DELETE
 CASCADE
 ON UPDATE CASCADE;
 
-ALTER TABLE Faculty ADD CONSTRAINT
-fk_faculty_person_dean FOREIGN KEY (DeanId)
-REFERENCES Person (Id) ON DELETE 
+ALTER TABLE Institutes ADD CONSTRAINT
+fk_institute_person_dean FOREIGN KEY (DeanId)
+REFERENCES Persons (Id) ON DELETE 
 SET NULL
 ON UPDATE CASCADE;
 
 -- Ise
-ALTER TABLE Registration ADD CONSTRAINT
+ALTER TABLE Registrations ADD CONSTRAINT
 fk_registration_course FOREIGN KEY (CourseId)
-REFERENCES Course (Id) ON DELETE
+REFERENCES Courses (Id) ON DELETE
 CASCADE
 ON UPDATE CASCADE;
 
-ALTER TABLE Lecturer ADD CONSTRAINT
-fk_lecturer_person FOREIGN KEY (PersonsId)
-REFERENCES Person (Id) ON DELETE
+ALTER TABLE Lecturers ADD CONSTRAINT
+fk_lecturer_person FOREIGN KEY (PersonId)
+REFERENCES Persons (Id) ON DELETE
 CASCADE
 ON UPDATE CASCADE;
 
-ALTER TABLE Lecturer ADD CONSTRAINT
-fk_lecturer_course FOREIGN KEY (CoursesId)
-REFERENCES Course (Id) ON DELETE 
+ALTER TABLE Lecturers ADD CONSTRAINT
+fk_lecturer_course FOREIGN KEY (CourseId)
+REFERENCES Courses (Id) ON DELETE 
 SET NULL
 ON UPDATE CASCADE;
 
-ALTER TABLE Course ADD CONSTRAINT
-fk_course_faculty FOREIGN KEY (FacultyId)
-REFERENCES Faculty (Id) ON DELETE
+ALTER TABLE Courses ADD CONSTRAINT
+fk_course_institute FOREIGN KEY (InstituteId)
+REFERENCES Institutes (Id) ON DELETE
 CASCADE
 ON UPDATE CASCADE;
 
-ALTER TABLE Faculty ADD CONSTRAINT
-fk_faculty_person_vice_dean FOREIGN KEY (ViceDeanId)
-REFERENCES Person (Id) ON DELETE 
+ALTER TABLE Institutes ADD CONSTRAINT
+fk_institute_person_vice_dean FOREIGN KEY (ViceDeanId)
+REFERENCES Persons (Id) ON DELETE 
 SET NULL
 ON UPDATE CASCADE;
 
-ALTER TABLE Person ADD CONSTRAINT
-fk_person_faculty FOREIGN KEY (FacultyId)
-REFERENCES Faculty (Id) ON DELETE
+ALTER TABLE Persons ADD CONSTRAINT
+fk_person_institute FOREIGN KEY (InstituteId)
+REFERENCES Institutes (Id) ON DELETE
 CASCADE
 ON UPDATE CASCADE;
 
 // Vaadete loomine (antud)
 CREATE VIEW v_oigusteaduskonna_inimesed AS
-SELECT * FROM person WHERE facultyId = 2;
+SELECT * FROM Persons WHERE InstituteId = 2;
 
 CREATE VIEW v_oigusteaduskonna_inimesed_mini
 /* Created by Martti Kakk */
 (eesnimi,perenimi) AS
 SELECT FirstName, LastName
-FROM person WHERE facultyId = 2;
+FROM Persons WHERE InstituteId = 2;
 
-CREATE VIEW v_persons_faculty AS
-SELECT p.FirstName, p.LastName, f.Name as FacultyName,
-f.Address as FacultyAddress
-FROM person as p JOIN faculty as f ON (p.facultyId = f.id);
+CREATE VIEW v_persons_institute AS
+SELECT p.FirstName, p.LastName, i.Name as InstituteName,
+i.Address as InstituteAddress
+FROM Persons as p JOIN Institutes as i ON (p.InstituteId = i.id);
 
-CREATE VIEW v_faculty_deans (FacultyName,
+CREATE VIEW v_Institute_deans (InstituteName,
 DeanName, ViceDeanName) AS
-SELECT f.Name, d.FirstName+' '+d.LastName as
+SELECT i.Name, d.FirstName+' '+d.LastName as
 deanName, v.FirstName+' '+v.LastName as
 viceDeanName
-FROM Faculty as f
-JOIN Person as d ON (f.deanId = d.id)
-JOIN Person as v ON (f.viceDeanId = v.id)
-ORDER BY f.Name;
+FROM Institutes as i
+JOIN Persons as d ON (i.deanId = d.id)
+JOIN Persons as v ON (i.viceDeanId = v.id)
+ORDER BY i.Name;
 
 
 // Vaadete loomine (ise)
 create view v_persons_atleast_4eap (FirstName, LastName) as
 /* Created by Martti Kakk */
-select distinct FirstName, LastName from person, course, faculty, registration 
-where Person.FacultyId = faculty.id
-and registration.courseid = course.id
-and personid = person.id
-and Course.FacultyId = faculty.id 
-and faculty.name = 'Matemaatika-informaatikateaduskond'
-and course.eap > 3;
+select distinct FirstName, LastName from Persons, Courses, Institutes, Registrations 
+where Persons.InstituteId = Institutes.id
+and Registrations.courseid = Courses.id
+and PersonId = Persons.id
+and Courses.InstituteId = Institutes.id 
+and Institutes.name = 'Matemaatika-informaatikateaduskond'
+and Courses.eap > 3;
 
 create view v_mostA(FirstName, LastName, NrOfA) as
 /* Created by Martti Kakk */
 select distinct FirstName, LastName, count(*) as NrOfA
-from Person join Faculty on Person.facultyId = Faculty.id
-join Course on Course.FacultyId = Faculty.id
-join Registration on Registration.CourseId = Course.id
+from Persons join Institutes on Persons.InstituteId = Institutes.id
+join Courses on Courses.InstituteId = Institutes.id
+join Registrations on Registrations.CourseId = Courses.id
 where FinalGrade = 'A'
-and Registration.PersonId = Person.id
-and Faculty.Name = 'Matemaatika-informaatikateaduskond'
-and Course.GradeType = 'Eksam'
+and Registrations.PersonId = Persons.id
+and Institutes.Name = 'Matemaatika-informaatikateaduskond'
+and Courses.GradeType = 'Eksam'
 group by FirstName, LastName;
 
 create view v_andmebaasideTeooria(PersonId, FirstName, LastName) as
 /* Created by Martti Kakk */
-select distinct person.id, FirstName, LastName from Person
-join faculty on person.facultyId = faculty.id
-join registration on registration.PersonId = Person.Id
-join course on course.facultyId = faculty.id
-where course.name = 'Andmebaaside teooria';
+select distinct Persons.id, FirstName, LastName from Persons
+join Institutes on Persons.InstituteId = Institutes.id
+join Registrations on Registrations.PersonId = Persons.Id
+join Courses on Courses.InstituteId = Institutes.id
+where Courses.name = 'Andmebaaside teooria';
 
 create view v_top40A(FirstName, LastName, nrOfA) as
 /* Created by Martti Kakk */
-select TOP 40 FirstName, LastName, count(*) as NrOfA from Person
-key join registration
+select TOP 40 FirstName, LastName, count(*) as NrOfA from Persons
+key join Registrations
 where FinalGrade = 'A'
 group by FirstName, LastName
 order by NrOfA desc;
@@ -219,9 +217,9 @@ avg(case FinalGrade
     when 'C' then 3
     when 'D' then 2
     when 'E' then 1
-end) as AverageGrade from Person
-join registration on person.id = registration.personId
-join course on course.id = registration.courseId
-where course.GradeType = 'Eksam'
+end) as AverageGrade from Persons
+join Registrations on Persons.id = Registrations.PersonId
+join Courses on Courses.id = Registrations.courseId
+where Courses.GradeType = 'Eksam'
 group by FirstName, LastName
 order by AverageGrade desc, Firstname asc, Lastname asc;
