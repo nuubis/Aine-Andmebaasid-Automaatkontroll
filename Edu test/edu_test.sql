@@ -45,7 +45,7 @@ create 	or replace variable kodutöö							numeric = 100;
 /*Kodutöö 3 punktid kokku = 100p */
 /* Tabelite punktide muutujad - Hindeskaala punktid, iga kodutöö osa on 100p */
 /* https://github.com/nuubis/Automaattestid-andmebaaside-ainele/wiki/Kodut%C3%B6%C3%B6--3-punktid */
-/* Tabel inimesed punktid, kokku on 6p */
+/* Tabel institutes punktid, kokku on 5p */
 create or replace variable institutes_tabel 								numeric = 5.0;
 create or replace variable institutes_veergude_arv 							numeric = 1.0;
 create or replace variable institutes_id 									numeric = 0.5;
@@ -55,6 +55,16 @@ create or replace variable institutes_deanid 								numeric = 0.5;
 create or replace variable institutes_vicedeanid 							numeric = 0.5;
 create or replace variable institutes_unique_nimi 							numeric = 0.5;
 create or replace variable institutes_kirjete_arv 							numeric = 1.0;
+/* Tabel inimesed punktid, kokku on 5p */
+create or replace variable persons_tabel 									numeric = 5.0;
+create or replace variable persons_veergude_arv 							numeric = 1.0;
+create or replace variable persons_id 										numeric = 0.5;
+create or replace variable persons_firstname 								numeric = 0.5;
+create or replace variable persons_lastname 								numeric = 0.5;
+create or replace variable persons_instituteid 								numeric = 0.5;
+create or replace variable persons_ssn 										numeric = 0.5;
+create or replace variable persons_unique_nimi 								numeric = 0.5;
+create or replace variable persons_kirjete_arv 								numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
@@ -441,36 +451,6 @@ endif;
 
 end;
 
-/* Protseduur, mis kontrollib, kas teatud tabelis on olemas vastav check kitsendus 
-Sissetulevad andmed:
-Check-i definitsioon = check_defn ehk see on selle checki kirjeldus süsteemis
-tabeli nimi = table_name
-veeru nimi = column_name
-
-Protseduuri sisesne muutuja: check_count = check kogus antud tingimustel.
-
-Kõigepealt loetakse kokku tabelist "syscheck" mitu check kitsendust on vastavalt sellele definitsioonile, peab olema ÜKS
-seejärel kui tulemus ei ole 1 siis lisatakse veateade Staatus tabelisse ja kui on 1 siis lisatakse 'OK' Staatus tabelisse
-*/
-create 	procedure check_check(p_check_defn varchar(500), p_table_name varchar(30), p_column_name varchar(50), punktid numeric, Jr integer)
-begin
-declare check_count int;
-declare soovitus varchar(5000);
-
-if 		p_table_name = upper('Inimesed') 
-then	set	soovitus = 'Kui sul on olemas Tabelis "Inimesed" check tingimus veerule "sugu", siis toimi järgmiselt. Ava inimesed tabel ja mine constraints tab-ile. Ava ASA80 properties ja mine definition tab-ile. Salvesta definitsioon nii, et kõik oleks ühel real.'
-else	set soovitus = ''
-endif;
-
-select 	count(*) into check_count		from syscheck where check_defn = p_check_defn;
-if 		check_count = 1				
-then 	insert Staatus values ('Tabel "' || p_table_name || '" check', p_column_name, '-',  								'OK', 	punktid, 	punktid, soovitus, Jr)
-else	insert Staatus values ('Tabel "' || p_table_name || '" check', p_column_name, 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, soovitus, Jr)
-endif;
-
-end;
-
-
 /*
 Järmised 2 protseduuri on enamvähem samad. Üks neist kirjutab kõik vead, hoiatused ja punktide veerud Staatus tabelist tekst (txt) faili ja teine kirjutab need exceli (csv) faili, 
 mille asukoht on C kettal TEMP kaustas.
@@ -544,18 +524,7 @@ andmeteks on: tabeli "Institutes" id, veeru nimi, veeru default tingimus, primar
 ning siis punktide arv, mis saab selle veeru korras oleku eest.
 Selles tabelis on ka täpitähtedega veerg võimalik, kus siis lisatakse check_column_t2pit2ht protseduuri nii täpitähteteta versioon kui ka täpitähtedega
 Tabelis toimub ka check tingimuse kontroll, ehk kas selles tabeli on olemas check tingimus, mis kontrollib kas "sugu" veeru andmeteks on "m" või "n"
-Kui on 7nda kodutöö kontroll, siis toimub ka kirjete arvu kontroll, kus vaadatakse, kas selles tabelis on vähemalt ÜKS kirje.
-
-CREATE TABLE Institutes(
-Id INTEGER NOT NULL DEFAULT
-AUTOINCREMENT PRIMARY KEY,
-Name VARCHAR(50) NOT NULL,
-Address VARCHAR(30),
-DeanId INTEGER,
-ViceDeanId INTEGER,
-UNIQUE(Name)
-);
-*/
+Kui on 7nda kodutöö kontroll, siis toimub ka kirjete arvu kontroll, kus vaadatakse, kas selles tabelis on vähemalt ÜKS kirje. */
 
 
 //Tabeli Institutes kontroll
@@ -576,12 +545,6 @@ if      v_size != 5
 then	insert Staatus values ('Tabel "Institutes"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', institutes_veergude_arv*0, institutes_veergude_arv, '', tabelid_jr) 
 else	insert Staatus values ('Tabel "Institutes"', 'Veergude arv', '-', 'OK', institutes_veergude_arv, institutes_veergude_arv, '', tabelid_jr)
 endif;
-
-/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
- p_table_id integer,     p_column_name varchar(30), 
-                                p_default varchar(30),  p_pkey char(1), 
-                                p_nulls char(1),        p_width integer, 
-								punktid numeric,		Jr integer */
 								
 call 	check_column(v_table_id, 'Id',    'autoincrement',                'y', 'n', 4, institutes_id, tabelid_jr); 
 call 	check_column(v_table_id, 'Name',   null,                'n', 'n', 50, institutes_name, tabelid_jr); 
@@ -620,44 +583,45 @@ Tabelis toimub ka unique tingimuse kontroll, ehk kas leidub veerul "Nimi" unique
 Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT KUUS kirjet.
 */
 
-//Tabeli Klubid kontroll
+//Tabeli Persons kontroll
 create 	procedure table_persons()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
 
-if 		not exists (select * from systable where upper(table_name) = upper('klubid')) 
-then 	insert Staatus values ('Tabel "Klubid"', '-', 'Tabelit ei eksisteeri.', 'VIGA', klubid_tabel*0, klubid_tabel, '', tabelid_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('persons')) 
+then 	insert Staatus values ('Tabel "Persons"', '-', 'Tabelit ei eksisteeri.', 'VIGA', persons_tabel*0, persons_tabel, '', tabelid_jr);
 return;
 endif;
 
-set 	v_table_id = find_table_id('klubid');
+set 	v_table_id = find_table_id('persons');
 
 select 	count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      version != 7  and   v_size != 3             
-then 	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
-elseif	version = 7 and v_size != 4
-then	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', '-', 'OK', klubid_veergude_arv, klubid_veergude_arv, '', tabelid_jr)
+if      v_size != 5                 
+then	insert Staatus values ('Tabel "Persons"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', persons_veergude_arv*0, persons_veergude_arv, '', tabelid_jr) 
+else	insert Staatus values ('Tabel "Persons"', 'Veergude arv', '-', 'OK', persons_veergude_arv, persons_veergude_arv, '', tabelid_jr)
 endif;
-
-call 	check_column(v_table_id, 'Id',       'autoincrement',    'y', 'n', 4, klubid_id, tabelid_jr); 
-call 	check_column(v_table_id, 'Nimi',     null,               'n', 'n', 100, klubid_nimi, tabelid_jr); 
-call 	check_column(v_table_id, 'Asukoht',  'Tartu',            'n', 'n', 70, klubid_asukoht, tabelid_jr);
-if		version = 7 then
-call	check_column(v_table_id, 'Asula',  null,            'n', 'y', 4, klubid_asula, tabelid_jr)
-endif;
+/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
+ p_table_id integer,     p_column_name varchar(30), 
+                                p_default varchar(30),  p_pkey char(1), 
+                                p_nulls char(1),        p_width integer, 
+								punktid numeric,		Jr integer */
+								
+call 	check_column(v_table_id, 'Id',       'autoincrement',    'y', 'n', 4, persons_id, tabelid_jr); 
+call 	check_column(v_table_id, 'FirstName',     null,               'n', 'n', 30, persons_firstname, tabelid_jr); 
+call 	check_column(v_table_id, 'LastName',     null,               'n', 'n', 30, persons_lastname, tabelid_jr);
+call 	check_column(v_table_id, 'InstituteId',  null,            'n', 'n', 4, persons_instituteid, tabelid_jr);
+call 	check_column(v_table_id, 'SSN',  		null,            'n', 'y', 11, persons_ssn, tabelid_jr);
 
 // Unique kitsenduse kontroll
-call 	check_unique('Klubid', 'Nimi', klubid_unique_nimi, tabelid_jr);
+call 	check_unique('Persons', 'FirstName, LastName', persons_unique_nimi, tabelid_jr);
 
 
 // Kirjete arvu kontroll
-select 	count(*) into kirje_count from klubid;
-if 		kirje_count = 6
-then 	insert Staatus values ('Tabel "Klubid"', 'Kirjete arv', '-', 												   	'OK',  	klubid_kirjete_arv, 	klubid_kirjete_arv,	'', tabelid_jr)
-else	insert Staatus values ('Tabel "Klubid"', 'Kirjete arv', 'Kirjete arv peab olema 6, hetkel on ' || kirje_count, 	'VIGA', klubid_kirjete_arv*0, 	klubid_kirjete_arv,	'', tabelid_jr)
+select 	count(*) into kirje_count from Persons;
+if 		kirje_count = 300
+then 	insert Staatus values ('Tabel "Persons"', 'Kirjete arv', '-', 												   	'OK',  	persons_kirjete_arv, 	persons_kirjete_arv,	'', tabelid_jr)
+else	insert Staatus values ('Tabel "Persons"', 'Kirjete arv', 'Kirjete arv peab olema 300, hetkel on ' || kirje_count, 	'VIGA', persons_kirjete_arv*0, 	persons_kirjete_arv,	'', tabelid_jr)
 endif;
 end;
 
@@ -1227,8 +1191,8 @@ declare aeg datetime;
 
 
 call table_institutes();
-/*call table_persons();
-call table_registrations();
+call table_persons();
+/*call table_registrations();
 call table_lecturers();
 call table_courses();
 call muud_elemendid();
