@@ -106,13 +106,21 @@ create or replace variable v_mostA_lastname								numeric = 1.0;
 create or replace variable v_mostA_nrofa								numeric = 1.0;
 create or replace variable v_mostA_kirje_summa 							numeric = 1.0;
 create or replace variable v_mostA_kirjete_arv 							numeric = 1.0;
-/* Vaade v_andmebaasideTeooria, kokku on 30p */
-create or replace variable v_andmebaasideTeooria 										numeric = 6.0;
-create or replace variable v_andmebaasideTeooria_veergude_arv 						numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_personid								numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_firstname							numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_lastname								numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_kirjete_arv 							numeric = 1.0;
+/* Vaade andmebaasideTeooria, kokku on 30p */
+create or replace variable v_andmebaasideTeooria 						numeric = 6.0;
+create or replace variable v_andmebaasideTeooria_veergude_arv 			numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_personid				numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_firstname				numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_lastname				numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 1.0;
+/* Vaade top40A, kokku on 30p */
+create or replace variable v_top40A 									numeric = 6.0;
+create or replace variable v_top40A_veergude_arv 						numeric = 1.0;
+create or replace variable v_top40A_firstname							numeric = 1.0;
+create or replace variable v_top40A_lastname							numeric = 1.0;
+create or replace variable v_top40A_nrofa								numeric = 1.0;
+create or replace variable v_top40A_kirje_summa 						numeric = 1.0;
+create or replace variable v_top40A_kirjete_arv 						numeric = 1.0;
 
 
 /* Veateadete järjekord */
@@ -976,14 +984,14 @@ call	check_column_for_view(v_table_id, 'FirstName', v_mostA_firstname, vaated_jr
 call	check_column_for_view(v_table_id, 'LastName', v_mostA_lastname, vaated_jr);
 call	check_column_for_view(v_table_id, 'NrOfA', v_mostA_nrofa, vaated_jr);
 
-// A koguse kontroll
+// Veeru NrOfA summa kontroll
 begin try
 	select 	sum(NrOfA) into kirje_summa from v_mostA;
 	if		kirje_summa > 22
-	then	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+	then	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
 	elseif	kirje_summa < 22
-	then	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', '-', 														'OK', 	v_mostA_kirje_summa, 	v_mostA_kirje_summa, '', vaated_jr)
+	then	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', '-', 														'OK', 	v_mostA_kirje_summa, 	v_mostA_kirje_summa, '', vaated_jr)
 	endif;
 end try
 begin catch
@@ -1081,38 +1089,52 @@ Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide vee
 // Vaade v_top40A kontroll
 create  procedure view_top40A()
 begin 
-declare v_table_id, v_size, partii_summa int;
+declare v_table_id, v_size, kirje_summa, kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('v_klubipartiikogused')) 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_klubipartiikogused*0, v_klubipartiikogused, '', vaated_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('v_top40A')) 
+then 	insert Staatus values ('Vaade "v_top40A"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_top40A*0, v_top40A, '', vaated_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_klubipartiikogused');
+set 	v_table_id = find_table_id('v_top40A');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 2                 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_klubipartiikogused_veergude_arv*0, v_klubipartiikogused_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_klubipartiikogused"', 'Veergude arv', '-', 'OK', v_klubipartiikogused_veergude_arv, v_klubipartiikogused_veergude_arv, '', vaated_jr)
+if      v_size != 3                 
+then 	insert Staatus values ('Vaade "v_top40A"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_top40A_veergude_arv*0, v_top40A_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "v_top40A"', 'Veergude arv', '-', 'OK', v_top40A_veergude_arv, v_top40A_veergude_arv, '', vaated_jr)
 endif;
 
-call	check_column_for_view(v_table_id, 'Klubi_nimi', v_klubipartiikogused_klubi_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Partiisid', v_klubipartiikogused_partiisid, vaated_jr);
+call	check_column_for_view(v_table_id, 'FirstName', v_top40A_firstname, vaated_jr);
+call	check_column_for_view(v_table_id, 'LastName', v_top40A_lastname, vaated_jr);
+call	check_column_for_view(v_table_id, 'NrOfA', v_top40A_nrofa, vaated_jr);
 
-// Partii veeru summa kontroll, partii_summa peab võrduma TÄPSELT KAKS SADA
+// Veeru NrOfA summa kontroll
 begin try
-	if 		exists (select * from syscolumn where column_name = 'partiisid' and table_id = find_table_id('v_klubipartiikogused'))
-	then	select 	sum(partiisid) into partii_summa from v_klubipartiikogused;
-			if 		partii_summa = 216
-			then	insert Staatus values('Vaade "v_klubipartiikogused"', 'Partiide summa', '-', 															'OK', 	v_klubipartiikogused_partiide_arvu_summa, 	v_klubipartiikogused_partiide_arvu_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_klubipartiikogused"', 'Partiide summa', 'Partiide summa peab olema 216, praegu on ' || partii_summa, 	'VIGA', v_klubipartiikogused_partiide_arvu_summa*0, 	v_klubipartiikogused_partiide_arvu_summa, '', vaated_jr)
-			endif;
-	else			insert Staatus values('Vaade "v_klubipartiikogused"', 'Partiide summa', 'Partiide summa peab olema 216, praegu on 0', 				'VIGA', v_klubipartiikogused_partiide_arvu_summa*0, 	v_klubipartiikogused_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
+	select 	sum(NrOfA) into kirje_summa from v_top40A;
+	if		kirje_summa > 199
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
+	elseif	kirje_summa < 199
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', '-', 														'OK', 	v_top40A_kirje_summa, 	v_top40A_kirje_summa, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_klubipartiikogused"', 'Partiide summa', 'Ei kompileeru', 	'VIGA', v_klubipartiikogused_partiide_arvu_summa*0, v_klubipartiikogused_partiide_arvu_summa, '', vaated_jr)
+	insert Staatus values('Vaade "v_top40A"', 'Kirje A summa', 'Ei kompileeru', 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
+end catch;
+
+// Kirjete kontroll
+begin try
+	select 	count(*) into kirje_count from v_top40A;
+	if		kirje_count > 40
+	then	insert Staatus values('Vaade "v_top40A"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_top40A_kirjete_arv*0, v_top40A_kirjete_arv, '', vaated_jr)
+	elseif	kirje_count < 40
+	then	insert Staatus values('Vaade "v_top40A"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_top40A_kirjete_arv*0, v_top40A_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_top40A"', 'Kirjete arv', '-', 														'OK', 	v_top40A_kirjete_arv, 	v_top40A_kirjete_arv, '', vaated_jr)
+	endif;
+end try
+begin catch
+	insert Staatus values('Vaade "v_top40A"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_top40A_kirjete_arv*0, v_top40A_kirjete_arv, '', vaated_jr)
 end catch;
 
 end;
@@ -1208,8 +1230,8 @@ call table_courses();
 call view_persons_atleast_4eap();
 call view_mostA();
 call view_andmebaasideTeooria();
-/*call view_top40A();
-call view_top30Students();*/
+call view_top40A();
+/*call view_top30Students();*/
 
 call arvuta_punktid();
 end;
