@@ -92,13 +92,14 @@ create or replace variable courses_kirjete_arv 							numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
-/* Vaade persons_atleast_4eap, kokku on 30p */
+
+/* Vaade persons_atleast_4eap, kokku on 4p */
 create or replace variable v_persons_atleast_4eap 						numeric = 4.0;
 create or replace variable v_persons_atleast_4eap_veergude_arv 			numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_firstname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_lastname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_kirjete_arv 			numeric = 1.0;
-/* Vaade mostA, kokku on 30p */
+/* Vaade mostA, kokku on 6p */
 create or replace variable v_mostA 										numeric = 6.0;
 create or replace variable v_mostA_veergude_arv 						numeric = 1.0;
 create or replace variable v_mostA_firstname							numeric = 1.0;
@@ -106,14 +107,14 @@ create or replace variable v_mostA_lastname								numeric = 1.0;
 create or replace variable v_mostA_nrofa								numeric = 1.0;
 create or replace variable v_mostA_kirje_summa 							numeric = 1.0;
 create or replace variable v_mostA_kirjete_arv 							numeric = 1.0;
-/* Vaade andmebaasideTeooria, kokku on 30p */
+/* Vaade andmebaasideTeooria, kokku on 6p */
 create or replace variable v_andmebaasideTeooria 						numeric = 6.0;
 create or replace variable v_andmebaasideTeooria_veergude_arv 			numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_personid				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_firstname				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_lastname				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 1.0;
-/* Vaade top40A, kokku on 30p */
+/* Vaade top40A, kokku on 6p */
 create or replace variable v_top40A 									numeric = 6.0;
 create or replace variable v_top40A_veergude_arv 						numeric = 1.0;
 create or replace variable v_top40A_firstname							numeric = 1.0;
@@ -121,6 +122,14 @@ create or replace variable v_top40A_lastname							numeric = 1.0;
 create or replace variable v_top40A_nrofa								numeric = 1.0;
 create or replace variable v_top40A_kirje_summa 						numeric = 1.0;
 create or replace variable v_top40A_kirjete_arv 						numeric = 1.0;
+/* Vaade top30Students, kokku on 6p */
+create or replace variable v_top30Students 								numeric = 6.0;
+create or replace variable v_top30Students_veergude_arv 				numeric = 1.0;
+create or replace variable v_top30Students_firstname					numeric = 1.0;
+create or replace variable v_top30Students_lastname						numeric = 1.0;
+create or replace variable v_top30Students_averagegrade					numeric = 1.0;
+create or replace variable v_top30Students_minmax						numeric = 1.0;
+create or replace variable v_top30Students_kirjete_arv 					numeric = 1.0;
 
 
 /* Veateadete järjekord */
@@ -1159,52 +1168,52 @@ Seejärel on isiku nime kirjapildi kontroll, kus isiku kirjapilt peab olema kuju
 // Vaate v_top30Students kontroll
 create  procedure view_top30Students()
 begin 
-declare v_table_id, v_size, kirje_count int;
+declare v_table_id, v_size, kirje_count, kirje_min, kirje_max int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('v_mangijad'))
-then 	insert Staatus values ('Vaade "v_mangijad"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_mangijad*0, v_mangijad, '', vaated_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('v_top30Students'))
+then 	insert Staatus values ('Vaade "v_top30Students"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_top30Students*0, v_top30Students, '', vaated_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_mangijad');
+set 	v_table_id = find_table_id('v_top30Students');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 4                 
-then 	insert Staatus values ('Vaade "v_mangijad"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', v_mangijad_veergude_arv*0, v_mangijad_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_mangijad"', 'Veergude arv', '-', 'OK', v_mangijad_veergude_arv, v_mangijad_veergude_arv, '', vaated_jr)
+if      v_size != 3                 
+then 	insert Staatus values ('Vaade "v_top30Students"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', v_top30Students_veergude_arv*0, v_top30Students_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "v_top30Students"', 'Veergude arv', '-', 'OK', v_top30Students_veergude_arv, v_top30Students_veergude_arv, '', vaated_jr)
 endif;
 
-call	check_column_for_view(v_table_id, 'Klubi_nimi', v_mangijad_klubi_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Klubi_id', v_mangijad_klubi_id, vaated_jr);
-call	check_column_for_view(v_table_id, 'Isik_nimi', v_mangijad_isik_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Isik_id', v_mangijad_isik_id, vaated_jr);
+call	check_column_for_view(v_table_id, 'FirstName', v_top30Students_firstname, vaated_jr);
+call	check_column_for_view(v_table_id, 'LastName', v_top30Students_lastname, vaated_jr);
+call	check_column_for_view(v_table_id, 'AverageGrade', v_top30Students_averagegrade, vaated_jr);
 
 // Kirjete kontroll
 begin try
-	select 	count(*) into kirje_count from v_mangijad;
-	if		kirje_count > 23
-	then	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 23
-	then	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', '-', 													'OK', 	v_mangijad_kirjete_arv, 	v_mangijad_kirjete_arv, '', vaated_jr)
+	select 	count(*) into kirje_count from v_top30Students;
+	if		kirje_count > 30
+	then	insert Staatus values('Vaade "v_top30Students"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_top30Students_kirjete_arv*0, 	v_top30Students_kirjete_arv, '', vaated_jr)
+	elseif	kirje_count < 30
+	then	insert Staatus values('Vaade "v_top30Students"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_top30Students_kirjete_arv*0, 	v_top30Students_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_top30Students"', 'Kirjete arv', '-', 													'OK', 	v_top30Students_kirjete_arv, 	v_top30Students_kirjete_arv, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_mangijad_kirjete_arv*0, v_mangijad_kirjete_arv, '', vaated_jr)
+	insert Staatus values('Vaade "v_top30Students"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_top30Students_kirjete_arv*0, v_top30Students_kirjete_arv, '', vaated_jr)
 end catch;
 
-// Isiku nime kirjapilt
+// Esimese ja 30nda koha kontroll- teen hiljem
 begin try
-	if 		(select isik_nimi from v_mangijad where isik_id = 71) = 'Mets, Arvo'
-	then	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
+	select max(averageGrade) into kirje_max from v_top30Students;
+	select min(averageGrade) into kirje_min from v_top30Students;
+	if 	kirje_max != 4.0 	 and kirje_min != 3.6
+	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade"', 'Max ja Min on valed, hetkel on vastavalt:' || kirje_max || ', ' || kirje_min, 	'VIGA', v_top30Students_minmax*0, 	v_top30Students_minmax, '', vaated_jr)
+	else 	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade"', '-', 'OK', v_top30Students_minmax, 	v_top30Students_minmax, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_mangijad"', 'Isik_nimi', 'Ei kompileeru', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
+	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" Min/Max', 'Ei kompileeru', 	'VIGA', v_top30Students_minmax*0, v_top30Students_minmax, '', vaated_jr)
 end catch;
-
 end;
 
 
@@ -1231,7 +1240,7 @@ call view_persons_atleast_4eap();
 call view_mostA();
 call view_andmebaasideTeooria();
 call view_top40A();
-/*call view_top30Students();*/
+call view_top30Students();
 
 call arvuta_punktid();
 end;
