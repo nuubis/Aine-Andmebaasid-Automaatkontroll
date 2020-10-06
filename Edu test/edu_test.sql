@@ -44,33 +44,33 @@ create 	or replace variable kodutöö							numeric = 100;
 
 /*Kodutöö punktid kokku = 100p */
 /* Tabel institutes punktid, kokku on 5p */
-create or replace variable institutes_tabel 								numeric = 5.0;
-create or replace variable institutes_veergude_arv 							numeric = 1.0;
-create or replace variable institutes_id 									numeric = 0.5;
-create or replace variable institutes_name 									numeric = 0.5;
-create or replace variable institutes_address 								numeric = 0.5;
-create or replace variable institutes_deanid 								numeric = 0.5;
-create or replace variable institutes_vicedeanid 							numeric = 0.5;
-create or replace variable institutes_unique_nimi 							numeric = 0.5;
-create or replace variable institutes_kirjete_arv 							numeric = 1.0;
+create or replace variable institutes_tabel 							numeric = 5.0;
+create or replace variable institutes_veergude_arv 						numeric = 1.0;
+create or replace variable institutes_id 								numeric = 0.5;
+create or replace variable institutes_name 								numeric = 0.5;
+create or replace variable institutes_address 							numeric = 0.5;
+create or replace variable institutes_deanid 							numeric = 0.5;
+create or replace variable institutes_vicedeanid 						numeric = 0.5;
+create or replace variable institutes_unique_nimi 						numeric = 0.5;
+create or replace variable institutes_kirjete_arv 						numeric = 1.0;
 /* Tabel persons punktid, kokku on 5p */
-create or replace variable persons_tabel 									numeric = 5.0;
-create or replace variable persons_veergude_arv 							numeric = 1.0;
-create or replace variable persons_id 										numeric = 0.5;
-create or replace variable persons_firstname 								numeric = 0.5;
-create or replace variable persons_lastname 								numeric = 0.5;
-create or replace variable persons_instituteid 								numeric = 0.5;
-create or replace variable persons_ssn 										numeric = 0.5;
-create or replace variable persons_unique_nimi 								numeric = 0.5;
-create or replace variable persons_kirjete_arv 								numeric = 1.0;
+create or replace variable persons_tabel 								numeric = 5.0;
+create or replace variable persons_veergude_arv 						numeric = 1.0;
+create or replace variable persons_id 									numeric = 0.5;
+create or replace variable persons_firstname 							numeric = 0.5;
+create or replace variable persons_lastname 							numeric = 0.5;
+create or replace variable persons_instituteid 							numeric = 0.5;
+create or replace variable persons_ssn 									numeric = 0.5;
+create or replace variable persons_unique_nimi 							numeric = 0.5;
+create or replace variable persons_kirjete_arv 							numeric = 1.0;
 /* Tabel registrations punktid, kokku on 5p */
-create or replace variable registrations_tabel 								numeric = 4.0;
-create or replace variable registrations_veergude_arv 						numeric = 1.0;
-create or replace variable registrations_id 								numeric = 0.5;
-create or replace variable registrations_courseid 							numeric = 0.5;
-create or replace variable registrations_personid 							numeric = 0.5;
-create or replace variable registrations_finalgrade 						numeric = 0.5;
-create or replace variable registrations_kirjete_arv 						numeric = 1.0;
+create or replace variable registrations_tabel 							numeric = 4.0;
+create or replace variable registrations_veergude_arv 					numeric = 1.0;
+create or replace variable registrations_id 							numeric = 0.5;
+create or replace variable registrations_courseid 						numeric = 0.5;
+create or replace variable registrations_personid 						numeric = 0.5;
+create or replace variable registrations_finalgrade 					numeric = 0.5;
+create or replace variable registrations_kirjete_arv 					numeric = 1.0;
 /* Tabel lecturers punktid, kokku on 5p */
 create or replace variable lecturers_tabel 								numeric = 4.0;
 create or replace variable lecturers_veergude_arv 						numeric = 1.0;
@@ -93,14 +93,11 @@ create or replace variable courses_kirjete_arv 							numeric = 1.0;
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
 /* Vaade edetabelid, kokku on 30p */
-/*create or replace variable v_edetabelid 								numeric = 30.0;
-create or replace variable v_edetabelid_veergude_arv 					numeric = 1.0;
-create or replace variable v_edetabelid_mängija 						numeric = 1.0;
-create or replace variable v_edetabelid_turniir 						numeric = 1.0;
-create or replace variable v_edetabelid_punkte 							numeric = 1.0;
-create or replace variable v_edetabelid_punkte_täiskohaga 				numeric = 4.0;
-create or replace variable v_edetabelid_punkte_komakohaga 				numeric = 8.0;
-create or replace variable v_edetabelid_kirjete_arv 					numeric = 14.0;*/
+create or replace variable v_persons_atleast_4eap 						numeric = 4.0;
+create or replace variable v_persons_atleast_4eap_veergude_arv 			numeric = 1.0;
+create or replace variable v_persons_atleast_4eap_firstname				numeric = 1.0;
+create or replace variable v_persons_atleast_4eap_lastname				numeric = 1.0;
+create or replace variable v_persons_atleast_4eap_kirjete_arv 			numeric = 1.0;
 
 
 /* Veateadete järjekord */
@@ -887,63 +884,42 @@ Seejärel tuleb punktide kontrollid.
 2) Teises kontrollitakse, kas turniiril 42, mängijal "Kivine, Kalle" on punktide arv 2.0
 Sest tihti tudengid ei jaga 2.0ga või korruta läbi 0.5ga punktide arvu.
 */
-// Vaate v_edetabelid kontroll
+// Vaate v_persons_atleast_4eap kontroll
 create  procedure view_persons_atleast_4eap()
 begin 
 declare v_table_id, v_size, kirje_count int;
        
-if 		not exists (select * from systable where upper(table_name) = upper('v_edetabelid')) 
-then 	insert Staatus values ('Vaade "v_edetabelid"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_edetabelid*0, v_edetabelid, '', vaated_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('v_persons_atleast_4eap')) 
+then 	insert Staatus values ('Vaade "v_persons_atleast_4eap"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_persons_atleast_4eap*0, v_persons_atleast_4eap, '', vaated_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_edetabelid');
+set 	v_table_id = find_table_id('v_persons_atleast_4eap');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 3 
-then 	insert Staatus values ('Vaade "v_edetabelid"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_edetabelid_veergude_arv*0, v_edetabelid_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_edetabelid"', 'Veergude arv', '-', 'OK', v_edetabelid_veergude_arv, v_edetabelid_veergude_arv, '', vaated_jr)
+if      v_size != 2 
+then 	insert Staatus values ('Vaade "v_persons_atleast_4eap"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_persons_atleast_4eap_veergude_arv*0, v_persons_atleast_4eap_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "v_persons_atleast_4eap"', 'Veergude arv', '-', 'OK', v_persons_atleast_4eap_veergude_arv, v_persons_atleast_4eap_veergude_arv, '', vaated_jr)
 endif;
 
-call 	check_column_for_view_t2pit2ht(v_table_id, 'Mängija', 'Mangija', v_edetabelid_mängija, vaated_jr);
-call	check_column_for_view(v_table_id, 'Turniir', v_edetabelid_turniir, vaated_jr);
-call	check_column_for_view(v_table_id, 'Punkte', v_edetabelid_punkte, vaated_jr);
+call	check_column_for_view(v_table_id, 'FirstName', v_persons_atleast_4eap_firstname, vaated_jr);
+call	check_column_for_view(v_table_id, 'LastName', v_persons_atleast_4eap_lastname, vaated_jr);
 
 // Kirjete kontroll
 begin try
-	select 	count(*) into kirje_count from v_edetabelid;
-	if		kirje_count > 34
-	then	insert Staatus values('Vaade "v_edetabelid"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_edetabelid_kirjete_arv*0, v_edetabelid_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 34
-	then	insert Staatus values('Vaade "v_edetabelid"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_edetabelid_kirjete_arv*0, v_edetabelid_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_edetabelid"', 'Kirjete arv', '-', 														'OK', 	v_edetabelid_kirjete_arv, 	v_edetabelid_kirjete_arv, '', vaated_jr)
+	select 	count(*) into kirje_count from v_persons_atleast_4eap;
+	if		kirje_count > 17
+	then	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_persons_atleast_4eap_kirjete_arv*0, v_persons_atleast_4eap_kirjete_arv, '', vaated_jr)
+	elseif	kirje_count < 17
+	then	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_persons_atleast_4eap_kirjete_arv*0, v_persons_atleast_4eap_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', '-', 														'OK', 	v_persons_atleast_4eap_kirjete_arv, 	v_persons_atleast_4eap_kirjete_arv, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_edetabelid"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_edetabelid_kirjete_arv*0, v_edetabelid_kirjete_arv, '', vaated_jr)
+	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_edetabelid_kirjete_arv*0, v_edetabelid_kirjete_arv, '', vaated_jr)
 end catch;
 
-// Punktide kontrollid
-begin try
-	if (select punkte from v_edetabelid where turniir = 41 and mangija = 'Kivine, Kalle') > 2.49 and (select punkte from v_edetabelid where turniir = 41 and mangija = 'Kivine, Kalle') < 2.51
-	then insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 41 punktid', '-', 'OK', 	v_edetabelid_punkte_komakohaga, 	v_edetabelid_punkte_komakohaga, '', vaated_jr)
-	else insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 41 punktid', 'Punktide arv pole õige, peab olema 2.5', 'VIGA', 	v_edetabelid_punkte_komakohaga*0, 	v_edetabelid_punkte_komakohaga, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 41 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_komakohaga*0, 	v_edetabelid_punkte_komakohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
-end catch;
-
-begin try
-	if (select punkte from v_edetabelid where turniir = 42 and mangija = 'Kivine, Kalle') > 1.99 and (select punkte from v_edetabelid where turniir = 42 and mangija = 'Kivine, Kalle') < 2.01
-	then insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 42 punktid', '-', 'OK', 	v_edetabelid_punkte_täiskohaga, 	v_edetabelid_punkte_täiskohaga, '', vaated_jr)
-	else insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 42 punktid', 'Punktide arv pole õige, peab olema 2.0', 'VIGA', 	v_edetabelid_punkte_täiskohaga*0, 	v_edetabelid_punkte_täiskohaga, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 42 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_täiskohaga*0, 	v_edetabelid_punkte_täiskohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
-end catch;
 end;
 
 
@@ -1200,8 +1176,8 @@ call table_registrations();
 call table_lecturers();
 call table_courses();
 /*call muud_elemendid();*/
-/*call view_persons_atleast_4eap();
-call view_mostA();
+call view_persons_atleast_4eap();
+/*call view_mostA();
 call view_andmebaasideTeooria();
 call view_top40A();
 call view_top30Students();*/
