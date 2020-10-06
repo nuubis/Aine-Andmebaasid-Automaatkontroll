@@ -29,6 +29,11 @@ if exists (select * from sysprocedure where proc_name = 'table_persons') 						t
 if exists (select * from sysprocedure where proc_name = 'table_registrations') 					then drop function table_registrations					endif;
 if exists (select * from sysprocedure where proc_name = 'table_lecturers') 						then drop function table_lecturers						endif;
 if exists (select * from sysprocedure where proc_name = 'table_courses') 						then drop function table_courses						endif;
+if exists (select * from sysprocedure where proc_name = 'view_persons_atleast_4eap') 			then drop function view_persons_atleast_4eap			endif;
+if exists (select * from sysprocedure where proc_name = 'view_mostA') 							then drop function view_mostA							endif;
+if exists (select * from sysprocedure where proc_name = 'view_andmebaasideTeooria') 			then drop function view_andmebaasideTeooria				endif;
+if exists (select * from sysprocedure where proc_name = 'view_top40A') 							then drop function view_top40A							endif;
+if exists (select * from sysprocedure where proc_name = 'view_top30Students') 					then drop function view_top30Students					endif;
 
 
 
@@ -41,27 +46,27 @@ create 	or replace variable kodutöö							numeric = 100;
 /* Tabelite punktide muutujad - Hindeskaala punktid, iga kodutöö osa on 100p */
 /* https://github.com/nuubis/Automaattestid-andmebaaside-ainele/wiki/Kodut%C3%B6%C3%B6--3-punktid */
 /* Tabel inimesed punktid, kokku on 6p */
-create or replace variable inimesed_tabel 								numeric = 6.0 * kolmas_kodutöö;
-create or replace variable inimesed_veergude_arv 						numeric = 1.0 * kolmas_kodutöö;
-create or replace variable inimesed_eesnimi 							numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_perenimi 							numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_sugu 								numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_sünnipäev 							numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_sisestatud 							numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_isikukood 							numeric = 0.5 * kolmas_kodutöö;
-create or replace variable inimesed_check_sugu 							numeric = 2.0 * kolmas_kodutöö;
+create or replace variable institutes_tabel 								numeric = 5.0;
+create or replace variable institutes_veergude_arv 							numeric = 1.0;
+create or replace variable institutes_id 									numeric = 0.5;
+create or replace variable institutes_name 									numeric = 0.5;
+create or replace variable institutes_address 								numeric = 0.5;
+create or replace variable institutes_deanid 								numeric = 0.5;
+create or replace variable institutes_vicedeanid 							numeric = 0.5;
+create or replace variable institutes_unique_nimi 							numeric = 0.5;
+create or replace variable institutes_kirjete_arv 							numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
-create or replace variable trigger_cascade 								numeric = 4.0 * kolmas_kodutöö;
-create or replace variable trigger_delete 								numeric = 4.0 * kolmas_kodutöö;
+/*create or replace variable trigger_cascade 								numeric = 4.0;
+create or replace variable trigger_delete 								numeric = 4.0;*/
 /* Vaade edetabelid, kokku on 30p */
-create or replace variable v_edetabelid 								numeric = 30.0 * viies_kodutöö;
-create or replace variable v_edetabelid_veergude_arv 					numeric = 1.0 * viies_kodutöö;
-create or replace variable v_edetabelid_mängija 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_edetabelid_turniir 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_edetabelid_punkte 							numeric = 1.0 * viies_kodutöö;
-create or replace variable v_edetabelid_punkte_täiskohaga 				numeric = 4.0 * viies_kodutöö;
-create or replace variable v_edetabelid_punkte_komakohaga 				numeric = 8.0 * viies_kodutöö;
-create or replace variable v_edetabelid_kirjete_arv 					numeric = 14.0 * viies_kodutöö;
+/*create or replace variable v_edetabelid 								numeric = 30.0;
+create or replace variable v_edetabelid_veergude_arv 					numeric = 1.0;
+create or replace variable v_edetabelid_mängija 						numeric = 1.0;
+create or replace variable v_edetabelid_turniir 						numeric = 1.0;
+create or replace variable v_edetabelid_punkte 							numeric = 1.0;
+create or replace variable v_edetabelid_punkte_täiskohaga 				numeric = 4.0;
+create or replace variable v_edetabelid_punkte_komakohaga 				numeric = 8.0;
+create or replace variable v_edetabelid_kirjete_arv 					numeric = 14.0;*/
 
 
 /* Veateadete järjekord */
@@ -510,20 +515,16 @@ begin
 declare summa, max_summa, hindepunkt, max_hindepunkt numeric;
 set 	summa = 0.0;
 
-max_summa = kodutöö
+set		max_summa = kodutöö;
 
 /* Hindepunktide välja arvutamine */
 select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
-if 		versioon = 7 
-then	
-set 	hindepunkt = (summa / max_summa) * 2;
-set		max_hindepunkt = 2.0 
-else
-set 	hindepunkt = (summa / max_summa);
-set 	max_hindepunkt = 1.0
-endif;
 
-/* Punktide sisestamine */
+set 	hindepunkt = (summa / max_summa);
+set 	max_hindepunkt = 1.0;
+
+
+//Punktide sisestamine 
 insert into Staatus values ('-', '-', '-', 'Kokku', summa, max_summa, '', max_punktid_jr);
 insert into Staatus values ('-', '-', '-', 'Hindepunktid', hindepunkt, max_hindepunkt, '', hindepunktid_jr);
 end;
@@ -576,12 +577,13 @@ then	insert Staatus values ('Tabel "Institutes"', 'Veergude arv', 'On vale, peab
 else	insert Staatus values ('Tabel "Institutes"', 'Veergude arv', '-', 'OK', institutes_veergude_arv, institutes_veergude_arv, '', tabelid_jr)
 endif;
 
-/* p_table_id integer,     p_column_name varchar(30), 
+/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
+ p_table_id integer,     p_column_name varchar(30), 
                                 p_default varchar(30),  p_pkey char(1), 
                                 p_nulls char(1),        p_width integer, 
 								punktid numeric,		Jr integer */
 								
-call 	check_column(v_table_id, 'Id',    autoincrement,                'y', 'n', 4, institutes_id, tabelid_jr); 
+call 	check_column(v_table_id, 'Id',    'autoincrement',                'y', 'n', 4, institutes_id, tabelid_jr); 
 call 	check_column(v_table_id, 'Name',   null,                'n', 'n', 50, institutes_name, tabelid_jr); 
 call 	check_column(v_table_id, 'Address',       null,                'n', 'y', 30, institutes_address, tabelid_jr);
 call 	check_column(v_table_id, 'DeanId',       null,                'n', 'y', 4, institutes_deanid, tabelid_jr);
@@ -599,7 +601,7 @@ then 	insert Staatus values ('Tabel "Institutes"', 'Kirjete arv', '-', 									
 else	insert Staatus values ('Tabel "Institutes"', 'Kirjete arv', 'Kirjete arv peab olema vähemalt 1, hetkel on ' || kirje_count, 	'VIGA', institutes_kirjete_arv*0, institutes_kirjete_arv,	'', tabelid_jr)
 endif;
 
-
+end;
 
 
 /*
@@ -619,7 +621,7 @@ Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSEL
 */
 
 //Tabeli Klubid kontroll
-create 	procedure table_klubid(version int)
+create 	procedure table_persons()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
@@ -677,7 +679,7 @@ Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSEL
 */
 
 //Tabeli Isikud kontroll
-create 	procedure table_isikud(version int) 
+create 	procedure table_registrations() 
 begin 
 declare v_table_id, v_size, kirje_count int;
 
@@ -730,7 +732,7 @@ Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSEL
 */
 
 //Tabeli Turniirid kontrollimine
-create  procedure table_turniirid(version int)
+create  procedure table_lecturers()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
@@ -796,7 +798,7 @@ Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSEL
 */
 
 //Tabeli Partiid kontroll
-create  procedure table_partiid(version int) 
+create  procedure table_courses() 
 begin 
 declare v_table_id, v_size, kirje_count int; 
 
@@ -838,47 +840,6 @@ endif;
 
 end;
 
-/*
-Tabeli "Asulad" kontroll, kus on siis veergude kontroll ja unique tingimuse kontroll.
-
-Protseduuri sisesed muutujad: v_table_id = "asulad" tabeli id; v_size = antud tabelis veergude arv; kirje_count = kirjete arv antud tabelis;
-
-Kõigepealt kontrollitakse, kas on olemas tabel "asulad", kui ei ole lisatakse veateade Staatus tabelisse ning protseduuri töö lõpetatakse
-Kui on korras, siis loetakse kokku mitu veergu on selles tabelis, kui ei ole õige arv siis veateade.
-Seejärel tuleb tabeli veergude ja nende atribuutide kontroll check_column protseduuri abil.
-Andmeteks on siis: tabeli "partiid" id, veeru nimi, veeru default tingimus, primary key tingimus, value tingimus, veeru suurus (ehk varchar(30)) 
-ning siis punktide arv, mis saab selle veeru korras oleku eest.
-
-Tabelis toimub unique tingimuse kontroll, ehk kas veergul "Nimi" on olemas unique kitsendus
-Kirjete arvu ei ole mõtet kontrollida, sest need sisestatakse skripti poolt
-*/
-// Tabeli Asulad kontroll
-create  procedure table_asulad() 
-begin 
-declare v_table_id, v_size int; 
-       
-
-if 		not exists (select * from systable where upper(table_name) = upper('asulad')) 
-then 	insert Staatus values ('Tabel "Asulad"', '-', 'Tabelit ei eksisteeri.', 'VIGA', asulad_tabel*0, asulad_tabel, '', tabelid_jr);
-return; 
-endif;
-
-set 	v_table_id = find_table_id('asulad');
-
-select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      v_size != 2                 
-then 	insert Staatus values ('Tabel "Asulad"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', asulad_veergude_arv*0, asulad_veergude_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Asulad"', 'Veergude arv', '-', 'OK', asulad_veergude_arv, asulad_veergude_arv, '', tabelid_jr)
-endif;
-
-call	check_column(v_table_id, 'id', 'autoincrement', 'y', 'n', 4, asulad_id, tabelid_jr);
-call	check_column(v_table_id, 'nimi', null, 'n', 'n', 100, asulad_nimi, tabelid_jr);
-
-// Unique kitsendus
-call 	check_unique('Asulad', 'Nimi', asulad_unique_nimi, tabelid_jr);
-
-end;
 
 
 /*
@@ -959,7 +920,7 @@ Seejärel tuleb punktide kontrollid.
 Sest tihti tudengid ei jaga 2.0ga või korruta läbi 0.5ga punktide arvu.
 */
 // Vaate v_edetabelid kontroll
-create  procedure view_edetabelid()
+create  procedure view_persons_atleast_4eap()
 begin 
 declare v_table_id, v_size, kirje_count int;
        
@@ -1033,8 +994,8 @@ Järgnev kontroll on try/catch vahel, sest võib juhtuda, et mingil põhjusel va
 Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide veergude andmetest kokku mitu partiid on kirjas. Peab olema TÄPSELT KAKS SADA! 
 */
 
-// Vaade v_klubipartiikogused_1 kontroll
-create  procedure view_klubipartiikogused_1()
+// Vaade v_mostA kontroll
+create  procedure view_mostA()
 begin 
 declare v_table_id, v_size, partii_summa int;
 
@@ -1087,8 +1048,8 @@ Järgnev kontroll on try/catch vahel, sest võib juhtuda, et mingil põhjusel va
 Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide veergude andmetest kokku mitu partiid on kirjas. Peab olema TÄPSELT KAKS SADA KUUSTEIST! 
 */
 
-// Vaade v_klubipartiikogused_2 kontroll
-create  procedure view_klubipartiikogused_2()
+// Vaade v_andmebaasideTeooria kontroll
+create  procedure view_andmebaasideTeooria()
 begin 
 declare v_table_id, v_size, partii_summa int;
 
@@ -1144,8 +1105,8 @@ Järgnev kontroll on try/catch vahel, sest võib juhtuda, et mingil põhjusel va
 Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide veergude andmetest kokku mitu partiid on kirjas. Peab olema TÄPSELT KAKS SADA KUUSTEIST! 
 */
 
-// Vaade v_klubipartiikogused kontroll
-create  procedure view_klubipartiikogused()
+// Vaade v_top40A kontroll
+create  procedure view_top40A()
 begin 
 declare v_table_id, v_size, partii_summa int;
 
@@ -1200,8 +1161,8 @@ Seejärel on kirjete arvu kontroll, kus kirjete arvu peab olema TÄPSELT KAKSKÜ
 Seejärel on isiku nime kirjapildi kontroll, kus isiku kirjapilt peab olema kujul: "perenimi, eesnimi".
 */
 
-// Vaate v_mangijad kontroll
-create  procedure view_mangijad()
+// Vaate v_top30Students kontroll
+create  procedure view_top30Students()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
@@ -1252,342 +1213,6 @@ end catch;
 end;
 
 
-/* 
-Vaate "v_turniiripartiid" kontroll, kus on siis veergude kontroll ja kirjete arvu kontroll.
-Sissetulevaid andmeid ei ole.
-
-Protseduuri sisesed muutujad: v_table_id = "v_turniiripartiid" tabeli id; v_size = antud tabelis veergude arv; kirje_count = kirjete arv antud tabelis;
-
-Kõigepealt kontrollitakse, kas on olemas tabel "v_turniiripartiid" kui ei ole lisatakse veateade Staatus tabelisse ning protseduuri töö lõpetatakse.
-Kui on korras, siis loetakse kokku mitu veergu on selles tabelis, kui ei ole õige arv siis veateade.
-Seejärel tuleb tabeli veergude olemasolu kontroll check_column_for_view abil.
-Andmeteks on siis: tabeli "v_turniiripartiid" id, veeru nimi ja punktide arv, mis saab selle veeru korras oleku eest.
-
-Järgnev kontroll on try/catch vahel, sest võib juhtuda, et mingil põhjusel vaadet ei ole võimalik vaadata.
-Seejärel on kirjete arvu kontroll, kus kirjete arvu peab olema TÄPSELT SADA KAHEKSA ehk sama kogus "Partiid" tabeliga 
-*/
-
-// Vaate v_turniiripartiid kontroll
-create  procedure view_turniiripartiid()
-begin 
-declare v_table_id, v_size, kirje_count int;
-       
-if 		not exists (select * from systable where upper(table_name) = upper('v_turniiripartiid'))
-then 	insert Staatus values ('Vaade "v_turniiripartiid"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_turniiripartiid*0, v_turniiripartiid, '', vaated_jr);
-return; 
-endif;
-
-set 	v_table_id = find_table_id('v_turniiripartiid');
-
-select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      v_size != 4                 
-then 	insert Staatus values ('Vaade "v_turniiripartiid"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', v_turniiripartiid_veergude_arv*0, v_turniiripartiid_veergude_arv, '', vaated_jr) 
-else	insert Staatus values ('Tabel "v_turniiripartiid"', 'Veergude arv', '-', 'OK', v_turniiripartiid_veergude_arv, v_turniiripartiid_veergude_arv, '', vaated_jr)
-endif;
-
-call	check_column_for_view(v_table_id, 'Turniir_nimi', v_turniiripartiid_turniir_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Partii_id', v_turniiripartiid_partii_id, vaated_jr);
-call	check_column_for_view(v_table_id, 'Partii_algus', v_turniiripartiid_partii_algus, vaated_jr);
-call	check_column_for_view_t2pit2ht(v_table_id, 'Partii_lõpp', 'Partii_lopp', v_turniiripartiid_partii_lõpp, vaated_jr);
-
-// Kirjete kontroll
-begin try
-	select 	count(*) into kirje_count from v_turniiripartiid;
-	if		kirje_count > 108
-	then	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_turniiripartiid_kirjete_arv*0, 	v_turniiripartiid_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 108
-	then	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_turniiripartiid_kirjete_arv*0, 	v_turniiripartiid_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', '-', 														'OK', 	v_turniiripartiid_kirjete_arv, 		v_turniiripartiid_kirjete_arv, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_turniiripartiid_kirjete_arv*0, v_turniiripartiid_kirjete_arv, '', vaated_jr)
-end catch;
-
-end;
-
-
-/* 
-Vaate "v_punktid" kontroll, kus on siis veergude kontroll, vaate kirjete arvu kontroll ja veeru "punkt" summa kontroll ning veeru punkt täiskoha ja komakoha kontroll.
-Sissetulevaid andmeid ei ole.
-
-Protseduuri sisesed muutujad: v_table_id = "v_punktid" tabeli id; v_size = antud tabelis veergude arv; kirje_count = kirjete arv antud tabelis; punkti_summa = veeru "punkt" summa;
-
-Kõigepealt kontrollitakse, kas on olemas tabel "v_punktid" kui ei ole lisatakse veateade Staatus tabelisse ning protseduuri töö lõpetatakse
-Kui on korras, siis loetakse kokku mitu veergu on selles tabelis, kui ei ole õige arv siis veateade.
-Seejärel tuleb tabeli veergude olemasolu kontroll check_column_for_view abil.
-Andmeteks on siis: tabeli "v_punktid" id, veeru nimi ja punktide arv, mis saab selle veeru korras oleku eest.
-
-Kõik järgnevad kontrollid on try/catch vahel, sest võib juhtuda, et mingil põhjusel vaadet ei ole võimalik vaadata.
-Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT KAKS SADA KUUSTEIST kirjet. 
-Seejärel on veeru "punkt" summa kontroll ehk arvutatakse kokku kõikide veergude andmetest kokku mitu punkti on kirjas. Peab olema TÄPSELT SADA KAHEKSA!
-Seejärel on veeru "punkt" täiskoha ja komakoha kontroll:
-1) Komakohaga - turniir 42, mängija 72, punkt peab olema 0.5
-1) Täiskohaga - turniir 41, mängija 77, punkt peab olema 1.0
-*/
-
-// Vaate v_punktid kontroll
-create  procedure view_punktid()
-begin 
-declare v_table_id, v_size, kirje_count, punkti_summa int;       
-
-if 		not exists (select * from systable where upper(table_name) = upper('v_punktid'))
-then 	insert Staatus values ('Vaade "v_punktid"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_punktid*0, v_punktid, '', vaated_jr);
-return; 
-endif;
-
-set 	v_table_id = find_table_id('v_punktid');
-
-select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      v_size != 5                 
-then 	insert Staatus values ('Vaade "v_punktid"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', v_punktid_veergude_arv*0, v_punktid_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_punktid"', 'Veergude arv', '-', 'OK', v_punktid_veergude_arv, v_punktid_veergude_arv, '', vaated_jr)
-endif;
-
-call	check_column_for_view(v_table_id, 'Partii', v_punktid_partii, vaated_jr);
-call	check_column_for_view(v_table_id, 'Turniir', v_punktid_turniir, vaated_jr);
-call	check_column_for_view_t2pit2ht(v_table_id, 'Mängija', 'Mangija', v_punktid_mängija, vaated_jr);
-call	check_column_for_view_t2pit2ht(v_table_id, 'Värv', 'Varv', v_punktid_värv, vaated_jr);
-call	check_column_for_view(v_table_id, 'Punkt', v_punktid_punkt, vaated_jr);
-
-// Kirjete kontroll
-begin try
-	select 	count(*) into kirje_count from v_punktid;
-	if		kirje_count > 216
-	then	insert Staatus values('Vaade "v_punktid"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_punktid_kirjete_arv*0, 	v_punktid_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 216
-	then 	insert Staatus values('Vaade "v_punktid"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_punktid_kirjete_arv*0, 	v_punktid_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_punktid"', 'Kirjete arv', '-', 														'OK', 	v_punktid_kirjete_arv, 		v_punktid_kirjete_arv, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_punktid_kirjete_arv*0, v_punktid_kirjete_arv, '', vaated_jr)
-end catch;
-
-// Veeru punkt summa kontroll
-begin try
-	if 		exists (select * from syscolumn where column_name = 'punkt' and table_id = find_table_id('v_punktid'))
-	then	select 	sum(punkt) into punkti_summa from v_punktid;
-			if 		punkti_summa = 108
-			then 	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punktide summa', '-', 														'OK', 	v_punktid_punkti_summa, 	v_punktid_punkti_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punktide summa', 'Punktide summa peab olema 108, praegu on ' || punkti_summa, 'VIGA', v_punktid_punkti_summa*0, 	v_partiid_punkti_summa, '', vaated_jr)
-			endif;
-	else			insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punktide summa', 'Punktide summa peab olema 108, praegu on 0', 				'VIGA', v_punktid_punkti_summa*0, 	v_partiid_punkti_summa, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punktide summa', 'Ei kompileeru', 	'VIGA', v_punktid_punkti_summa*0, v_punktid_punkti_summa, '', vaated_jr)
-end catch;
-
-// Veeru punkt koma ja täiskoha kontroll
-begin try
-	if 		(select punkt from v_punktid where turniir = 42 and mangija = 72 and punkt = 0.5) = 0.5
-	then	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', '-', 	'OK', v_punktid_punkt_koma, v_punktid_punkt_koma, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Punkt pole õige.', 	'VIGA', v_punktid_punkt_koma*0, v_punktid_punkt_koma, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_koma*0, v_punktid_punkt_koma, '', vaated_jr)
-end catch;
-
-begin try
-	if 		(select punkt from v_punktid where turniir = 41 and mangija = 77 and punkt = 1.0) = 1.0
-	then	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', '-', 	'OK', v_punktid_punkt_täis, v_punktid_punkt_täis, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Punkt pole õige', 	'VIGA', v_punktid_punkt_täis*0, v_punktid_punkt_täis, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_täis*0, v_punktid_punkt_täis, '', vaated_jr)
-end catch;
-
-end;
-
-
-/*
-Vaate "v_partiid" kontroll, veergude "valge_punkt" ja "must_punkt" summa kontroll ning vaate kirjete arvu kontroll.
-Sissetulevaid andmeid ei ole.
-
-Protseduuri sisesed muutujad: v_table_id = "v_partiid" tabeli id; v_size = antud tabelis veergude arv; kirje_count = kirjete arv antud tabelis; punkti_summa = veeru "must_punkt" ja "valge_punkt" summa;
-
-Kõigepealt kontrollitakse, kas on olemas tabel "v_partiid" kui ei ole lisatakse veateade Staatus tabelisse ning protseduuri töö lõpetatakse.
-Kui on korras, siis loetakse kokku mitu veergu on selles tabelis, kui ei ole õige arv siis veateade.
-Seejärel tuleb tabeli veergude olemasolu kontroll check_column_for_view abil.
-Andmeteks on siis: tabeli "v_partiid" id, veeru nimi ja punktide arv, mis saab selle veeru korras oleku eest.
-
-Kõik järgnevad kontrollid on try/catch vahel, sest võib juhtuda, et mingil põhjusel vaadet ei ole võimalik vaadata.
-Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT SADA KAHEKSA kirjet.
-Seejärel on veergude "valge_punkt" ja "must_punkt" summa kontroll ehk arvutatakse kokku kõikide "must_punkt" veergude ja "valge_punkt" veergude andmetest kokku mitu punkti on kirjas. 
-Peab olema TÄPSELT SADA KAHEKSA!
-*/
-
-// Vaate v_partiid kontroll
-create  procedure view_partiid()
-begin 
-declare v_table_id, v_size, kirje_count, punkti_summa int;   
-
-if 		not exists (select * from systable where upper(table_name) = upper('v_partiid'))
-then 	insert Staatus values ('Vaade "v_partiid"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_partiid*0, v_partiid, '', vaated_jr);
-return; 
-endif;
-
-set 	v_table_id = find_table_id('v_partiid');
-
-select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      v_size != 9                 
-then 	insert Staatus values ('Vaade "v_partiid"', 'Veergude arv', 'On vale, peab olema 9, hetkel on ' || v_size, 'VIGA', v_partiid_veergude_arv*0, v_partiid_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_partiid"', 'Veergude arv', '-', 'OK', v_partiid_veergude_arv, v_partiid_veergude_arv, '', vaated_jr)
-endif;
-
-call	check_column_for_view(v_table_id, 'Id', v_partiid_id, vaated_jr);
-call	check_column_for_view(v_table_id, 'Turniir', v_partiid_turniir, vaated_jr);
-call	check_column_for_view(v_table_id, 'Algus', v_partiid_algus, vaated_jr);
-call	check_column_for_view(v_table_id, 'Valge_nimi', v_partiid_valge_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Valge_klubi', v_partiid_valge_klubi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Valge_punkt', v_partiid_valge_punkt, vaated_jr);
-call	check_column_for_view(v_table_id, 'Must_nimi', v_partiid_must_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Must_klubi', v_partiid_must_klubi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Must_punkt', v_partiid_must_punkt, vaated_jr);
-
-begin try
-	// Kirjete kontroll
-	select 	count(*) into kirje_count from v_partiid;
-	if		kirje_count > 108
-	then	insert Staatus values('Vaade "v_partiid"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_partiid_kirjete_arv*0, 	v_partiid_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 108
-	then	insert Staatus values('Vaade "v_partiid"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_partiid_kirjete_arv*0, 	v_partiid_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_partiid"', 'Kirjete arv', '-', 														'OK', 	v_partiid_kirjete_arv, 		v_partiid_kirjete_arv, '', vaated_jr)
-	endif;
-end try
-begin catch
-insert Staatus values('Vaade "v_partiid"', 'Kirjete arv', 'Ei kompileeru', 'VIGA', 	v_partiid_kirjete_arv*0, 		v_partiid_kirjete_arv, '', vaated_jr)
-end catch;
-
-begin try
-// Veergude must_punkt ja valge_punkt summa kontroll
-if 		exists (select * from syscolumn where column_name = 'valge_punkt' and table_id = find_table_id('v_partiid')) 
-and 	exists (select * from syscolumn where column_name = 'must_punkt' and table_id = find_table_id('v_partiid'))
-then	select 	sum(valge_punkt) + sum(must_punkt) into punkti_summa from v_partiid;
-		if 		punkti_summa = 108
-		then 	insert Staatus values('Vaade "v_partiid"', 'Mustade ja valgete punktide summa', '-', 															'OK', 	v_partiid_punkti_summa, 	v_partiid_punkti_summa, '', vaated_jr)
-		else	insert Staatus values('Vaade "v_partiid"', 'Mustade ja valgete punktide summa', 'Punktide summa peab olema 108, praegu on ' || punkti_summa, 	'VIGA', v_partiid_punkti_summa*0, 	v_partiid_punkti_summa, '', vaated_jr)
-		endif;
-else			insert Staatus values('Vaade "v_partiid"', 'Mustade ja valgete punktide summa', 'Punktide summa peab olema 108, praegu on 0', 					'VIGA', v_partiid_punkti_summa*0, 	v_partiid_punkti_summa, '', vaated_jr)
-		endif;
-end try
-begin catch
-insert Staatus values('Vaade "v_partiid"', 'Mustade ja valgete punktide summa', 'Ei kompileeru', 'VIGA', 	v_partiid_punkti_summa*0, 		v_partiid_punkti_summa, '', vaated_jr)
-end catch;
-
-end;
-
-
-/*
-Vaate "v_kolmik" kontroll, esimese koha punktid kontroll, veeru "punktid" kogu summa kontroll ning vaate kirjete arvu kontroll.
-Sissetulevaid andmeid ei ole.
-
-Protseduuri sisesed muutujad: v_table_id = "v_kolmik" tabeli id; v_size = antud tabelis veergude arv; kirje_count = kirjete arv antud tabelis; punkti_summa = veeru "punktid" summa;
-
-Kõigepealt kontrollitakse, kas on olemas tabel "v_kolmik" kui ei ole lisatakse veateade Staatus tabelisse ning protseduuri töö lõpetatakse.
-Kui on korras, siis loetakse kokku mitu veergu on selles tabelis, kui ei ole õige arv siis veateade.
-Seejärel tuleb tabeli veergude olemasolu kontroll check_column_for_view abil.
-Andmeteks on siis: tabeli "v_kolmik" id, veeru nimi ja punktide arv, mis saab selle veeru korras oleku eest.
-
-Kõik järgnevad kontrollid on try/catch vahel, sest võib juhtuda, et mingil põhjusel vaadet ei ole võimalik vaadata.
-Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT KOLM kirjet.
-Seejärel luuakse TEMP tabel, sest mõnel tudengil võivad veeru nimed olla valesti, selle välitmiseks loob skript temp tabeli soovitud veeru nimedega
-Seejärel on veeru "punktid" summa kontroll ehk arvutatakse kokku kõikide punktide summa 
-Peab olema TÄPSELT 11.0!
-Järgmisena toimub igakjuhuks ka esimese koha kontroll ehk kontrollitakse, kas esimesel kohal oleval isikul on 4.5 punkti.
-Selle kontrolliks luuakse Temp tabel, sest veerul "järjekorra_number" võib tudengitel olla erinevad nimed 
-ja see annab errori kui see nimi pole õige, seega Temp tabelis on selle veeru nimi "Nr".
-*/
-create procedure view_kolmik()
-begin
-declare v_table_id, v_size, kirje_count, punkti_summa int;   
-
-if 		not exists (select * from systable where upper(table_name) = upper('v_kolmik'))
-then 	insert Staatus values ('Vaade "v_kolmik"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_kolmik*0, v_kolmik, '', vaated_jr);
-return; 
-endif;
-
-set 	v_table_id = find_table_id('v_kolmik');
-
-select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
-
-if      v_size != 3                 
-then 	insert Staatus values ('Vaade "v_kolmik"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_kolmik_veergude_arv*0, v_kolmik_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_kolmik"', 'Veergude arv', '-', 'OK', v_kolmik_veergude_arv, v_kolmik_veergude_arv, '', vaated_jr)
-endif;
-
-// call	check_column_for_view(v_table_id, 'Järjekorra_number', v_kolmik_nr, vaated_jr);
-call	check_column_for_view(v_table_id, 'Nimi', v_kolmik_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Punktid', v_kolmik_punktid, vaated_jr);
-
-begin try
-	// Kirjete kontroll
-	select 	count(*) into kirje_count from v_kolmik;
-	if		kirje_count > 3
-	then	insert Staatus values('Vaade "v_kolmik"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_kolmik_kirjete_arv*0, 	v_kolmik_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 3
-	then	insert Staatus values('Vaade "v_kolmik"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_kolmik_kirjete_arv*0, 	v_kolmik_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_kolmik"', 'Kirjete arv', '-', 														'OK', 	v_kolmik_kirjete_arv, 		v_kolmik_kirjete_arv, '', vaated_jr)
-	endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_kolmik"', 'Kirjete arv', 'Ei kompileeru', 'VIGA', 	v_kolmik_kirjete_arv*0, 		v_kolmik_kirjete_arv, '', vaated_jr)
-end catch;
-
-begin try
-	create	table #Temp(nr int, nimi varchar(102), punktid numeric); 
-	unload	select * from v_kolmik to 'C:\\TEMP\\kodutoo_check.txt' encoding 'UTF-8';
-	load	table #Temp (nr, nimi, punktid) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
-end try
-begin catch
-end catch;
-    
-begin try
-if 	exists (select * from syscolumn where column_name = 'punktid' and table_id = v_table_id) then
-	select 	sum(punktid) into punkti_summa from v_kolmik;
-	if 		punkti_summa = 11
-	then 	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', '-', 															'OK', 	v_kolmik_punkti_summa, 	v_kolmik_punkti_summa, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', 'Punktide summa peab olema 11.0, praegu on ' || punkti_summa, 	'VIGA', v_kolmik_punkti_summa*0, 	v_kolmik_punkti_summa, '', vaated_jr)
-	endif;
-else
-	select 	sum(punktid) into punkti_summa from #Temp;
-	if 		punkti_summa = 11
-	then 	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', '-', 															'OK', 	v_kolmik_punkti_summa, 	v_kolmik_punkti_summa, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', 'Punktide summa peab olema 11.0, praegu on ' || punkti_summa, 	'VIGA', v_kolmik_punkti_summa*0, 	v_kolmik_punkti_summa, '', vaated_jr)
-	endif;
-endif;
-end try
-begin catch
-	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', 'Ei kompileeru', 'VIGA', 	v_kolmik_punkti_summa*0, 		v_kolmik_punkti_summa, '', vaated_jr)
-end catch;
-
-begin try
-	if		(select punktid from #Temp where nr = 1) = 4.5	
-	then	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', '-', 														'OK', 	v_kolmik_esimene_punktid, 		v_kolmik_esimene_punktid, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Esimese koha punktid peavad olema 4.5, praegu on ' || (select punktid from #Temp where nr = 1), 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, '', vaated_jr)
-	endif;
-end try
-begin catch
-	begin try
-		if		(select punktid from v_kolmik where nimi = 'Maasikas, Malle') = 4.5	
-		then	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', '-', 														'OK', 	v_kolmik_esimene_punktid, 		v_kolmik_esimene_punktid, '', vaated_jr)
-		else	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Esimese koha punktid peavad olema 4.5.', 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, 'Kas on "perenimi, eesnimi"?', vaated_jr)
-		endif;
-	end try
-	begin catch
-		insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Ei kompileeru', 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, 'Kas on "perenimi, eesnimi"?', vaated_jr);
-	end catch;
-end catch;
-
-end;
-
-
 /*
 Protseduur käivita, mis siis käivitab kodutöö kontrolli
 
@@ -1601,16 +1226,20 @@ declare aja_muutuja date;
 declare aeg datetime;
 
 
-call table_inimesed(kodutöö);
-call table_klubid(kodutöö);
-call table_turniirid(kodutöö);
-call table_isikud(kodutöö);
-call table_partiid(kodutöö);
-call muud_elemendid(kodutöö);
-call view_edetabelid();
+call table_institutes();
+/*call table_persons();
+call table_registrations();
+call table_lecturers();
+call table_courses();
+call muud_elemendid();
+call view_persons_atleast_4eap();
+call view_mostA();
+call view_andmebaasideTeooria();
+call view_top40A();
+call view_top30Students();*/
 
 
-begin try
+/*begin try
 	if		kodutöö = 7 then
 			select max(sisestatud) into aeg from inimesed;
 			set aja_muutuja = aeg;
@@ -1622,9 +1251,9 @@ begin try
 	endif;
 end try
 begin catch
-end catch;
+end catch;*/
 
-call arvuta_punktid(versioon);
+call arvuta_punktid();
 end;
 
 /* See option lülitab välja trigerite akitverimise kirjete kustutamise ja siestamise ajaks, sest 7ndas kodutöös on trigerid tihti valesti tehtud. 
@@ -1665,7 +1294,7 @@ call 	deleteS();
 call 	käivita();
 
 /* Tulemuste väljastamine ekraanile ning kirjutamine txt ja csv failidesse */
-select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' or Olek = 'Aeg' 
-order by Jr;
-output to 'C:\TEMP\tulemus.csv' format excel;
-output to 'C:\TEMP\tulemus.txt' format text;
+select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' 
+//order by Jr;
+/*output to 'C:\TEMP\tulemus.csv' format excel;
+output to 'C:\TEMP\tulemus.txt' format text;*/
