@@ -65,6 +65,14 @@ create or replace variable persons_instituteid 								numeric = 0.5;
 create or replace variable persons_ssn 										numeric = 0.5;
 create or replace variable persons_unique_nimi 								numeric = 0.5;
 create or replace variable persons_kirjete_arv 								numeric = 1.0;
+/* Tabel inimesed punktid, kokku on 5p */
+create or replace variable registrations_tabel 								numeric = 4.0;
+create or replace variable registrations_veergude_arv 						numeric = 1.0;
+create or replace variable registrations_id 								numeric = 0.5;
+create or replace variable registrations_courseid 							numeric = 0.5;
+create or replace variable registrations_personid 							numeric = 0.5;
+create or replace variable registrations_finalgrade 						numeric = 0.5;
+create or replace variable registrations_kirjete_arv 						numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
@@ -642,39 +650,35 @@ Tabelis toimub ka unique tingimuse kontroll, ehk kas veergudel "Eesnimi" ja "Per
 Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT KAKSKÜMMEND KOLM kirjet.
 */
 
-//Tabeli Isikud kontroll
+//Tabeli Registrations kontroll
 create 	procedure table_registrations() 
 begin 
 declare v_table_id, v_size, kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('isikud')) 
-then 	insert Staatus values ('Tabel "Isikud"', '-', 'Tabelit ei eksisteeri.', 'VIGA', isikud_tabel*0, isikud_tabel, '', tabelid_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('registrations')) 
+then 	insert Staatus values ('Tabel "Registrations"', '-', 'Tabelit ei eksisteeri.', 'VIGA', registrations_tabel*0, registrations_tabel, '', tabelid_jr);
 return;
 endif;
 
-set 	v_table_id = find_table_id('isikud');
+set 	v_table_id = find_table_id('registrations');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 5                 
-then 	insert Staatus values ('Tabel "Isikud"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', isikud_veergude_arv*0, isikud_veergude_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Isikud"', 'Veergude arv', '-', 'OK', isikud_veergude_arv, isikud_veergude_arv, '', tabelid_jr)
+if      v_size != 4                 
+then 	insert Staatus values ('Tabel "Registrations"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', registrations_veergude_arv*0, registrations_veergude_arv, '', tabelid_jr)
+else	insert Staatus values ('Tabel "Registrations"', 'Veergude arv', '-', 'OK', registrations_veergude_arv, registrations_veergude_arv, '', tabelid_jr)
 endif;
 
-call 	check_column(v_table_id, 'Id',          'autoincrement',    'y', 'n', 4, isikud_id, tabelid_jr); 
-call 	check_column(v_table_id, 'Eesnimi',     null,               'n', 'n', 50, isikud_eesnimi, tabelid_jr); 
-call 	check_column(v_table_id, 'Perenimi',    null,               'n', 'n', 50, isikud_perenimi, tabelid_jr); 
-call 	check_column(v_table_id, 'Isikukood',   null,               'n', 'y', 11, isikud_isikukood, tabelid_jr); 
-call 	check_column(v_table_id, 'Klubi',       null,               'n', 'y', 4, isikud_klubi, tabelid_jr);
-
-// Unique kitsenduse kontroll
-call 	check_unique('Isikud', 'Eesnimi, Perenimi', isikud_unique_ees_pere, tabelid_jr);
+call 	check_column(v_table_id, 'Id',          'autoincrement',    'y', 'n', 4, registrations_id, tabelid_jr); 
+call 	check_column(v_table_id, 'CourseId',     null,               'n', 'n', 4, registrations_courseid, tabelid_jr); 
+call 	check_column(v_table_id, 'PersonId',    null,               'n', 'n', 4, registrations_personid, tabelid_jr); 
+call 	check_column(v_table_id, 'FinalGrade',   null,               'n', 'y', 1, registrations_finalgrade, tabelid_jr); 
 
 // Kirjete arvu kontroll
-select 	count(*) into kirje_count from isikud;
-if 		kirje_count = 23
-then 	insert Staatus values ('Tabel "Isikud"', 'Kirjete arv', '-', 														'OK', 	isikud_kirjete_arv, 	isikud_kirjete_arv,	'', tabelid_jr)
-else	insert Staatus values ('Tabel "Isikud"', 'Kirjete arv', 'Kirjete arv peab olema 23, hetkel on ' || kirje_count, 	'VIGA', isikud_kirjete_arv*0, 	isikud_kirjete_arv,	'', tabelid_jr)
+select 	count(*) into kirje_count from registrations; // 1230 või 1198
+if 		kirje_count = 1230
+then 	insert Staatus values ('Tabel "Registrations"', 'Kirjete arv', '-', 														'OK', 	registrations_kirjete_arv, 	registrations_kirjete_arv,	'', tabelid_jr)
+else	insert Staatus values ('Tabel "Registrations"', 'Kirjete arv', 'Kirjete arv peab olema 23, hetkel on ' || kirje_count, 	'VIGA', registrations_kirjete_arv*0, 	registrations_kirjete_arv,	'', tabelid_jr)
 endif;
 end;
 
@@ -1192,8 +1196,8 @@ declare aeg datetime;
 
 call table_institutes();
 call table_persons();
-/*call table_registrations();
-call table_lecturers();
+call table_registrations();
+/*call table_lecturers();
 call table_courses();
 call muud_elemendid();
 call view_persons_atleast_4eap();
@@ -1237,15 +1241,8 @@ begin
 	or		not exists (select * from syscolumn where upper(column_name) = upper(Veerg_2) and table_id = find_table_id(Tabel))
 	then 	raiserror 17000 'Ei saa lisada andmeid tabelisse "' + Tabel + '"! Puudub veeru paar "'+ Veerg_1 +'"/"'+ Veerg_2 +'"!'
 	endif;
-end;
-
-create procedure check_error_tapitaht(Tabel varchar(100), Veerg_1 varchar(100), Veerg_2 varchar(100))
-begin
-	if 		not exists (select * from syscolumn where upper(column_name) = upper(Veerg_1) and table_id = find_table_id(Tabel))
-	and		not exists (select * from syscolumn where upper(column_name) = upper(Veerg_2) and table_id = find_table_id(Tabel))
-	then 	raiserror 17000 'Ei saa lisada andmeid tabelisse "' + Tabel + '"! Puudub veerg "'+ Veerg_1 +'" või "'+ Veerg_2 +'"!'
-	endif;
 end;*/
+
 
 
 
