@@ -92,12 +92,20 @@ create or replace variable courses_kirjete_arv 							numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
-/* Vaade edetabelid, kokku on 30p */
+/* Vaade persons_atleast_4eap, kokku on 30p */
 create or replace variable v_persons_atleast_4eap 						numeric = 4.0;
 create or replace variable v_persons_atleast_4eap_veergude_arv 			numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_firstname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_lastname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_kirjete_arv 			numeric = 1.0;
+/* Vaade mostA, kokku on 30p */
+create or replace variable v_mostA 										numeric = 6.0;
+create or replace variable v_mostA_veergude_arv 						numeric = 1.0;
+create or replace variable v_mostA_firstname							numeric = 1.0;
+create or replace variable v_mostA_lastname								numeric = 1.0;
+create or replace variable v_mostA_nrofa								numeric = 1.0;
+create or replace variable v_mostA_kirje_summa 							numeric = 1.0;
+create or replace variable v_mostA_kirjete_arv 							numeric = 1.0;
 
 
 /* Veateadete järjekord */
@@ -917,7 +925,7 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_edetabelid_kirjete_arv*0, v_edetabelid_kirjete_arv, '', vaated_jr)
+	insert Staatus values('Vaade "v_persons_atleast_4eap"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_persons_atleast_4eap_kirjete_arv*0, v_persons_atleast_4eap_kirjete_arv, '', vaated_jr)
 end catch;
 
 end;
@@ -941,38 +949,52 @@ Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide vee
 // Vaade v_mostA kontroll
 create  procedure view_mostA()
 begin 
-declare v_table_id, v_size, partii_summa int;
+declare v_table_id, v_size, kirje_summa, kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('v_klubipartiikogused_1')) 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused_1"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_klubipartiikogused_1*0, v_klubipartiikogused_1, '', vaated_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('v_mostA')) 
+then 	insert Staatus values ('Vaade "v_mostA"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_mostA*0, v_mostA, '', vaated_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_klubipartiikogused_1');
+set 	v_table_id = find_table_id('v_mostA');
 
 select count(column_name) into v_size from syscolumn  where table_id = v_table_id;
 
-if      v_size != 2 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused_1"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_klubipartiikogused_1_veergude_arv*0, v_klubipartiikogused_1_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_klubipartiikogused_1"', 'Veergude arv', '-', 'OK', v_klubipartiikogused_1_veergude_arv, v_klubipartiikogused_1_veergude_arv, '', vaated_jr)
+if      v_size != 3 
+then 	insert Staatus values ('Vaade "v_mostA"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_mostA_veergude_arv*0, v_mostA_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "v_mostA"', 'Veergude arv', '-', 'OK', v_mostA_veergude_arv, v_mostA_veergude_arv, '', vaated_jr)
 endif;
 
-call	check_column_for_view(v_table_id, 'Klubi_nimi', v_klubipartiikogused_1_klubi_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Partiisid', v_klubipartiikogused_1_partiisid, vaated_jr);
+call	check_column_for_view(v_table_id, 'FirstName', v_mostA_firstname, vaated_jr);
+call	check_column_for_view(v_table_id, 'LastName', v_mostA_lastname, vaated_jr);
+call	check_column_for_view(v_table_id, 'NrOfA', v_mostA_nrofa, vaated_jr);
 
-// Partii veeru summa kontroll, partii_summa peab võrduma TÄPSELT KAKS SADA
+// A koguse kontroll
 begin try
-	if 		exists (select * from syscolumn where column_name = 'partiisid' and table_id = find_table_id('v_klubipartiikogused_1'))
-	then	select 	sum(partiisid) into partii_summa from v_klubipartiikogused_1;
-			if 		partii_summa = 200
-			then	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', '-', 														 	'OK', 	v_klubipartiikogused_1_partiide_arvu_summa, 	v_klubipartiikogused_1_partiide_arvu_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on ' || partii_summa, 	'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, '', vaated_jr)
-			endif;
-	else			insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on 0', 				'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
+	select 	sum(NrOfA) into kirje_summa from v_mostA;
+	if		kirje_summa > 22
+	then	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+	elseif	kirje_summa < 22
+	then	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', '-', 														'OK', 	v_mostA_kirje_summa, 	v_mostA_kirje_summa, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Ei kompileeru', 	'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, v_klubipartiikogused_1_partiide_arvu_summa, '', vaated_jr)
+	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Ei kompileeru', 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+end catch;
+
+// Kirjete kontroll
+begin try
+	select 	count(*) into kirje_count from v_mostA;
+	if		kirje_count > 16
+	then	insert Staatus values('Vaade "v_mostA"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mostA_kirjete_arv*0, v_mostA_kirjete_arv, '', vaated_jr)
+	elseif	kirje_count < 16
+	then	insert Staatus values('Vaade "v_mostA"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mostA_kirjete_arv*0, v_mostA_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_mostA"', 'Kirjete arv', '-', 														'OK', 	v_mostA_kirjete_arv, 	v_mostA_kirjete_arv, '', vaated_jr)
+	endif;
+end try
+begin catch
+	insert Staatus values('Vaade "v_mostA"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_mostA_kirjete_arv*0, v_mostA_kirjete_arv, '', vaated_jr)
 end catch;
 end;
 
@@ -1177,8 +1199,8 @@ call table_lecturers();
 call table_courses();
 /*call muud_elemendid();*/
 call view_persons_atleast_4eap();
-/*call view_mostA();
-call view_andmebaasideTeooria();
+call view_mostA();
+/*call view_andmebaasideTeooria();
 call view_top40A();
 call view_top30Students();*/
 
