@@ -106,6 +106,13 @@ create or replace variable v_mostA_lastname								numeric = 1.0;
 create or replace variable v_mostA_nrofa								numeric = 1.0;
 create or replace variable v_mostA_kirje_summa 							numeric = 1.0;
 create or replace variable v_mostA_kirjete_arv 							numeric = 1.0;
+/* Vaade v_andmebaasideTeooria, kokku on 30p */
+create or replace variable v_andmebaasideTeooria 										numeric = 6.0;
+create or replace variable v_andmebaasideTeooria_veergude_arv 						numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_personid								numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_firstname							numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_lastname								numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_kirjete_arv 							numeric = 1.0;
 
 
 /* Veateadete järjekord */
@@ -1017,38 +1024,38 @@ Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide vee
 // Vaade v_andmebaasideTeooria kontroll
 create  procedure view_andmebaasideTeooria()
 begin 
-declare v_table_id, v_size, partii_summa int;
+declare v_table_id, v_size,kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('v_klubipartiikogused_2')) 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused_2"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_klubipartiikogused_2*0, v_klubipartiikogused_2, '', vaated_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('v_andmebaasideTeooria')) 
+then 	insert Staatus values ('Vaade "v_andmebaasideTeooria"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_andmebaasideTeooria*0, v_andmebaasideTeooria, '', vaated_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_klubipartiikogused_2');
+set 	v_table_id = find_table_id('v_andmebaasideTeooria');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 2                 
-then 	insert Staatus values ('Vaade "v_klubipartiikogused_2"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_klubipartiikogused_2_veergude_arv*0, v_klubipartiikogused_2_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_klubipartiikogused_2"', 'Veergude arv', '-', 'OK', v_klubipartiikogused_2_veergude_arv, v_klubipartiikogused_2_veergude_arv, '', vaated_jr)
+if      v_size != 3                 
+then 	insert Staatus values ('Vaade "v_andmebaasideTeooria"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_andmebaasideTeooria_veergude_arv*0, v_andmebaasideTeooria_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "v_andmebaasideTeooria"', 'Veergude arv', '-', 'OK', v_andmebaasideTeooria_veergude_arv, v_andmebaasideTeooria_veergude_arv, '', vaated_jr)
 endif;
 
-call	check_column_for_view(v_table_id, 'Klubi_nimi', v_klubipartiikogused_2_klubi_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'Partiisid', v_klubipartiikogused_2_partiisid, vaated_jr);
+call	check_column_for_view(v_table_id, 'PersonId', v_andmebaasideTeooria_personid, vaated_jr);
+call	check_column_for_view(v_table_id, 'FirstName', v_andmebaasideTeooria_firstname, vaated_jr);
+call	check_column_for_view(v_table_id, 'LastName', v_andmebaasideTeooria_lastname, vaated_jr);
 
-// Partii veeru summa kontroll, partii_summa peab võrduma TÄPSELT KAKS SADA
+// Kirjete kontroll
 begin try
-	if 		exists (select * from syscolumn where column_name = 'partiisid' and table_id = find_table_id('v_klubipartiikogused_2'))
-	then	select 	sum(partiisid) into partii_summa from v_klubipartiikogused_2;
-			if 		partii_summa = 216
-			then	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', '-', 															'OK', 	v_klubipartiikogused_2_partiide_arvu_summa, 	v_klubipartiikogused_2_partiide_arvu_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Partiide summa peab olema 216, praegu on ' || partii_summa, 	'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, '', vaated_jr)
-			endif;
-	else			insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on 0', 				'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
+	select 	count(*) into kirje_count from v_andmebaasideTeooria;
+	if		kirje_count > 17
+	then	insert Staatus values('Vaade "v_andmebaasideTeooria"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_andmebaasideTeooria_kirjete_arv*0, v_andmebaasideTeooria_kirjete_arv, '', vaated_jr)
+	elseif	kirje_count < 17
+	then	insert Staatus values('Vaade "v_andmebaasideTeooria"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_andmebaasideTeooria_kirjete_arv*0, v_andmebaasideTeooria_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_andmebaasideTeooria"', 'Kirjete arv', '-', 														'OK', 	v_andmebaasideTeooria_kirjete_arv, 	v_andmebaasideTeooria_kirjete_arv, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Ei kompileeru', 	'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, v_klubipartiikogused_2_partiide_arvu_summa, '', vaated_jr)
+	insert Staatus values('Vaade "v_andmebaasideTeooria"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_andmebaasideTeooria_kirjete_arv*0, v_andmebaasideTeooria_kirjete_arv, '', vaated_jr)
 end catch;
 
 end;
@@ -1200,24 +1207,9 @@ call table_courses();
 /*call muud_elemendid();*/
 call view_persons_atleast_4eap();
 call view_mostA();
-/*call view_andmebaasideTeooria();
-call view_top40A();
+call view_andmebaasideTeooria();
+/*call view_top40A();
 call view_top30Students();*/
-
-
-/*begin try
-	if		kodutöö = 7 then
-			select max(sisestatud) into aeg from inimesed;
-			set aja_muutuja = aeg;
-			begin try
-				insert into Staatus values ('-', (select eesnimi from inimesed where sisestatud = aeg) || ', ' || (select perenimi from inimesed where sisestatud = aeg), aja_muutuja, 'Aeg', 0, 0, '', tudeng_jr);
-			end try
-			begin catch
-			end catch;
-	endif;
-end try
-begin catch
-end catch;*/
 
 call arvuta_punktid();
 end;
