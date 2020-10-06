@@ -42,9 +42,7 @@ if exists (select * from sysprocedure where proc_name = 'view_top30Students') 		
 create 	or replace variable kodutöö							numeric = 100;
 
 
-/*Kodutöö 3 punktid kokku = 100p */
-/* Tabelite punktide muutujad - Hindeskaala punktid, iga kodutöö osa on 100p */
-/* https://github.com/nuubis/Automaattestid-andmebaaside-ainele/wiki/Kodut%C3%B6%C3%B6--3-punktid */
+/*Kodutöö punktid kokku = 100p */
 /* Tabel institutes punktid, kokku on 5p */
 create or replace variable institutes_tabel 								numeric = 5.0;
 create or replace variable institutes_veergude_arv 							numeric = 1.0;
@@ -55,7 +53,7 @@ create or replace variable institutes_deanid 								numeric = 0.5;
 create or replace variable institutes_vicedeanid 							numeric = 0.5;
 create or replace variable institutes_unique_nimi 							numeric = 0.5;
 create or replace variable institutes_kirjete_arv 							numeric = 1.0;
-/* Tabel inimesed punktid, kokku on 5p */
+/* Tabel persons punktid, kokku on 5p */
 create or replace variable persons_tabel 									numeric = 5.0;
 create or replace variable persons_veergude_arv 							numeric = 1.0;
 create or replace variable persons_id 										numeric = 0.5;
@@ -65,7 +63,7 @@ create or replace variable persons_instituteid 								numeric = 0.5;
 create or replace variable persons_ssn 										numeric = 0.5;
 create or replace variable persons_unique_nimi 								numeric = 0.5;
 create or replace variable persons_kirjete_arv 								numeric = 1.0;
-/* Tabel inimesed punktid, kokku on 5p */
+/* Tabel registrations punktid, kokku on 5p */
 create or replace variable registrations_tabel 								numeric = 4.0;
 create or replace variable registrations_veergude_arv 						numeric = 1.0;
 create or replace variable registrations_id 								numeric = 0.5;
@@ -73,6 +71,14 @@ create or replace variable registrations_courseid 							numeric = 0.5;
 create or replace variable registrations_personid 							numeric = 0.5;
 create or replace variable registrations_finalgrade 						numeric = 0.5;
 create or replace variable registrations_kirjete_arv 						numeric = 1.0;
+/* Tabel lecturers punktid, kokku on 5p */
+create or replace variable lecturers_tabel 								numeric = 4.0;
+create or replace variable lecturers_veergude_arv 						numeric = 1.0;
+create or replace variable lecturers_id 								numeric = 0.5;
+create or replace variable lecturers_courseid 							numeric = 0.5;
+create or replace variable lecturers_personid 							numeric = 0.5;
+create or replace variable lecturers_responsible 						numeric = 0.5;
+create or replace variable lecturers_kirjete_arv 						numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
@@ -609,11 +615,7 @@ if      v_size != 5
 then	insert Staatus values ('Tabel "Persons"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', persons_veergude_arv*0, persons_veergude_arv, '', tabelid_jr) 
 else	insert Staatus values ('Tabel "Persons"', 'Veergude arv', '-', 'OK', persons_veergude_arv, persons_veergude_arv, '', tabelid_jr)
 endif;
-/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
- p_table_id integer,     p_column_name varchar(30), 
-                                p_default varchar(30),  p_pkey char(1), 
-                                p_nulls char(1),        p_width integer, 
-								punktid numeric,		Jr integer */
+
 								
 call 	check_column(v_table_id, 'Id',       'autoincrement',    'y', 'n', 4, persons_id, tabelid_jr); 
 call 	check_column(v_table_id, 'FirstName',     null,               'n', 'n', 30, persons_firstname, tabelid_jr); 
@@ -699,46 +701,42 @@ Tabelis toimub ka unique tingimuse kontroll, ehk kas veergul "Nimi" on olemas un
 Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT KAKS kirjet.
 */
 
-//Tabeli Turniirid kontrollimine
+//Tabeli Lecturers kontrollimine
 create  procedure table_lecturers()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('turniirid')) 
-then 	insert Staatus values ('Tabel "Turniirid"', '-', 'Tabelit ei eksisteeri.', 'VIGA', turniirid_tabel*0, turniirid_tabel, '', tabelid_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('lecturers')) 
+then 	insert Staatus values ('Tabel "Lecturers"', '-', 'Tabelit ei eksisteeri.', 'VIGA', lecturers_tabel*0, lecturers_tabel, '', tabelid_jr);
 return;  
 endif;
 
-set 	v_table_id = find_table_id('turniirid');
+set 	v_table_id = find_table_id('lecturers');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 6 and version = 7                
-then 	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', 'On vale, peab olema 6, hetkel on ' || v_size, 'VIGA', turniirid_veergude_arv*0, turniirid_veergude_arv, '', tabelid_jr)
-elseif 	v_size != 5 and version != 7
-then	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', turniirid_veergude_arv*0, turniirid_veergude_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', '-', 'OK', turniirid_veergude_arv, turniirid_veergude_arv, '', tabelid_jr)
+if 	v_size != 4
+then	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', lecturers_veergude_arv*0, lecturers_veergude_arv, '', tabelid_jr)
+else	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', '-', 'OK', lecturers_veergude_arv, lecturers_veergude_arv, '', tabelid_jr)
 endif;
 
-call 	check_column(v_table_id, 'Id',              'autoincrement',    'y', 'n', 4, turniirid_id, tabelid_jr);
-call 	check_column(v_table_id, 'Nimi',            null,               'n', 'n', 100, turniirid_nimi, tabelid_jr);
-call 	check_column(v_table_id, 'Toimumiskoht',    null,               'n', 'y', 100, turniirid_toimumiskoht, tabelid_jr);
-if 		version = 7 then
-call	check_column(v_table_id, 'Asula', 			null,				'n', 'y', 4, turniirid_asula, tabelid_jr) 
-endif;
+/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
+ p_table_id integer,     p_column_name varchar(30), 
+                                p_default varchar(30),  p_pkey char(1), 
+                                p_nulls char(1),        p_width integer, 
+								punktid numeric,		Jr integer */
+								
+call 	check_column(v_table_id, 'Id',              'autoincrement',    'y', 'n', 4, lecturers_id, tabelid_jr);
+call 	check_column(v_table_id, 'CourseId',            null,               'n', 'y', 4, lecturers_courseid, tabelid_jr);
+call 	check_column(v_table_id, 'PersonId',    null,               'n', 'n', 4, lecturers_personid, tabelid_jr);
+call 	check_column(v_table_id, 'Responsible',    null,               'n', 'y', 2, lecturers_responsible, tabelid_jr);
 
-// kontrollin kas on täpitähtedega veerg või mitte
-call 	check_column_t2pit2ht('Loppkuupaev', 'Lõppkuupäev', v_table_id, null, 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr);
-call 	check_column_t2pit2ht('Alguskuupaev', 'Alguskuupäev', v_table_id, null, 'n', 'n', 4, turniirid_alguskuupäev, tabelid_jr);
-
-// Unique kitsenduse kontroll
-call 	check_unique('Turniirid', 'Nimi', turniirid_unique_nimi, tabelid_jr);
 
 // Kirjete arvu kontroll
-select 	count(*) into kirje_count from turniirid;
-if 		kirje_count = 2
-then 	insert Staatus values ('Tabel "Turniirid"', 'Kirjete arv', '-', 													'OK', 	turniirid_kirjete_arv, 		turniirid_kirjete_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Turniirid"', 'Kirjete arv', 'Kirjete arv peab olema 2, hetkel on ' || kirje_count, 	'VIGA', turniirid_kirjete_arv*0, 	turniirid_kirjete_arv, '', tabelid_jr)
+select 	count(*) into kirje_count from lecturers;
+if 		kirje_count = 149
+then 	insert Staatus values ('Tabel "Lecturers"', 'Kirjete arv', '-', 													'OK', 	lecturers_kirjete_arv, 		lecturers_kirjete_arv, '', tabelid_jr)
+else	insert Staatus values ('Tabel "Lecturers"', 'Kirjete arv', 'Kirjete arv peab olema 149, hetkel on ' || kirje_count, 	'VIGA', lecturers_kirjete_arv*0, 	lecturers_kirjete_arv, '', tabelid_jr)
 endif;
 end;
 
@@ -1197,8 +1195,8 @@ declare aeg datetime;
 call table_institutes();
 call table_persons();
 call table_registrations();
-/*call table_lecturers();
-call table_courses();
+call table_lecturers();
+/*call table_courses();
 call muud_elemendid();
 call view_persons_atleast_4eap();
 call view_mostA();
