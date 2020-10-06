@@ -79,6 +79,16 @@ create or replace variable lecturers_courseid 							numeric = 0.5;
 create or replace variable lecturers_personid 							numeric = 0.5;
 create or replace variable lecturers_responsible 						numeric = 0.5;
 create or replace variable lecturers_kirjete_arv 						numeric = 1.0;
+/* Tabel courses punktid, kokku on 5p */
+create or replace variable courses_tabel 								numeric = 5.0;
+create or replace variable courses_veergude_arv 						numeric = 1.0;
+create or replace variable courses_id 									numeric = 0.5;
+create or replace variable courses_instituteid 							numeric = 0.5;
+create or replace variable courses_name 								numeric = 0.5;
+create or replace variable courses_code 								numeric = 0.5;
+create or replace variable courses_eap 									numeric = 0.5;
+create or replace variable courses_gradetype 							numeric = 0.5;
+create or replace variable courses_kirjete_arv 							numeric = 1.0;
 /* Välisvõtmete triggerid, kokku on 8p */
 /*create or replace variable trigger_cascade 								numeric = 4.0;
 create or replace variable trigger_delete 								numeric = 4.0;*/
@@ -719,12 +729,6 @@ if 	v_size != 4
 then	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', lecturers_veergude_arv*0, lecturers_veergude_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', '-', 'OK', lecturers_veergude_arv, lecturers_veergude_arv, '', tabelid_jr)
 endif;
-
-/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
- p_table_id integer,     p_column_name varchar(30), 
-                                p_default varchar(30),  p_pkey char(1), 
-                                p_nulls char(1),        p_width integer, 
-								punktid numeric,		Jr integer */
 								
 call 	check_column(v_table_id, 'Id',              'autoincrement',    'y', 'n', 4, lecturers_id, tabelid_jr);
 call 	check_column(v_table_id, 'CourseId',            null,               'n', 'y', 4, lecturers_courseid, tabelid_jr);
@@ -763,45 +767,43 @@ Tabelis toimub 3 check tingimuse kontrolli
 Seejärel on kirjete arvu kontroll, kus vaadatakse kas selles tabelis on TÄPSELT SADA KAHEKSA kirjet.
 */
 
-//Tabeli Partiid kontroll
+//Tabeli Courses kontroll
 create  procedure table_courses() 
 begin 
 declare v_table_id, v_size, kirje_count int; 
 
-if 		not exists (select * from systable where upper(table_name) = upper('partiid')) 
-then 	insert Staatus values ('Tabel "Partiid"', '-', 'Tabelit ei eksisteeri.', 'VIGA', partiid_tabel*0, partiid_tabel, '', tabelid_jr);
+if 		not exists (select * from systable where upper(table_name) = upper('courses')) 
+then 	insert Staatus values ('Tabel "Courses"', '-', 'Tabelit ei eksisteeri.', 'VIGA', courses_tabel*0, courses_tabel, '', tabelid_jr);
 return; 
 endif;
 
-set 	v_table_id = find_table_id('partiid');
+set 	v_table_id = find_table_id('courses');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 9                 
-then 	insert Staatus values ('Tabel "Partiid"', 'Veergude arv', 'On vale, peab olema 9, hetkel on ' || v_size, 'VIGA', partiid_veergude_arv*0, partiid_veergude_arv, '', tabelid_jr)
-else	insert Staatus values ('Tabel "Partiid"', 'Veergude arv', '-', 'OK', partiid_veergude_arv, partiid_veergude_arv, '', tabelid_jr)
+if      v_size != 6                 
+then 	insert Staatus values ('Tabel "Courses"', 'Veergude arv', 'On vale, peab olema 6, hetkel on ' || v_size, 'VIGA', courses_veergude_arv*0, courses_veergude_arv, '', tabelid_jr)
+else	insert Staatus values ('Tabel "Courses"', 'Veergude arv', '-', 'OK', courses_veergude_arv, courses_veergude_arv, '', tabelid_jr)
 endif;
 
-call 	check_column(v_table_id, 'Id',            'autoincrement',       'y', 'n', 4, partiid_id, tabelid_jr); 
-call 	check_column(v_table_id, 'Turniir',       null,                  'n', 'n', 4, partiid_turniir, tabelid_jr); 
-call 	check_column(v_table_id, 'Algushetk',     'current timestamp',   'n', 'n', 8, partiid_algushetk, tabelid_jr); 
-call 	check_column(v_table_id, 'Valge',         null,                  'n', 'n', 4, partiid_valge, tabelid_jr); 
-call 	check_column(v_table_id, 'Must',          null,                  'n', 'n', 4, partiid_must, tabelid_jr); 
-call 	check_column(v_table_id, 'Valge_tulemus', null,                  'n', 'y', 2, partiid_valge_tulemus, tabelid_jr); 
-call 	check_column(v_table_id, 'Musta_tulemus', null,                  'n', 'y', 2, partiid_musta_tulemus, tabelid_jr); 
-call 	check_column_t2pit2ht('Lopphetk', 'Lõpphetk', v_table_id, null,  'n', 'y', 8, partiid_lõpphetk, tabelid_jr);
-call 	check_column_t2pit2ht('Kokkuvote', 'Kokkuvõte', v_table_id, null, 'n', 'y', 5000, partiid_kokkuvõte, tabelid_jr);
+/* select * from syscolumn where table_id = find_table_id('institutes') and column_name = 'vicedeanid'
+ p_table_id integer,     p_column_name varchar(30), 
+                                p_default varchar(30),  p_pkey char(1), 
+                                p_nulls char(1),        p_width integer, 
+								punktid numeric,		Jr integer */
+call 	check_column(v_table_id, 'Id',            'autoincrement',       'y', 'n', 4, courses_id, tabelid_jr); 
+call 	check_column(v_table_id, 'InstituteId',       null,                  'n', 'n', 4, courses_instituteid, tabelid_jr); 
+call 	check_column(v_table_id, 'Name',     		null,   			'n', 'n', 50, courses_name, tabelid_jr); 
+call 	check_column(v_table_id, 'Code',         	null,                  'n', 'y', 20, courses_code, tabelid_jr); 
+call 	check_column(v_table_id, 'EAP',          	null,                  'n', 'y', 4, courses_eap, tabelid_jr); 
+call 	check_column(v_table_id, 'GradeType', 	null,                  'n', 'y', 8, courses_gradetype, tabelid_jr); 
 
-// Check kitsenduste kontroll
-call 	check_check('check("valge_tulemus" in( 0,1,2 ) )', 'Partiid', 'Valge_tulemus', partiid_check_valge_tulemus, tabelid_jr);
-call 	check_check('check("musta_tulemus" in( 0,1,2 ) )', 'Partiid', 'Musta_tulemus', partiid_check_musta_tulemus, tabelid_jr);
-call 	check_check('check("valge_tulemus"+"musta_tulemus" = 2)', 'Partiid', 'Valge_tulemus + Musta_tulemus', partiid_check_valge_musta_tulemus, tabelid_jr);
 
 // Kirjete arvu kontroll
-select 	count(*) into kirje_count from partiid;
-if 		kirje_count = 108
-then 	insert Staatus values ('Tabel "Partiid"', 'Kirjete arv', '-',														'OK', 	partiid_kirjete_arv, 	partiid_kirjete_arv,	'', tabelid_jr)
-else	insert Staatus values ('Tabel "Partiid"', 'Kirjete arv', 'Kirjete arv peab olema 108, hetkel on ' || kirje_count, 	'VIGA', partiid_kirjete_arv*0, 	partiid_kirjete_arv,	'', tabelid_jr)
+select 	count(*) into kirje_count from courses; //100 või 101 või 102
+if 		kirje_count = 102
+then 	insert Staatus values ('Tabel "Courses"', 'Kirjete arv', '-',														'OK', 	courses_kirjete_arv, 	courses_kirjete_arv,	'', tabelid_jr)
+else	insert Staatus values ('Tabel "Courses"', 'Kirjete arv', 'Kirjete arv peab olema 102, hetkel on ' || kirje_count, 	'VIGA', courses_kirjete_arv*0, 	courses_kirjete_arv,	'', tabelid_jr)
 endif;
 
 end;
@@ -1196,9 +1198,9 @@ call table_institutes();
 call table_persons();
 call table_registrations();
 call table_lecturers();
-/*call table_courses();
-call muud_elemendid();
-call view_persons_atleast_4eap();
+call table_courses();
+/*call muud_elemendid();*/
+/*call view_persons_atleast_4eap();
 call view_mostA();
 call view_andmebaasideTeooria();
 call view_top40A();
