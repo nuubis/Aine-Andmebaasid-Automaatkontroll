@@ -91,14 +91,14 @@ create or replace variable courses_eap 									numeric = 0.5;
 create or replace variable courses_gradetype 							numeric = 0.5;
 create or replace variable courses_kirjete_arv 							numeric = 1.0;
 /* Välisvõtmete punktid */
-create or replace variable välisvõti_registration_person				numeric = 3.0
-create or replace variable välisvõti_institute_person_dean				numeric = 3.0
-create or replace variable välisvõti_registration_course				numeric = 3.0
-create or replace variable välisvõti_lecturer_person					numeric = 3.0
-create or replace variable välisvõti_lecturer_course					numeric = 3.0
-create or replace variable välisvõti_course_institute					numeric = 3.0
-create or replace variable välisvõti_institute_person_vice_dean			numeric = 3.0
-create or replace variable välisvõti_person_institute					numeric = 3.0
+create or replace variable välisvõti_registration_person				numeric = 3.0;
+create or replace variable välisvõti_institute_person_dean				numeric = 3.0;
+create or replace variable välisvõti_registration_course				numeric = 3.0;
+create or replace variable välisvõti_lecturer_person					numeric = 3.0;
+create or replace variable välisvõti_lecturer_course					numeric = 3.0;
+create or replace variable välisvõti_course_institute					numeric = 3.0;
+create or replace variable välisvõti_institute_person_vice_dean			numeric = 3.0;
+create or replace variable välisvõti_person_institute					numeric = 3.0;
 /* Välisvõtmed */
 /* Välisvõtmete triggerid, kokku on 8p */
 create or replace variable trigger_cascade 								numeric = 2.0;
@@ -117,7 +117,7 @@ create or replace variable v_mostA_veergude_arv 						numeric = 1.0;
 create or replace variable v_mostA_firstname							numeric = 1.0;
 create or replace variable v_mostA_lastname								numeric = 1.0;
 create or replace variable v_mostA_nrofa								numeric = 1.0;
-create or replace variable v_mostA_kirje_summa 							numeric = 2.0; // kui max(nrofa) > 2
+create or replace variable v_mostA_kirje_max 							numeric = 2.0;
 create or replace variable v_mostA_kirjete_arv 							numeric = 3.0;
 /* Vaade andmebaasideTeooria, kokku on 6p */
 create or replace variable v_andmebaasideTeooria 						numeric = 9.0;
@@ -132,7 +132,8 @@ create or replace variable v_top40A_veergude_arv 						numeric = 1.0;
 create or replace variable v_top40A_firstname							numeric = 1.0;
 create or replace variable v_top40A_lastname							numeric = 1.0;
 create or replace variable v_top40A_nrofa								numeric = 1.0;
-create or replace variable v_top40A_kirje_summa 						numeric = 3.0; // kui max > 6 ja min = 4
+create or replace variable v_top40A_kirje_max 							numeric = 1.5; // kui max > 6 
+create or replace variable v_top40A_kirje_min 							numeric = 1.5; // kui min = 4
 create or replace variable v_top40A_kirjete_arv 						numeric = 2.0;
 /* Vaade top30Students, kokku on 6p */
 create or replace variable v_top30Students 								numeric = 9.0;
@@ -386,7 +387,6 @@ set primary_t_id = find_table_id(p_primary_table);
 set primary_c_id = find_column_id(primary_t_id, p_primary_column);
 set foreign_t_id = find_table_id(p_foreign_table);
 set foreign_c_id = find_column_id(foreign_t_id, p_foreign_column);
-select primary_t_id;
 
 // Loen kokku mitu välisvõtit vastab nendele andmetele (peaks olema 1)
 select 	count(foreign_key_id) 		into count_f_key from sysfkcol
@@ -798,7 +798,7 @@ Mõnel tudengil võib olla ka tekkinud tabel "maint_name", kui see on olemas, si
 aga kuna tegelik arv on ikkagi 1, siis lihtsalt lahutatakse üks kui eksisteerib "maint_name" ja/või "maint_plan" tabel.
 */
 // Protseduur, mis kontrollib välisvõtmeid ja triggereid
-create  procedure muud_elemendid(version int)
+create  procedure muud_elemendid()
 begin
 declare trigger_count_C, trigger_count_DC, trigger_count_DN int;
 
@@ -821,24 +821,23 @@ where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigg
 if 		trigger_count_C = 8				
 then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
 else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tingmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 6.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
-								'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)
-endif			
+								'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)			
 endif;
 
 /* Kahe järgneva delete triggerite kontrollide vahe on see, et ühe tingimus kustutamisel on CASCADE ja teisel on NULL*/
 select 	count(*) into trigger_count_DC		from systrigger
 where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
-if 		(trigger_count_D = 5) or (trigger_count_D = 6 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
+if 		(trigger_count_DC = 5) or (trigger_count_DC = 6 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
 then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_cascade, trigger_delete_cascade, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 1.', 
+else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 5.', 
 								'VIGA', trigger_delete_cascade*0, trigger_delete_cascade, '', välisvõtmed_tg_jr)
 endif;
 
-select 	count(*) into trigger_count_DC		from systrigger
-where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
-if 		(trigger_count_D = 3) or (trigger_count_D = 4 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
+select 	count(*) into trigger_count_DN		from systrigger
+where	event = 'D' and trigger_time = 'A' 	and referential_action = 'N' and trigger_name is null;
+if 		(trigger_count_DN = 3) or (trigger_count_DN = 4 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
 then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_null, trigger_delete_null, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 1.', 
+else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 3.', 
 								'VIGA', trigger_delete_null*0, trigger_delete_null, '', välisvõtmed_tg_jr)
 endif;
 
@@ -922,7 +921,7 @@ Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide vee
 // Vaade v_mostA kontroll
 create  procedure view_mostA()
 begin 
-declare v_table_id, v_size, kirje_summa, kirje_count int;
+declare v_table_id, v_size, kirje_max, kirje_count int;
 
 if 		not exists (select * from systable where upper(table_name) = upper('v_mostA')) 
 then 	insert Staatus values ('Vaade "v_mostA"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_mostA*0, v_mostA, '', vaated_jr);
@@ -942,18 +941,16 @@ call	check_column_for_view(v_table_id, 'FirstName', v_mostA_firstname, vaated_jr
 call	check_column_for_view(v_table_id, 'LastName', v_mostA_lastname, vaated_jr);
 call	check_column_for_view(v_table_id, 'NrOfA', v_mostA_nrofa, vaated_jr);
 
-// Veeru NrOfA summa kontroll
+// Veeru NrOfA maksimumi kontroll
 begin try
-	select 	sum(NrOfA) into kirje_summa from v_mostA;
-	if		kirje_summa > 22
-	then	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
-	elseif	kirje_summa < 22
-	then	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA summa', '-', 														'OK', 	v_mostA_kirje_summa, 	v_mostA_kirje_summa, '', vaated_jr)
+	select 	max(NrOfA) into kirje_max from v_mostA;
+	if		kirje_max > 2
+	then	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA maksimum', 'Maksimum on SUUREM kui vaja, praegu on ' || kirje_max, 	'VIGA', v_mostA_kirje_max*0, v_mostA_kirje_max, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_mostA"', 'Veeru NrOfA maksimum', '-', 														'OK', 	v_mostA_kirje_max, 	v_mostA_kirje_max, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_mostA"', 'Kirje A summa', 'Ei kompileeru', 	'VIGA', v_mostA_kirje_summa*0, v_mostA_kirje_summa, '', vaated_jr)
+	insert Staatus values('Vaade "v_mostA"', 'Kirje A maksimum', 'Ei kompileeru', 	'VIGA', v_mostA_kirje_max*0, v_mostA_kirje_max, '', vaated_jr)
 end catch;
 
 // Kirjete kontroll
@@ -1047,7 +1044,7 @@ Seejärel on veeru "partiisid" summa kontroll ehk arvutatakse kokku kõikide vee
 // Vaade v_top40A kontroll
 create  procedure view_top40A()
 begin 
-declare v_table_id, v_size, kirje_summa, kirje_count int;
+declare v_table_id, v_size, kirje_max, kirje_min, kirje_count int;
 
 if 		not exists (select * from systable where upper(table_name) = upper('v_top40A')) 
 then 	insert Staatus values ('Vaade "v_top40A"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_top40A*0, v_top40A, '', vaated_jr);
@@ -1067,18 +1064,32 @@ call	check_column_for_view(v_table_id, 'FirstName', v_top40A_firstname, vaated_j
 call	check_column_for_view(v_table_id, 'LastName', v_top40A_lastname, vaated_jr);
 call	check_column_for_view(v_table_id, 'NrOfA', v_top40A_nrofa, vaated_jr);
 
-// Veeru NrOfA summa kontroll
+// Veeru NrOfA maksimumi kontroll
 begin try
-	select 	sum(NrOfA) into kirje_summa from v_top40A;
-	if		kirje_summa > 199
-	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', 'Summa on SUUREM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
-	elseif	kirje_summa < 199
-	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', 'Summa on VÄIKSEM kui vaja, praegu on ' || kirje_summa, 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA summa', '-', 														'OK', 	v_top40A_kirje_summa, 	v_top40A_kirje_summa, '', vaated_jr)
+	select 	max(NrOfA) into kirje_max from v_top40A;
+	if		kirje_max > 6
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA maksimum', 'Maksimum on SUUREM kui vaja, praegu on ' || kirje_max, 	'VIGA', v_top40A_kirje_max*0, v_top40A_kirje_max, '', vaated_jr)
+	elseif	kirje_count < 6
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA maksimum', 'Maksimum on VÄIKSEM kui vaja, praegu on ' || kirje_max, 	'VIGA', v_top40A_kirje_max*0, v_top40A_kirje_max, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA maksimum', '-', 														'OK', 	v_top40A_kirje_max, 	v_top40A_kirje_max, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_top40A"', 'Kirje A summa', 'Ei kompileeru', 	'VIGA', v_top40A_kirje_summa*0, v_top40A_kirje_summa, '', vaated_jr)
+	insert Staatus values('Vaade "v_top40A"', 'Kirje A maksimum', 'Ei kompileeru', 	'VIGA', v_top40A_kirje_max*0, v_top40A_kirje_max, '', vaated_jr)
+end catch;
+
+// Veeru NrOfA miinimum kontroll
+begin try
+	select 	min(NrOfA) into kirje_min from v_top40A;
+	if		kirje_min > 4
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA miinimum', 'Miinimum on SUUREM kui vaja, praegu on ' || kirje_min, 	'VIGA', v_top40A_kirje_min*0, v_top40A_kirje_min, '', vaated_jr)
+	elseif	kirje_count < 4
+	then	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA miinimum', 'Miinimum on VÄIKSEM kui vaja, praegu on ' || kirje_min, 	'VIGA', v_top40A_kirje_min*0, v_top40A_kirje_min, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_top40A"', 'Veeru NrOfA miinimum', '-', 														'OK', 	v_top40A_kirje_min, 	v_top40A_kirje_min, '', vaated_jr)
+	endif;
+end try
+begin catch
+	insert Staatus values('Vaade "v_top40A"', 'Kirje A miinimum', 'Ei kompileeru', 	'VIGA', v_top40A_kirje_min*0, v_top40A_kirje_min, '', vaated_jr)
 end catch;
 
 // Kirjete kontroll
@@ -1151,17 +1162,32 @@ begin catch
 	insert Staatus values('Vaade "v_top30Students"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_top30Students_kirjete_arv*0, v_top30Students_kirjete_arv, '', vaated_jr)
 end catch;
 
-// Esimese ja 30nda koha kontroll- teen hiljem
+// Veeru Average maksimum
 begin try
 	select max(averageGrade) into kirje_max from v_top30Students;
-	select min(averageGrade) into kirje_min from v_top30Students;
-	if 	kirje_max != 4.0 	 and kirje_min != 3.6
-	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade"', 'Max ja Min on valed, hetkel on vastavalt:' || kirje_max || ', ' || kirje_min, 	'VIGA', v_top30Students_minmax*0, 	v_top30Students_minmax, '', vaated_jr)
-	else 	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade"', '-', 'OK', v_top30Students_minmax, 	v_top30Students_minmax, '', vaated_jr)
+	if 		kirje_max > 4.0 
+	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', 'Maksimum on SUUREM kui vaja, praegu on ' || kirje_max || ', ' || kirje_min, 	'VIGA', v_top30Students_max*0, 	v_top30Students_max, '', vaated_jr)
+	elseif	kirje_max < 4.0
+	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', 'Maksimum on VÄHEM kui vaja, praegu on ' || kirje_max, 	'VIGA', v_top30Students_max*0, 	v_top30Students_max, '', vaated_jr)
+	else 	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', '-', 'OK', v_top30Students_max, 	v_top30Students_max, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" Min/Max', 'Ei kompileeru', 	'VIGA', v_top30Students_minmax*0, v_top30Students_minmax, '', vaated_jr)
+	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', 'Ei kompileeru', 	'VIGA', v_top30Students_minmax*0, v_top30Students_minmax, '', vaated_jr)
+end catch;
+
+// Veeru Average miinimum
+begin try
+	select min(averageGrade) into kirje_min from v_top30Students;
+	if 		kirje_min > 3.6
+	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" miinimum', 'Miinimum on SUUREM kui vaja, praegu on:' || kirje_min || ', ' || kirje_min, 	'VIGA', v_top30Students_min*0, 	v_top30Students_min, '', vaated_jr)
+	elseif	kirje_min < 3.6
+	then	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" miinimum', 'Miinimum on VÄHEM kui vaja, praegu on ' || kirje_min, 	'VIGA', v_top30Students_min*0, 	v_top30Students_min, '', vaated_jr)
+	else 	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" miinimum', '-', 'OK', v_top30Students_min, 	v_top30Students_min, '', vaated_jr)
+	endif;
+end try
+begin catch
+	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" miinimum', 'Ei kompileeru', 	'VIGA', v_top30Students_min*0, v_top30Students_min, '', vaated_jr)
 end catch;
 end;
 
@@ -1181,7 +1207,7 @@ call table_persons();
 call table_registrations();
 call table_lecturers();
 call table_courses();
-/*call muud_elemendid();*/
+call muud_elemendid();
 call view_persons_atleast_4eap();
 call view_mostA();
 call view_andmebaasideTeooria();
