@@ -11,6 +11,7 @@ if exists (select * from sysprocedure where proc_name = 'deleteS') 								then 
 if exists (select * from sysprocedure where proc_name = 'find_table_id') 						then drop function find_table_id 						endif;
 if exists (select * from sysprocedure where proc_name = 'find_table_name') 						then drop function find_table_name 						endif;
 if exists (select * from sysprocedure where proc_name = 'find_column_name') 					then drop function find_column_name 					endif;
+if exists (select * from sysprocedure where proc_name = 'find_column_id')						then drop function find_column_id 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_unique')							then drop function check_unique 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_check')							then drop function check_check							endif;
 if exists (select * from sysprocedure where proc_name = 'check_foreign_key')					then drop function check_foreign_key					endif;
@@ -39,7 +40,7 @@ if exists (select * from sysprocedure where proc_name = 'view_top30Students') 		
 
 
 /* Kodutööde max punktid */
-create 	or replace variable kodutöö							numeric = 100;
+create 	or replace variable kodutöö										numeric = 100;
 
 
 /*Kodutöö punktid kokku = 100p */
@@ -89,47 +90,65 @@ create or replace variable courses_code 								numeric = 0.5;
 create or replace variable courses_eap 									numeric = 0.5;
 create or replace variable courses_gradetype 							numeric = 0.5;
 create or replace variable courses_kirjete_arv 							numeric = 1.0;
+/* Välisvõtmete punktid */
+create or replace variable välisvõti_registration_person				numeric = 3.0
+create or replace variable välisvõti_institute_person_dean				numeric = 3.0
+create or replace variable välisvõti_registration_course				numeric = 3.0
+create or replace variable välisvõti_lecturer_person					numeric = 3.0
+create or replace variable välisvõti_lecturer_course					numeric = 3.0
+create or replace variable välisvõti_course_institute					numeric = 3.0
+create or replace variable välisvõti_institute_person_vice_dean			numeric = 3.0
+create or replace variable välisvõti_person_institute					numeric = 3.0
+/* Välisvõtmed */
 /* Välisvõtmete triggerid, kokku on 8p */
-/*create or replace variable trigger_cascade 								numeric = 4.0;
-create or replace variable trigger_delete 								numeric = 4.0;*/
-
+create or replace variable trigger_cascade 								numeric = 2.0;
+create or replace variable trigger_delete_cascade 						numeric = 3.0;
+create or replace variable trigger_delete_null 							numeric = 3.0;
 /* Vaade persons_atleast_4eap, kokku on 4p */
 create or replace variable v_persons_atleast_4eap 						numeric = 4.0;
 create or replace variable v_persons_atleast_4eap_veergude_arv 			numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_firstname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_lastname				numeric = 1.0;
 create or replace variable v_persons_atleast_4eap_kirjete_arv 			numeric = 1.0;
+/* Vaated */
 /* Vaade mostA, kokku on 6p */
-create or replace variable v_mostA 										numeric = 6.0;
+create or replace variable v_mostA 										numeric = 9.0;
 create or replace variable v_mostA_veergude_arv 						numeric = 1.0;
 create or replace variable v_mostA_firstname							numeric = 1.0;
 create or replace variable v_mostA_lastname								numeric = 1.0;
 create or replace variable v_mostA_nrofa								numeric = 1.0;
-create or replace variable v_mostA_kirje_summa 							numeric = 1.0;
-create or replace variable v_mostA_kirjete_arv 							numeric = 1.0;
+create or replace variable v_mostA_kirje_summa 							numeric = 2.0; // kui max(nrofa) > 2
+create or replace variable v_mostA_kirjete_arv 							numeric = 3.0;
 /* Vaade andmebaasideTeooria, kokku on 6p */
-create or replace variable v_andmebaasideTeooria 						numeric = 6.0;
+create or replace variable v_andmebaasideTeooria 						numeric = 9.0;
 create or replace variable v_andmebaasideTeooria_veergude_arv 			numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_personid				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_firstname				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_lastname				numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 1.0;
+create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 5.0;
 /* Vaade top40A, kokku on 6p */
-create or replace variable v_top40A 									numeric = 6.0;
+create or replace variable v_top40A 									numeric = 9.0;
 create or replace variable v_top40A_veergude_arv 						numeric = 1.0;
 create or replace variable v_top40A_firstname							numeric = 1.0;
 create or replace variable v_top40A_lastname							numeric = 1.0;
 create or replace variable v_top40A_nrofa								numeric = 1.0;
-create or replace variable v_top40A_kirje_summa 						numeric = 1.0;
-create or replace variable v_top40A_kirjete_arv 						numeric = 1.0;
+create or replace variable v_top40A_kirje_summa 						numeric = 3.0; // kui max > 6 ja min = 4
+create or replace variable v_top40A_kirjete_arv 						numeric = 2.0;
 /* Vaade top30Students, kokku on 6p */
-create or replace variable v_top30Students 								numeric = 6.0;
+create or replace variable v_top30Students 								numeric = 9.0;
 create or replace variable v_top30Students_veergude_arv 				numeric = 1.0;
 create or replace variable v_top30Students_firstname					numeric = 1.0;
 create or replace variable v_top30Students_lastname						numeric = 1.0;
-create or replace variable v_top30Students_averagegrade					numeric = 1.0;
-create or replace variable v_top30Students_minmax						numeric = 1.0;
-create or replace variable v_top30Students_kirjete_arv 					numeric = 1.0;
+create or replace variable v_top30Students_averagegrade					numeric = 1.5;
+create or replace variable v_top30Students_min							numeric = 1.5; // pane eraldi
+create or replace variable v_top30Students_max							numeric = 1.5; // pane eraldi
+create or replace variable v_top30Students_kirjete_arv 					numeric = 1.5;
+
+/* Tabelid kokku = 23p, 
+Välisvõtmed kokku = 24p, 
+triggerid kokku = 8p, 
+vaated kokku = 45p?
+Kokku = 100p*/
 
 
 /* Veateadete järjekord */
@@ -208,6 +227,16 @@ declare c_name varchar(100);
 select  column_name into c_name from syscolumn
 where   table_id = a_table_id and upper(column_name) = upper(a_column_name);
 return 	c_name;
+end;
+
+/* Abifunktsioon, et saada tabeli ID-st ja tabeli veeru nimest - tabeli veeru ID*/
+create function find_column_id(a_table_id int, a_column_name varchar(100))
+returns int
+begin
+declare c_id int;
+select 	column_id into c_id from syscolumn
+where 	table_id = a_table_id and upper(column_name) = upper(a_column_name);
+return c_id;
 end;
 
 /* Veeru andmete kontrollimise protseduur - kontrollib ainult tabeli veeru atribuute 
@@ -325,84 +354,6 @@ end;
 
 
 
-/* Täpitähtedega veeru andmete kontroll - see on ainult tabelite omale
-Mõndades tabelites on võimalik kirjutada veerud täpitähtedega, 
-see protseduur kontrollib, milline neist (kaks varianti) on olemas
-ning siis selle olemasolevaga käivitab check_column protseduuri.
-Kui pole mõlemat olemas, siis check_column protseduuri läheb ilma täpitähtedeta veerg, sest nii on materjalis kirjas.
-
-Sissetulevad andmed on: täpitähteteta veeru nimi, täpitähtedega veeru nimi ja siis veeru atribuudid, 
-mis olid check_column protseduuri juures põhjalikult seletatud.
-
-Protseduuri sisesed muutujad: c1, c2 = veergude nimed.
-See protseduur ei tagasta midagi.
-*/
-create	procedure check_column_t2pit2ht (ilma_t2pi varchar(50), t2pi varchar(30), 
-									   v_table_id int, v_default varchar(30), 
-									   v_pkey char(1), v_nulls char(1), 
-									   v_width int, punktid numeric, Jr integer)
-begin
-declare c1,c2 varchar(50);
-
-select  column_name into c1 from syscolumn where upper(column_name) = upper(t2pi) 			and table_id = v_table_id;
-select  column_name into c2 from syscolumn where upper(column_name) = upper(ilma_t2pi) 		and table_id = v_table_id;
-
-if      c1 is null and c2 is not null then 
-call 	check_column(v_table_id, ilma_t2pi, v_default,               v_pkey, v_nulls, v_width, punktid, Jr)
-
-elseif  c2 is null and c1 is not null then
-call 	check_column(v_table_id, t2pi, 		v_default,               v_pkey, v_nulls, v_width, punktid, Jr)
-
-elseif  c1 is null and c2 is null then 
-call 	check_column(v_table_id, ilma_t2pi, v_default,               v_pkey, v_nulls, v_width, punktid, Jr)
-
-else
-call 	check_column(v_table_id, ilma_t2pi, v_default,               v_pkey, v_nulls, v_width, punktid, Jr)
-
-endif;
-end;
-
-/*
-Täpitähtedega veeru andmete kontroll ainult vaadetele
-Mõndades vaadetes on võimalik kirjutada veerud täpitähtedega, 
-see protseduur kontrollib, milline neist (kaks varianti) on olemas 
-ning siis selle olemasolevaga käivitab check_column_for_view protseduuri.
-Kui pole mõlemat olemas, siis check_column_for_view protseduuri läheb ilma täpitähtedeta veerg, sest nii on materjalis kirjas.
-
-Sissetulevad andmed:
-vaate id = p_table_id
-vaate täpitähtedega veeru variant = t2pi
-vaate täpitähtedeta veeru variant = ilma_t2pi
-punktid - kui palju see veerg väärt punkte on
-
-Protseduuri sisesed muutujad: c1, c2 = veergude nimed.
-Protseduur ei tagasta midagi.
-*/
-create 	procedure check_column_for_view_t2pit2ht (p_table_id int, t2pi varchar(30), 
-												  ilma_t2pi varchar(30), punktid numeric, Jr integer)
-
-begin
-declare c1,c2 varchar(50);
-
-select  column_name into c1 from syscolumn where upper(column_name) = upper(t2pi) 			and table_id = p_table_id;
-select  column_name into c2 from syscolumn where upper(column_name) = upper(ilma_t2pi) 		and table_id = p_table_id;
-
-if      c1 is null and c2 is not null then 
-call 	check_column_for_view(p_table_id, ilma_t2pi, punktid, Jr)
-
-elseif  c2 is null and c1 is not null then
-call 	check_column_for_view(p_table_id, t2pi, punktid, Jr)
-
-elseif  c1 is null and c2 is null then 
-call 	check_column_for_view(p_table_id, ilma_t2pi, punktid, Jr)
-
-else
-call 	check_column_for_view(p_table_id, ilma_t2pi, punktid, Jr)
-endif;
-
-end;
-
-
 /* Süsteemsete välisvõtmete kontroll - kontrollib kas teatud tabelite ja veergude vahel on välisvõti olemas
 Sissetulevad andmed: 
 Peamine tabel = primary_table 
@@ -422,31 +373,26 @@ päringu tingimusteks on välistabeli id, peamise tabeli id ja "foreign_key_id",
 Kui kõik on korras, siis sisestataks OK ja punktide arv.
 Protseduur ei tagasta midagi.
 */
-create	procedure check_foreign_key(p_primary_table varchar(30), p_foreign_table varchar(30),
-									p_primary_column varchar(30), p_foreign_column varchar(30),
+
+
+create	procedure check_foreign_key(p_primary_table varchar(30), p_primary_column varchar(30),
+									p_foreign_table varchar(30), p_foreign_column varchar(30),
 									punktid numeric, Jr integer)
 begin
 declare primary_t_id, foreign_t_id, primary_c_id, foreign_c_id, f_key_id int;
 declare count_f_key, count_fk int;
 
-// Salvestan kõikide vajalike tabelite ja veergude ID-d ning samal ajal kontrollin, kas need on olemas
-select 	table_id into primary_t_id 	from systable where upper(table_name) = upper(p_primary_table);
-
-select 	column_id into primary_c_id from syscolumn where table_id = primary_t_id
-and 	upper(column_name) 			= upper(p_primary_column);
-
-select 	table_id into foreign_t_id 	from systable where table_name = p_foreign_table;
-
-select 	column_id into foreign_c_id from syscolumn where table_id = foreign_t_id
-and 	upper(column_name) 			= upper(p_foreign_column);
+set primary_t_id = find_table_id(p_primary_table);
+set primary_c_id = find_column_id(primary_t_id, p_primary_column);
+set foreign_t_id = find_table_id(p_foreign_table);
+set foreign_c_id = find_column_id(foreign_t_id, p_foreign_column);
+select primary_t_id;
 
 // Loen kokku mitu välisvõtit vastab nendele andmetele (peaks olema 1)
 select 	count(foreign_key_id) 		into count_f_key from sysfkcol
 where 	foreign_table_id = foreign_t_id 
 and 	foreign_column_id = foreign_c_id
 and 	primary_column_id = primary_c_id;
-
-
 
 // Kui 	on rohkem kui üks, siis tagastan veateate
 if 		count_f_key != 1 	then insert Staatus values ('Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"', 
@@ -854,43 +800,46 @@ aga kuna tegelik arv on ikkagi 1, siis lihtsalt lahutatakse üks kui eksisteerib
 // Protseduur, mis kontrollib välisvõtmeid ja triggereid
 create  procedure muud_elemendid(version int)
 begin
-declare trigger_count_C, trigger_count_D int;
+declare trigger_count_C, trigger_count_DC, trigger_count_DN int;
 
 // Välisvõtmete kontroll
-call	check_foreign_key('Klubid',       'Isikud',        'id', 'klubi', välisvõti_isik_2_klubi, välisvõtmed_jr);
-call  	check_foreign_key('Isikud',       'Partiid',       'id', 'valge', välisvõti_partii_2_isik_valge, välisvõtmed_jr);
-call	check_foreign_key('Isikud',       'Partiid',       'id', 'must',  välisvõti_partii_2_isik_must, välisvõtmed_jr);
-call	check_foreign_key('Turniirid',    'Partiid',       'id', 'turniir', välisvõti_partii_2_turniir, välisvõtmed_jr);
-if		version = 7 then
-call	check_foreign_key('Asulad', 'Klubid', 'id', 'asula', välisvõti_klubi_2_asula, välisvõtmed_jr);
-call	check_foreign_key('Asulad', 'Turniirid', 'id', 'asula', välisvõti_turniir_2_asula, välisvõtmed_jr);
-endif;
+call	check_foreign_key('Registrations',    	'PersonId',        	'Persons', 		'Id', välisvõti_registration_person, 		välisvõtmed_jr);
+call  	check_foreign_key('Institutes',       	'DeanId',       	'Persons', 		'Id', välisvõti_institute_person_dean, 		välisvõtmed_jr);
+call	check_foreign_key('Registrations',    	'CourseId',       	'Courses', 		'Id', välisvõti_registration_course, 		välisvõtmed_jr);
+call	check_foreign_key('Lecturers',    		'PersonId',       	'Persons', 		'Id', välisvõti_lecturer_person, 			välisvõtmed_jr);
+call	check_foreign_key('Lecturers',    		'CourseId',       	'Courses', 		'Id', välisvõti_lecturer_course, 			välisvõtmed_jr);
+call	check_foreign_key('Courses',    		'InstituteId',      'Institutes', 	'Id', välisvõti_course_institute, 			välisvõtmed_jr);
+call	check_foreign_key('Institutes',    		'ViceDeanId',       'Persons', 		'Id', välisvõti_institute_person_vice_dean, välisvõtmed_jr);
+call	check_foreign_key('Persons',    		'InstituteId',      'Institutes', 	'Id', välisvõti_person_institute, 			välisvõtmed_jr);
+
 
 
 // Süsteemsete triggerite kontroll välisvõtmete juures
-if 		version < 7
-then	select 	count(*) into trigger_count_C		from systrigger
-		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
-		if 		trigger_count_C = 4				
-		then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
-		else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tinigmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 4.',  	'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
-		endif
-				
-else	select 	count(*) into trigger_count_C		from systrigger
-		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
-		if 		trigger_count_C = 6				
-		then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
-		else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tinigmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 6.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
-										'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)
-		endif			
+		
+select 	count(*) into trigger_count_C		from systrigger
+where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
+if 		trigger_count_C = 8				
+then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
+else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tingmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 6.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
+								'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)
+endif			
 endif;
 
-select 	count(*) into trigger_count_D		from systrigger
+/* Kahe järgneva delete triggerite kontrollide vahe on see, et ühe tingimus kustutamisel on CASCADE ja teisel on NULL*/
+select 	count(*) into trigger_count_DC		from systrigger
 where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
-if 		(trigger_count_D = 1) or (trigger_count_D = 2 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
-then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete, trigger_delete, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_D || ', peab olema 1.', 
-								'VIGA', trigger_delete*0, trigger_delete, '', välisvõtmed_tg_jr)
+if 		(trigger_count_D = 5) or (trigger_count_D = 6 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
+then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_cascade, trigger_delete_cascade, '', välisvõtmed_tg_jr)
+else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 1.', 
+								'VIGA', trigger_delete_cascade*0, trigger_delete_cascade, '', välisvõtmed_tg_jr)
+endif;
+
+select 	count(*) into trigger_count_DC		from systrigger
+where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
+if 		(trigger_count_D = 3) or (trigger_count_D = 4 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
+then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_null, trigger_delete_null, '', välisvõtmed_tg_jr)
+else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 1.', 
+								'VIGA', trigger_delete_null*0, trigger_delete_null, '', välisvõtmed_tg_jr)
 endif;
 
 end;
@@ -1226,9 +1175,6 @@ See teade tuleb ainult 5-7 kodutöö korral.
 
 create 	procedure käivita()
 begin
-declare aja_muutuja date;
-declare aeg datetime;
-
 
 call table_institutes();
 call table_persons();
@@ -1277,6 +1223,6 @@ call 	käivita();
 
 /* Tulemuste väljastamine ekraanile ning kirjutamine txt ja csv failidesse */
 select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' 
-//order by Jr;
-/*output to 'C:\TEMP\tulemus.csv' format excel;
-output to 'C:\TEMP\tulemus.txt' format text;*/
+order by Jr;
+output to 'C:\TEMP\tulemus.csv' format excel;
+output to 'C:\TEMP\tulemus.txt' format text;

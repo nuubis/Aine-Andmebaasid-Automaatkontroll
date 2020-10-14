@@ -92,7 +92,7 @@ JOIN Registrations as r ON (c.Id = r.CourseId)
 JOIN Persons as p ON (r.PersonId = p.Id)
 WHERE c.Name = 'Andmebaasid';
 
-
+// Foreign_table = Registrations, foreign_column = PersonId, Primary_table = Persons, primary_column = Id
 // Välisvõtmete loomine (antud)
 ALTER TABLE Registrations ADD CONSTRAINT
 fk_registration_person FOREIGN KEY (PersonId)
