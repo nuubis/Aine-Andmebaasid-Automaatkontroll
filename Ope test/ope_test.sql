@@ -1707,7 +1707,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_koma*0, v_punktid_punkt_koma, '', vaated_jr)
+	begin try
+		if 		(select punkt from v_punktid where turniir = 42 and mängija = 72 and punkt = 0.5) = 0.5
+		then	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', '-', 	'OK', v_punktid_punkt_koma, v_punktid_punkt_koma, '', vaated_jr)
+		else	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Punkt pole õige.', 	'VIGA', v_punktid_punkt_koma*0, v_punktid_punkt_koma, '', vaated_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_koma*0, v_punktid_punkt_koma, '', vaated_jr)
+	end catch;
 end catch;
 
 begin try
@@ -1717,7 +1725,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_täis*0, v_punktid_punkt_täis, '', vaated_jr)
+	begin try
+		if 		(select punkt from v_punktid where turniir = 41 and mängija = 77 and punkt = 1.0) = 1.0
+		then	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', '-', 	'OK', v_punktid_punkt_täis, v_punktid_punkt_täis, '', vaated_jr)
+		else	insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Punkt pole õige', 	'VIGA', v_punktid_punkt_täis*0, v_punktid_punkt_täis, '', vaated_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Vaade "v_punktid"', 'Veeru "punkt" punkti kontroll', 'Ei kompileeru', 	'VIGA', v_punktid_punkt_täis*0, v_punktid_punkt_täis, '', vaated_jr)
+	end catch;
 end catch;
 
 end;
