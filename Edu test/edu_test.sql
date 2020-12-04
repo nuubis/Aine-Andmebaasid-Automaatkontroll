@@ -1,7 +1,3 @@
-/* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 7;
-/* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
-create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
 if exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_column_t2pit2ht')				then drop function check_column_t2pit2ht 				endif;
@@ -24,7 +20,6 @@ if exists (select * from sysprocedure where proc_name = 'käivita') 								then
 if exists (select * from sysprocedure where proc_name = 'check_error') 							then drop function check_error							endif;
 if exists (select * from sysprocedure where proc_name = 'check_error_paar') 					then drop function check_error_paar						endif;
 if exists (select * from sysprocedure where proc_name = 'check_error_tapitaht') 				then drop function check_error_tapitaht					endif;
-
 if exists (select * from sysprocedure where proc_name = 'table_institutes') 					then drop function table_institutes						endif;
 if exists (select * from sysprocedure where proc_name = 'table_persons') 						then drop function table_persons						endif;
 if exists (select * from sysprocedure where proc_name = 'table_registrations') 					then drop function table_registrations					endif;
@@ -1173,7 +1168,7 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', 'Ei kompileeru', 	'VIGA', v_top30Students_minmax*0, v_top30Students_minmax, '', vaated_jr)
+	insert Staatus values('Vaade "v_top30Students"', 'Veeru "AverageGrade" maksimum', 'Ei kompileeru', 	'VIGA', v_top30Students_max*0, v_top30Students_max, '', vaated_jr)
 end catch;
 
 // Veeru Average miinimum
