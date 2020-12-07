@@ -1,3 +1,5 @@
+/* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
+create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
 if exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_column_t2pit2ht')				then drop function check_column_t2pit2ht 				endif;
@@ -487,15 +489,19 @@ Protseduuri sisesed muutujad: summa = kõik kokku liidetud punktid; max_summa = 
 create 	procedure arvuta_punktid()
 begin
 declare summa, max_summa, hindepunkt, max_hindepunkt numeric;
-set 	summa = 0.0;
+declare kordaja int;
 
+set 	summa = 0.0;
 set		max_summa = kodutöö;
+set 	kordaja = 4;
+
+if 		aine = 'S' then set kordaja = 9 endif;
 
 /* Hindepunktide välja arvutamine */
 select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
 
-set 	hindepunkt = (summa / max_summa);
-set 	max_hindepunkt = 1.0;
+set 	hindepunkt = (summa / max_summa) * kordaja;
+set 	max_hindepunkt = 1.0 * kordaja;
 
 
 //Punktide sisestamine 
