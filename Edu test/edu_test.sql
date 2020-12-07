@@ -96,9 +96,9 @@ create or replace variable välisvõti_institute_person_vice_dean			numeric = 3.
 create or replace variable välisvõti_person_institute					numeric = 3.0;
 /* Välisvõtmed */
 /* Välisvõtmete triggerid, kokku on 8p */
-create or replace variable trigger_cascade 								numeric = 2.0;
-create or replace variable trigger_delete_cascade 						numeric = 3.0;
-create or replace variable trigger_delete_null 							numeric = 3.0;
+create or replace variable trigger_cascade 								numeric = 3.0;
+create or replace variable trigger_delete_cascade 						numeric = 4.0;
+create or replace variable trigger_delete_null 							numeric = 4.0;
 /* Vaade persons_atleast_4eap, kokku on 4p */
 create or replace variable v_persons_atleast_4eap 						numeric = 4.0;
 create or replace variable v_persons_atleast_4eap_veergude_arv 			numeric = 1.0;
@@ -120,25 +120,25 @@ create or replace variable v_andmebaasideTeooria_veergude_arv 			numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_personid				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_firstname				numeric = 1.0;
 create or replace variable v_andmebaasideTeooria_lastname				numeric = 1.0;
-create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 5.0;
+create or replace variable v_andmebaasideTeooria_kirjete_arv 			numeric = 4.0;
 /* Vaade top40A, kokku on 6p */
 create or replace variable v_top40A 									numeric = 9.0;
 create or replace variable v_top40A_veergude_arv 						numeric = 1.0;
 create or replace variable v_top40A_firstname							numeric = 1.0;
 create or replace variable v_top40A_lastname							numeric = 1.0;
 create or replace variable v_top40A_nrofa								numeric = 1.0;
-create or replace variable v_top40A_kirje_max 							numeric = 1.5; // kui max > 6 
-create or replace variable v_top40A_kirje_min 							numeric = 1.5; // kui min = 4
+create or replace variable v_top40A_kirje_max 							numeric = 2.0; 
+create or replace variable v_top40A_kirje_min 							numeric = 2.0; 
 create or replace variable v_top40A_kirjete_arv 						numeric = 2.0;
 /* Vaade top30Students, kokku on 6p */
 create or replace variable v_top30Students 								numeric = 9.0;
 create or replace variable v_top30Students_veergude_arv 				numeric = 1.0;
 create or replace variable v_top30Students_firstname					numeric = 1.0;
 create or replace variable v_top30Students_lastname						numeric = 1.0;
-create or replace variable v_top30Students_averagegrade					numeric = 1.5;
-create or replace variable v_top30Students_min							numeric = 1.5; // pane eraldi
-create or replace variable v_top30Students_max							numeric = 1.5; // pane eraldi
-create or replace variable v_top30Students_kirjete_arv 					numeric = 1.5;
+create or replace variable v_top30Students_averagegrade					numeric = 2.0;
+create or replace variable v_top30Students_min							numeric = 2.0; 
+create or replace variable v_top30Students_max							numeric = 2.0; 
+create or replace variable v_top30Students_kirjete_arv 					numeric = 2.0;
 
 /* Tabelid kokku = 23p, 
 Välisvõtmed kokku = 24p, 
@@ -797,15 +797,16 @@ create  procedure muud_elemendid()
 begin
 declare trigger_count_C, trigger_count_DC, trigger_count_DN int;
 
+/* p_primary_table varchar(30), p_primary_column varchar(30), p_foreign_table varchar(30), p_foreign_column varchar(30), punktid numeric, Jr integer) */
 // Välisvõtmete kontroll
-call	check_foreign_key('Registrations',    	'PersonId',        	'Persons', 		'Id', välisvõti_registration_person, 		välisvõtmed_jr);
-call  	check_foreign_key('Institutes',       	'DeanId',       	'Persons', 		'Id', välisvõti_institute_person_dean, 		välisvõtmed_jr);
-call	check_foreign_key('Registrations',    	'CourseId',       	'Courses', 		'Id', välisvõti_registration_course, 		välisvõtmed_jr);
-call	check_foreign_key('Lecturers',    		'PersonId',       	'Persons', 		'Id', välisvõti_lecturer_person, 			välisvõtmed_jr);
-call	check_foreign_key('Lecturers',    		'CourseId',       	'Courses', 		'Id', välisvõti_lecturer_course, 			välisvõtmed_jr);
-call	check_foreign_key('Courses',    		'InstituteId',      'Institutes', 	'Id', välisvõti_course_institute, 			välisvõtmed_jr);
-call	check_foreign_key('Institutes',    		'ViceDeanId',       'Persons', 		'Id', välisvõti_institute_person_vice_dean, välisvõtmed_jr);
-call	check_foreign_key('Persons',    		'InstituteId',      'Institutes', 	'Id', välisvõti_person_institute, 			välisvõtmed_jr);
+call	check_foreign_key('Persons', 'Id', 'Registrations', 'PersonId',	välisvõti_registration_person, 		välisvõtmed_jr);
+call  	check_foreign_key('Persons', 'Id', 'Institutes', 'DeanId', välisvõti_institute_person_dean, 		välisvõtmed_jr);
+call	check_foreign_key('Courses', 'Id', 'Registrations', 'CourseId',	 välisvõti_registration_course, 		välisvõtmed_jr);
+call	check_foreign_key('Persons', 'Id', 'Lecturers', 'PersonId',	välisvõti_lecturer_person, 			välisvõtmed_jr);
+call	check_foreign_key('Courses', 'Id', 'Lecturers', 'CourseId',		 välisvõti_lecturer_course, 			välisvõtmed_jr);
+call	check_foreign_key('Institutes', 'Id', 'Courses', 'InstituteId', 	 välisvõti_course_institute, 			välisvõtmed_jr);
+call	check_foreign_key('Persons', 'Id',  'Institutes', 'ViceDeanId', 		 välisvõti_institute_person_vice_dean, välisvõtmed_jr);
+call	check_foreign_key('Institutes', 'Id', 'Persons', 'InstituteId', 	 välisvõti_person_institute, 			välisvõtmed_jr);
 
 
 
@@ -1123,7 +1124,8 @@ Seejärel on isiku nime kirjapildi kontroll, kus isiku kirjapilt peab olema kuju
 // Vaate v_top30Students kontroll
 create  procedure view_top30Students()
 begin 
-declare v_table_id, v_size, kirje_count, kirje_min, kirje_max int;
+declare v_table_id, v_size, kirje_count int;
+declare kirje_min, kirje_max double;
 
 if 		not exists (select * from systable where upper(table_name) = upper('v_top30Students'))
 then 	insert Staatus values ('Vaade "v_top30Students"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_top30Students*0, v_top30Students, '', vaated_jr);
