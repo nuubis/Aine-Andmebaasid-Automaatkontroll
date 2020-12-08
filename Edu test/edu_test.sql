@@ -561,7 +561,7 @@ call 	check_unique('Institutes', 'Name', institutes_unique_nimi, tabelid_jr);
 select 	count(*) into kirje_count from Institutes;
 if 		kirje_count >= 10 
 then 	insert Staatus values ('Tabel "Institutes"', 'Kirjete arv', '-', 																'OK', 	institutes_kirjete_arv, 	institutes_kirjete_arv,	'', tabelid_jr)
-else	insert Staatus values ('Tabel "Institutes"', 'Kirjete arv', 'Kirjete arv peab olema vähemalt 1, hetkel on ' || kirje_count, 	'VIGA', institutes_kirjete_arv*0, institutes_kirjete_arv,	'', tabelid_jr)
+else	insert Staatus values ('Tabel "Institutes"', 'Kirjete arv', 'Kirjete arv peab olema vähemalt 10, hetkel on ' || kirje_count, 	'VIGA', institutes_kirjete_arv*0, institutes_kirjete_arv,	'', tabelid_jr)
 endif;
 
 end;
@@ -666,7 +666,7 @@ call 	check_column(v_table_id, 'FinalGrade',   null,               'n', 'y', 1, 
 select 	count(*) into kirje_count from registrations; // 1230 või 1198
 if 		kirje_count = 1230
 then 	insert Staatus values ('Tabel "Registrations"', 'Kirjete arv', '-', 														'OK', 	registrations_kirjete_arv, 	registrations_kirjete_arv,	'', tabelid_jr)
-else	insert Staatus values ('Tabel "Registrations"', 'Kirjete arv', 'Kirjete arv peab olema 23, hetkel on ' || kirje_count, 	'VIGA', registrations_kirjete_arv*0, 	registrations_kirjete_arv,	'', tabelid_jr)
+else	insert Staatus values ('Tabel "Registrations"', 'Kirjete arv', 'Kirjete arv peab olema 1230, hetkel on ' || kirje_count, 	'VIGA', registrations_kirjete_arv*0, 	registrations_kirjete_arv,	'', tabelid_jr)
 endif;
 end;
 
