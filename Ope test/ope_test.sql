@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 7;
+create or replace variable versioon int = 3;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -1232,15 +1232,15 @@ if 		version < 7
 then	select 	count(*) into trigger_count_C		from systrigger
 		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 		if 		trigger_count_C = 4				
-		then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
-		else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tinigmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 4.',  	'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
+		then 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
+		else 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on puudu.',  	'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
 		endif
 				
 else	select 	count(*) into trigger_count_C		from systrigger
 		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 		if 		trigger_count_C = 6				
-		then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
-		else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tinigmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 6.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
+		then 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
+		else 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on puudu.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
 										'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)
 		endif			
 endif;
@@ -1248,8 +1248,8 @@ endif;
 select 	count(*) into trigger_count_D		from systrigger
 where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 if 		(trigger_count_D = 1) or (trigger_count_D = 2 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
-then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete, trigger_delete, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_D || ', peab olema 1.', 
+then 	insert Staatus values ('Välisvõtme tingimus "ON DELETE CASCADE"', '-', '-',	'OK', trigger_delete, trigger_delete, '', välisvõtmed_tg_jr)
+else 	insert Staatus values ('Välisvõtme tingimus "ON DELETE CASCADE"', '-', 'Ühe välisvõtme "ON DELETE CASCADE" tingimus on puudu.', 
 								'VIGA', trigger_delete*0, trigger_delete, '', välisvõtmed_tg_jr)
 endif;
 
