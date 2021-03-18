@@ -13,8 +13,8 @@ Tudengi kodutöö kontrollimine:
 
 1) Laadida Moodle'ist tudengi kodutöö zip fail.
 2) Pakkida lahti kausta, kus hakatakse kodutöid kontrollima.
-3) Kontrollida, et tudeng on esitanud olemas ope.db ja ope.log failid.
-4) Käivitada test.bat.
+3) Kontrollida, et tudeng on esitanud ope.db ja ope.log failid.
+4) Käivitada ope_test.bat.
 
 Pakkfail avab iSQL'i ja tudengi andmebaasi ning käivitab skripti, mis teeb kontrollid.
 Kontrolli lõpus tuleb tulemus iSQL'i aknasse.

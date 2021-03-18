@@ -1523,7 +1523,7 @@ create  procedure view_mangijad()
 begin 
 declare v_table_id, v_size, kirje_count int;
 
-if 		not exists (select * from systable where upper(table_name) = upper('v_mangijad'))
+if 		not exists (select * from systable where upper(table_name) = upper('v_mangijad') or upper(table_name) = upper('v_mängijad'))
 then 	insert Staatus values ('Vaade "v_mangijad"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_mangijad*0, v_mangijad, '', vaated_jr);
 return; 
 endif;
