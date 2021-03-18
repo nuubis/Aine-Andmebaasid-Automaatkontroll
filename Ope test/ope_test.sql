@@ -1518,10 +1518,11 @@ Seejärel on kirjete arvu kontroll, kus kirjete arvu peab olema TÄPSELT KAKSKÜ
 Seejärel on isiku nime kirjapildi kontroll, kus isiku kirjapilt peab olema kujul: "perenimi, eesnimi".
 */
 
-// Vaate v_mangijad kontroll
+// Vaate v_mangijad/v_mängijad kontroll
 create  procedure view_mangijad()
 begin 
 declare v_table_id, v_size, kirje_count int;
+declare v_table_name varchar(100);
 
 if 		not exists (select * from systable where upper(table_name) = upper('v_mangijad') or upper(table_name) = upper('v_mängijad'))
 then 	insert Staatus values ('Vaade "v_mangijad"', '-', 'Vaadet ei eksisteeri.', 'VIGA', v_mangijad*0, v_mangijad, '', vaated_jr);
@@ -1533,11 +1534,14 @@ then set 	v_table_id = find_table_id('v_mangijad')
 else set 	v_table_id = find_table_id('v_mängijad');
 endif;
 
+// Selleks, et saaks kontrollide tagasisides kasutada õiget vaate nime
+set v_table_name = find_table_name(v_table_id);
+
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
 if      v_size != 4                 
-then 	insert Staatus values ('Vaade "v_mangijad"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', v_mangijad_veergude_arv*0, v_mangijad_veergude_arv, '', vaated_jr)
-else	insert Staatus values ('Tabel "v_mangijad"', 'Veergude arv', '-', 'OK', v_mangijad_veergude_arv, v_mangijad_veergude_arv, '', vaated_jr)
+then 	insert Staatus values ('Vaade "' + v_table_name + '"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', v_mangijad_veergude_arv*0, v_mangijad_veergude_arv, '', vaated_jr)
+else	insert Staatus values ('Tabel "' + v_table_name + '"', 'Veergude arv', '-', 'OK', v_mangijad_veergude_arv, v_mangijad_veergude_arv, '', vaated_jr)
 endif;
 
 call	check_column_for_view(v_table_id, 'Klubi_nimi', v_mangijad_klubi_nimi, vaated_jr);
@@ -1554,14 +1558,14 @@ begin try
     select 	count(*) into kirje_count from v_mängijad
     endif;
 	if		kirje_count > 23
-	then	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
+	then	insert Staatus values('Vaade "' + v_table_name + '"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
 	elseif	kirje_count < 23
-	then	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', '-', 													'OK', 	v_mangijad_kirjete_arv, 	v_mangijad_kirjete_arv, '', vaated_jr)
+	then	insert Staatus values('Vaade "' + v_table_name + '"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
+	else	insert Staatus values('Vaade "' + v_table_name + '"', 'Kirjete arv', '-', 													'OK', 	v_mangijad_kirjete_arv, 	v_mangijad_kirjete_arv, '', vaated_jr)
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_mangijad_kirjete_arv*0, v_mangijad_kirjete_arv, '', vaated_jr)
+	insert Staatus values('Vaade "' + v_table_name + '"', 'Kirjete arv', 'Ei kompileeru', 	'VIGA', v_mangijad_kirjete_arv*0, v_mangijad_kirjete_arv, '', vaated_jr)
 end catch;
 
 // Isiku nime kirjapilt
@@ -1569,18 +1573,18 @@ begin try
 	if 		exists (select * from systable where upper(table_name) = upper('v_mangijad') )
     then
 	if 		(select isik_nimi from v_mangijad where isik_id = 71) = 'Mets, Arvo'
-	then	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
+	then	insert Staatus values('Vaade "' + v_table_name + '"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
+	else	insert Staatus values('Vaade "' + v_table_name + '"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
 	endif;
     else
     if 		(select isik_nimi from v_mängijad where isik_id = 71) = 'Mets, Arvo' 
-	then	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
-	else	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
+	then	insert Staatus values('Vaade "' + v_table_name + '"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
+	else	insert Staatus values('Vaade "' + v_table_name + '"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
 	endif;
     endif
 end try
 begin catch
-	insert Staatus values('Vaade "v_mangijad"', 'Isik_nimi', 'Ei kompileeru', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
+	insert Staatus values('Vaade "' + v_table_name + '"', 'Isik_nimi', 'Ei kompileeru', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
 end catch;
 
 end;
@@ -2897,7 +2901,7 @@ Kontroll protseduuril pole sissetulevaid andmeid ega väljuvaid andmeid.
 create 	procedure function_mangija_koormus()
 begin
 
-if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_koormus') 
+if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_koormus' or proc_name = 'f_mängija_koormus') 
 then	insert Staatus values('Funktsioon "f_mangija_koormus"', '-', 'Funktsiooni ei eksisteeri', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, '', funktsioonid_jr);
 return;
 endif;
@@ -2909,7 +2913,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Funktsioon "f_mangija_koormus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr);
+	begin try
+		if		f_mängija_koormus(71) = 8
+		then	insert Staatus values('Funktsioon "f_mängija_koormus"', '-', '-', 'OK', f_mangija_koormus, f_mangija_koormus, '', funktsioonid_jr)
+		else	insert Staatus values('Funktsioon "f_mängija_koormus"', '-', 'Funktsioon on vigane', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, 'Kas liidad nii mustana kui ka valgena mängud kokku?', funktsioonid_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Funktsioon "f_mangija_koormus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, 'Kas sa oma funktsiooni testisid?', funktsioonid_j);
+	end catch;
 end catch;
 /* funktsiooni muutuja on isikud tabeli ID */
 end;
@@ -2928,7 +2940,7 @@ Kontroll protseduuril pole sissetulevaid andmeid ega väljuvaid andmeid.
 create	procedure function_mangija_voite_turniiril()
 begin
 
-if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_voite_turniiril') 
+if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_voite_turniiril' or proc_name = 'f_mängija_võite_turniiril') 
 then	insert Staatus values('Funktsioon "f_mangija_voite_turniiril"', '-', 'Funktsiooni ei eksisteeri', 'VIGA', f_mangija_voite_turniiril*0, f_mangija_voite_turniiril, '', funktsioonid_jr);
 return;
 endif;
@@ -2940,8 +2952,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Funktsioon "f_mangija_voite_turniiril"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_voite_turniiril*0, f_mangija_voite_turniiril, 'Kas sa oma funktsiooni testisid kahe parameetriga?', funktsioonid_jr);
-	
+	begin try
+		if		f_mängija_võite_turniiril(71, 42) = 2
+		then	insert Staatus values('Funktsioon "f_mängija_võite_turniiril"', '-', '-', 'OK', f_mangija_voite_turniiril, f_mangija_voite_turniiril, '', funktsioonid_jr)
+		else	insert Staatus values('Funktsioon "f_mängija_võite_turniiril"', '-', 'Kõiki võite ei ole arvestatud.', 'VIGA', f_mangija_voite_turniiril*0, f_mangija_voite_turniiril, 'Kas sa arvestasid mustana kui ka valgena võite?', funktsioonid_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Funktsioon "f_mangija_voite_turniiril"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_voite_turniiril*0, f_mangija_voite_turniiril, 'Kas sa oma funktsiooni testisid kahe parameetriga?', funktsioonid_jr);
+	end catch;
 end catch;
 /* funktsiooni muutujad on isik_id ja turniir_id*/
 end;
@@ -2961,7 +2980,7 @@ Kontroll protseduuril pole sissetulevaid andmeid ega väljuvaid andmeid.
 create 	procedure function_mangija_punktid_turniiril()
 begin
 
-if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_punktid_turniiril') 
+if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_punktid_turniiril' or proc_name = 'f_mängija_punktid_turniiril') 
 then	insert Staatus values('Funktsioon "f_mangija_punktid_turniiril"', '-', 'Funktsiooni ei eksisteeri', 'VIGA', f_mangija_punktid_turniiril*0, f_mangija_punktid_turniiril, '', funktsioonid_jr);
 return;
 endif;
@@ -2973,7 +2992,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Funktsioon "f_mangija_punktid_turniiril"', 'f_mangija_punktid_turniiril(80, 42) =  punktid (1.0)', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_punktid_turniiril_täiskohaga*0, f_mangija_punktid_turniiril_täiskohaga, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr);
+	begin try
+		if		f_mängija_punktid_turniiril(80, 42) = 1.0
+		then	insert Staatus values('Funktsioon "f_mängija_punktid_turniiril"', 'f_mängija_punktid_turniiril(80, 42) =  punktid (1.0)', '-', 'OK', f_mangija_punktid_turniiril_täiskohaga, f_mangija_punktid_turniiril_täiskohaga, '', funktsioonid_jr)
+		else	insert Staatus values('Funktsioon "f_mängija_punktid_turniiril"', 'f_mängija_punktid_turniiril(80, 42) =  punktid (1.0)', 'Punktid pole õigesti arvutatud.', 'VIGA', f_mangija_punktid_turniiril_täiskohaga*0, f_mangija_punktid_turniiril_täiskohaga, 'Kas sa tulemuse jagasid 2.0-ga või tagastasid double väärtuse?', funktsioonid_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Funktsioon "f_mangija_punktid_turniiril"', 'f_mangija_punktid_turniiril(80, 42) =  punktid (1.0)', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_punktid_turniiril_täiskohaga*0, f_mangija_punktid_turniiril_täiskohaga, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr);
+	end catch;
 end catch;
 
 begin try
@@ -2983,7 +3010,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Funktsioon "f_mangija_punktid_turniiril"', 'f_mangija_punktid_turniiril(80, 41) = punktid (2.5)', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_punktid_turniiril_komakohaga*0, f_mangija_punktid_turniiril_komakohaga, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr)
+	begin try
+		if		f_mängija_punktid_turniiril(80, 41) = 2.5
+		then	insert Staatus values('Funktsioon "f_mängija_punktid_turniiril"', 'f_mängija_punktid_turniiril(80, 41) = punktid (2.5)', '-', 'OK', f_mangija_punktid_turniiril_komakohaga, f_mangija_punktid_turniiril_komakohaga, '', funktsioonid_jr)
+		else	insert Staatus values('Funktsioon "f_mängija_punktid_turniiril"', 'f_mängija_punktid_turniiril(80, 41) = punktid (2.5)', 'Punktid pole õigesti arvutatud.', 'VIGA', f_mangija_punktid_turniiril_komakohaga*0, f_mangija_punktid_turniiril_komakohaga, 'Kas sa tulemuse jagasid 2.0-ga või tagastasid double väärtuse?', funktsioonid_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Funktsioon "f_mangija_punktid_turniiril"', 'f_mangija_punktid_turniiril(80, 41) = punktid (2.5)', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_punktid_turniiril_komakohaga*0, f_mangija_punktid_turniiril_komakohaga, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr)
+	end catch;
 end catch;
 
 end;
@@ -3206,7 +3241,7 @@ Kontroll protseduuril pole sissetulevaid andmeid ega väljuvaid andmeid.
 create	procedure procedure_voit_viik_kaotus()
 begin
 
-if 		not exists (select * from sysprocedure where proc_name = 'sp_voit_viik_kaotus') 
+if 		not exists (select * from sysprocedure where proc_name = 'sp_voit_viik_kaotus' or proc_name = 'sp_võit_viik_kaotus') 
 then	insert Staatus values('Protseduur "sp_voit_viik_kaotus"', '-', 'Protseduuri ei eksisteeri', 'VIGA', sp_voit_viik_kaotus*0, sp_voit_viik_kaotus, '', protseduurid_jr);
 return;
 endif;
