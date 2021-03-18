@@ -1528,7 +1528,10 @@ then 	insert Staatus values ('Vaade "v_mangijad"', '-', 'Vaadet ei eksisteeri.',
 return; 
 endif;
 
-set 	v_table_id = find_table_id('v_mangijad');
+if 		exists (select * from systable where upper(table_name) = upper('v_mangijad') )
+then set 	v_table_id = find_table_id('v_mangijad')
+else set 	v_table_id = find_table_id('v_mängijad');
+endif;
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
@@ -1544,7 +1547,12 @@ call	check_column_for_view(v_table_id, 'Isik_id', v_mangijad_isik_id, vaated_jr)
 
 // Kirjete kontroll
 begin try
-	select 	count(*) into kirje_count from v_mangijad;
+	if 		exists (select * from systable where upper(table_name) = upper('v_mangijad') )
+    then
+    select 	count(*) into kirje_count from v_mangijad
+    else 
+    select 	count(*) into kirje_count from v_mängijad
+    endif;
 	if		kirje_count > 23
 	then	insert Staatus values('Vaade "v_mangijad"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
 	elseif	kirje_count < 23
@@ -1558,10 +1566,18 @@ end catch;
 
 // Isiku nime kirjapilt
 begin try
+	if 		exists (select * from systable where upper(table_name) = upper('v_mangijad') )
+    then
 	if 		(select isik_nimi from v_mangijad where isik_id = 71) = 'Mets, Arvo'
 	then	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
 	else	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
 	endif;
+    else
+    if 		(select isik_nimi from v_mängijad where isik_id = 71) = 'Mets, Arvo' 
+	then	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', '-', 'OK', 	v_mangijad_isik_nimi_kuju, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
+	else	insert Staatus values('Vaade "v_mangijad"', 'Isiku nimi', 'Isiku nime kirjapilt on vale.', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, 'Kas on "perenimi, eesnimi"?', vaated_jr)
+	endif;
+    endif
 end try
 begin catch
 	insert Staatus values('Vaade "v_mangijad"', 'Isik_nimi', 'Ei kompileeru', 'VIGA', 	v_mangijad_isik_nimi_kuju*0, 	v_mangijad_isik_nimi_kuju, '', vaated_jr)
