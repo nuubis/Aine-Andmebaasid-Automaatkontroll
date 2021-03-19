@@ -2288,7 +2288,10 @@ then 	insert Staatus values ('Vaade "V_4"', 'Veergude arv', 'On vale, peab olema
 else	insert Staatus values ('Tabel "V_4"', 'Veergude arv', '-', 'OK', v_4_veergude_arv, v_4_veergude_arv, '', vaated_1_12_jr)
 endif;
 
+if 		exists (select * from syscolumn where table_id = v_table_id and column_name = 'algusaeg') then
 call 	check_column_for_view(v_table_id, 'algusaeg', v_4_algushetk, vaated_1_12_jr);
+else	check_column_for_view(v_table_id, 'algushetk', v_4_algushetk, vaated_1_12_jr);
+endif;
 
 // Kirjete arvu kontroll
 begin try
