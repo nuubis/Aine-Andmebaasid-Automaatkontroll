@@ -1321,7 +1321,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 41 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_komakohaga*0, 	v_edetabelid_punkte_komakohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
+	begin try
+		if (select punkte from v_edetabelid where turniir = 41 and mängija = 'Kivine, Kalle') > 2.49 and (select punkte from v_edetabelid where turniir = 41 and mängija = 'Kivine, Kalle') < 2.51
+		then insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 41 punktid', '-', 'OK', 	v_edetabelid_punkte_komakohaga, 	v_edetabelid_punkte_komakohaga, '', vaated_jr)
+		else insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 41 punktid', 'Punktide arv pole õige, peab olema 2.5', 'VIGA', 	v_edetabelid_punkte_komakohaga*0, 	v_edetabelid_punkte_komakohaga, '', vaated_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 41 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_komakohaga*0, 	v_edetabelid_punkte_komakohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
+	end catch;
 end catch;
 
 begin try
@@ -1331,7 +1339,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 42 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_täiskohaga*0, 	v_edetabelid_punkte_täiskohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
+	begin try
+		if (select punkte from v_edetabelid where turniir = 42 and mängija = 'Kivine, Kalle') > 1.99 and (select punkte from v_edetabelid where turniir = 42 and mängija = 'Kivine, Kalle') < 2.01
+		then insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 42 punktid', '-', 'OK', 	v_edetabelid_punkte_täiskohaga, 	v_edetabelid_punkte_täiskohaga, '', vaated_jr)
+		else insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, turniir 42 punktid', 'Punktide arv pole õige, peab olema 2.0', 'VIGA', 	v_edetabelid_punkte_täiskohaga*0, 	v_edetabelid_punkte_täiskohaga, '', vaated_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values('Vaade "v_edetabelid"', 'Kivine Kalle, tuniir 42 punktid', 'Ei kompileeru', 'VIGA', 	v_edetabelid_punkte_täiskohaga*0, 	v_edetabelid_punkte_täiskohaga, 'Kas on "perenimi, eesnimi" või veeru nimi "mangija"?', vaated_jr)
+	end catch;
 end catch;
 end;
 
@@ -2288,10 +2304,12 @@ then 	insert Staatus values ('Vaade "V_4"', 'Veergude arv', 'On vale, peab olema
 else	insert Staatus values ('Tabel "V_4"', 'Veergude arv', '-', 'OK', v_4_veergude_arv, v_4_veergude_arv, '', vaated_1_12_jr)
 endif;
 
-if 		exists (select * from syscolumn where table_id = v_table_id and column_name = 'algusaeg') then
-call 	check_column_for_view(v_table_id, 'algusaeg', v_4_algushetk, vaated_1_12_jr);
-else	check_column_for_view(v_table_id, 'algushetk', v_4_algushetk, vaated_1_12_jr);
-endif;
+/*if 		exists (select * from syscolumn where table_id = v_table_id and column_name = 'algusaeg') 
+then	call check_column_for_view(v_table_id, 'algusaeg', v_4_algushetk, vaated_1_12_jr)
+else	call check_column_for_view(v_table_id, 'algushetk', v_4_algushetk, vaated_1_12_jr)
+endif;*/
+
+call 	check_column_for_view_t2pit2ht(v_table_id, 'algusaeg', 'algushetk', v_4_algushetk, vaated_1_12_jr);
 
 // Kirjete arvu kontroll
 begin try
