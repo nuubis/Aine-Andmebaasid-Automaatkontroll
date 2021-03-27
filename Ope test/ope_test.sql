@@ -1,10 +1,11 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 5;
+create or replace variable versioon int = 3;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
 if exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_column_t2pit2ht')				then drop function check_column_t2pit2ht 				endif;
+if exists (select * from sysprocedure where proc_name = 'check_turniir_columns') 				then drop function check_turniir_columns				endif;
 if exists (select * from sysprocedure where proc_name = 'check_fk') 							then drop function check_fk 							endif;
 if exists (select * from sysprocedure where proc_name = 'table_inimesed') 						then drop function table_inimesed 						endif;
 if exists (select * from sysprocedure where proc_name = 'table_isikud') 						then drop function table_isikud 						endif;
@@ -658,7 +659,37 @@ endif;
 
 end;
 
+-- Protseduur, mis kontrollib turniirid tabeli veergusid (alguskuupaev, loppkuupaev) või (alguskuupäev, lõppkuupäev) paaridena, sest andmete sisestamisel on
+-- tähtis, et need oleks paaridena korrektsed 
+create procedure check_turniir_columns (algus varchar(50), lopp varchar(50),
+										algus_t2pi varchar(50), lopp_t2pi varchar(50), 
+										v_table_id int, v_default varchar(30), v_pkey char(1), 
+										algus_v_nulls char(1), lopp_v_nulls char(1),
+										v_width int, punktid numeric, Jr integer)
+begin
 
+if 		exists (select column_name from syscolumn where upper(column_name) = upper(algus) and table_id = v_table_id) 
+and 	exists (select column_name from syscolumn where upper(column_name) = upper(lopp) and table_id = v_table_id)
+then 	call check_column(v_table_id, algus, v_default, v_pkey, algus_v_nulls, v_width, punktid, Jr);
+		call check_column(v_table_id, lopp, v_default, v_pkey, lopp_v_nulls, v_width, punktid, Jr)
+
+elseif	exists (select column_name from syscolumn where upper(column_name) = upper(algus_t2pi) and table_id = v_table_id) 
+and 	exists (select column_name from syscolumn where upper(column_name) = upper(lopp_t2pi) and table_id = v_table_id)
+then 	call check_column(v_table_id, algus_t2pi, v_default, v_pkey, algus_v_nulls, v_width, punktid, Jr);
+		call check_column(v_table_id, lopp_t2pi, v_default, v_pkey, lopp_v_nulls, v_width, punktid, Jr)
+
+else	call check_column(v_table_id, algus_t2pi, v_default, v_pkey, algus_v_nulls, v_width, punktid, Jr);
+		call check_column(v_table_id, lopp_t2pi, v_default, v_pkey, lopp_v_nulls, v_width, punktid, Jr)
+endif;
+
+end;
+
+/*
+--call 	check_column_t2pit2ht('Loppkuupaev', 'Lõppkuupäev', v_table_id, null, 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr);
+--call 	check_column_t2pit2ht('Alguskuupaev', 'Alguskuupäev', v_table_id, null, 'n', 'n', 4, turniirid_alguskuupäev, tabelid_jr);
+
+call 	check_turniir_columns('Alguskuupaev', 'Loppkuupaev', 'Alguskuupäev' 'Lõppkuupäev', v_table_id, null, 'n', 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr
+*/
 /* Süsteemsete välisvõtmete kontroll - kontrollib kas teatud tabelite ja veergude vahel on välisvõti olemas
 Sissetulevad andmed: 
 Peamine tabel = primary_table 
@@ -1076,9 +1107,16 @@ call	check_column(v_table_id, 'Asula', 			null,				'n', 'y', 4, turniirid_asula,
 endif;
 
 // kontrollin kas on täpitähtedega veerg või mitte
-call 	check_column_t2pit2ht('Loppkuupaev', 'Lõppkuupäev', v_table_id, null, 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr);
-call 	check_column_t2pit2ht('Alguskuupaev', 'Alguskuupäev', v_table_id, null, 'n', 'n', 4, turniirid_alguskuupäev, tabelid_jr);
+--call 	check_column_t2pit2ht('Loppkuupaev', 'Lõppkuupäev', v_table_id, null, 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr);
+--call 	check_column_t2pit2ht('Alguskuupaev', 'Alguskuupäev', v_table_id, null, 'n', 'n', 4, turniirid_alguskuupäev, tabelid_jr);
 
+/*algus varchar(50), lopp varchar(50),
+										algus_t2pi varchar(50), lopp_t2pi varchar(50), 
+										v_table_id int, v_default varchar(30), v_pkey char(1), 
+										algus_v_nulls char(1), lopp_v_nulls char(1),
+										v_width int, punktid numeric, Jr integer*/
+										
+call 	check_turniir_columns('Alguskuupaev', 'Loppkuupaev', 'Alguskuupäev', 'Lõppkuupäev', v_table_id, null, 'n', 'n', 'y', 4, turniirid_lõppkuupäev, tabelid_jr);
 // Unique kitsenduse kontroll
 call 	check_unique('Turniirid', 'Nimi', turniirid_unique_nimi, tabelid_jr);
 
