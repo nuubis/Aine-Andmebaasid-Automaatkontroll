@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 7;
+create or replace variable versioon int = 5;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -1573,6 +1573,7 @@ begin try
     else 
     select 	count(*) into kirje_count from v_mängijad
     endif;
+	
 	if		kirje_count > 23
 	then	insert Staatus values('Vaade "' + v_table_name + '"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_mangijad_kirjete_arv*0, 	v_mangijad_kirjete_arv, '', vaated_jr)
 	elseif	kirje_count < 23
@@ -1909,14 +1910,6 @@ end try
 begin catch
 	insert Staatus values('Vaade "v_kolmik"', 'Kirjete arv', 'Ei kompileeru', 'VIGA', 	v_kolmik_kirjete_arv*0, 		v_kolmik_kirjete_arv, '', vaated_jr)
 end catch;
-
-begin try
-	create	table #Temp(nr int, nimi varchar(102), punktid numeric); 
-	unload	select * from v_kolmik to 'C:\\TEMP\\kodutoo_check.txt' encoding 'UTF-8';
-	load	table #Temp (nr, nimi, punktid) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
-end try
-begin catch
-end catch;
     
 begin try
 if 	exists (select * from syscolumn where column_name = 'punktid' and table_id = v_table_id) then
@@ -1926,6 +1919,11 @@ if 	exists (select * from syscolumn where column_name = 'punktid' and table_id =
 	else	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', 'Punktide summa peab olema 11.0, praegu on ' || punkti_summa, 	'VIGA', v_kolmik_punkti_summa*0, 	v_kolmik_punkti_summa, '', vaated_jr)
 	endif;
 else
+	create	table #Temp(nr int, nimi varchar(102), punktid numeric); 
+	unload	select * from v_kolmik to 'C:\\TEMP\\kodutoo_check.txt' encoding 'UTF-8';
+	load	table #Temp (nr, nimi, punktid) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+	insert Staatus values('Test', 'Test', 'Temp on olemas','VIGA',0,0,'',vaated_jr);
+	
 	select 	sum(punktid) into punkti_summa from #Temp;
 	if 		punkti_summa = 11
 	then 	insert Staatus values('Vaade "v_kolmik"', 'Punktide summa kokku', '-', 															'OK', 	v_kolmik_punkti_summa, 	v_kolmik_punkti_summa, '', vaated_jr)
@@ -1938,6 +1936,10 @@ begin catch
 end catch;
 
 begin try
+	create	table #Temp(nr int, nimi varchar(102), punktid numeric); 
+	unload	select * from v_kolmik to 'C:\\TEMP\\kodutoo_check.txt' encoding 'UTF-8';
+	load	table #Temp (nr, nimi, punktid) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+	
 	if		(select punktid from #Temp where nr = 1) = 4.5	
 	then	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', '-', 														'OK', 	v_kolmik_esimene_punktid, 		v_kolmik_esimene_punktid, '', vaated_jr)
 	else	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Esimese koha punktid peavad olema 4.5, praegu on ' || (select punktid from #Temp where nr = 1), 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, '', vaated_jr)
@@ -1947,7 +1949,7 @@ begin catch
 	begin try
 		if		(select punktid from v_kolmik where nimi = 'Maasikas, Malle') = 4.5	
 		then	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', '-', 														'OK', 	v_kolmik_esimene_punktid, 		v_kolmik_esimene_punktid, '', vaated_jr)
-		else	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Esimese koha punktid peavad olema 4.5.', 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, 'Kas on "perenimi, eesnimi"?', vaated_jr)
+		else	insert Staatus values('Vaade "v_kolmik"', 'Esimese koha punktid', 'Esimese koha punktid peavad olema 4.5', 	'VIGA', v_kolmik_esimene_punktid*0, 	v_kolmik_esimene_punktid, 'Kas on "perenimi, eesnimi"?', vaated_jr)
 		endif;
 	end try
 	begin catch
@@ -3302,7 +3304,7 @@ begin try
 	endif;
 end try
 begin catch
-	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_voit_viik_kaotus_kontrollid*0, sp_voit_viik_kaotus_kontrollid, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
+	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude/Viikide/Kaotuste arv, id 75', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_voit_viik_kaotus_kontrollid*0, sp_voit_viik_kaotus_kontrollid, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
 end catch;
 
 end;
