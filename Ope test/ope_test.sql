@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 3;
+create or replace variable versioon int = 6;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -2981,7 +2981,7 @@ begin catch
 		endif;
 	end try
 	begin catch
-		insert Staatus values('Funktsioon "f_mangija_koormus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, 'Kas sa oma funktsiooni testisid?', funktsioonid_j);
+		insert Staatus values('Funktsioon "f_mangija_koormus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_mangija_koormus*0, f_mangija_koormus, 'Kas sa oma funktsiooni testisid?', funktsioonid_jr);
 	end catch;
 end catch;
 /* funktsiooni muutuja on isikud tabeli ID */
