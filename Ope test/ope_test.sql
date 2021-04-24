@@ -3165,7 +3165,7 @@ endif;
 
 // Ettevalmistus töö ehk õige sp_info tabeli loomine
 begin try
-	select * from infopump();
+	select * from sp_infopump();
     set select_õnnestus = 1;
 end try
 begin catch
@@ -3173,25 +3173,25 @@ begin catch
 end catch;
 
 if select_õnnestus = 1 then 
-	if 	exists (select * from systable where table_name = 'sp_info_view') then drop table sp_info_view endif;
+	if 	exists (select * from systable where table_name = 'sp_info_view') then drop view sp_info_view endif;
 	create view sp_info_view as select * from sp_infopump(); 
     
 	if 		(select count(column_name) from syscolumn where table_id = find_table_id('sp_info_view')) = 2 then
 			if 		exists (select * from systable where table_name = 'sp_info') then drop table sp_info endif;
 			create 	table sp_info (id int default autoincrement, nimi varchar(102), arv int);
-			load 	table sp_info (nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ';';
+			load 	table sp_info (nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ',';
             
 	elseif (select count(column_name) from syscolumn where table_id = find_table_id('sp_info_view')) = 3 then
 			if 		exists (select * from systable where table_name = 'sp_info') then drop table sp_info endif;
 			create 	table sp_info (id int default autoincrement, osa int, nimi varchar(102), arv int);
-			load 	table sp_info (osa, nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ';';
+			load 	table sp_info (osa, nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ',';
 	endif;
     
 else
 	if 		exists (select * from systable where table_name = 'sp_info') then drop table sp_info endif;
 	create 	table sp_info (id int default autoincrement, nimi varchar(102), arv int);
 	begin try
-		load 	table sp_info (nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ';';
+		load 	table sp_info (nimi, arv) from 'C:\\TEMP\\info.txt' defaults on delimited by ',';
 		set tabel = 1;
 	end try
 	begin catch
@@ -3924,6 +3924,7 @@ begin catch
 end catch;
 
 output 	to 'c:\\temp\\info.txt'
+delimited by ','
 format	text;
 
 
