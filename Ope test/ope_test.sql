@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 6;
+create or replace variable versioon int = 7;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -2101,7 +2101,7 @@ endif;
 
 call	check_column_for_view(v_table_id, 'asula_id', v_asulasuurus_asula_id, vaated_jr);
 call	check_column_for_view(v_table_id, 'asula_nimi', v_asulasuurus_asula_nimi, vaated_jr);
-call	check_column_for_view(v_table_id, 'mangijaid', v_asulasuurus_mangijaid, vaated_jr);
+call	check_column_for_view_t2pit2ht(v_table_id, 'mängijaid', 'mangijaid', v_asulasuurus_mangijaid, vaated_jr);
 
 // Kirjete arvu kontroll
 begin try
@@ -2125,7 +2125,15 @@ begin try
 	endif;
 end try
 begin catch
-	insert Staatus values ('Vaade "v_asulasuurus"', 'Kirje kontroll', 'Ei kompileeru', 'VIGA', v_asulasuurus_kirje*0, v_asulasuurus_kirje, '', vaated_jr)
+	begin try
+		if 		(select mängijaid from v_asulasuurus where asula_nimi = 'Tartu') = 23 and (select mängijaid from v_asulasuurus where asula_nimi = 'Elva') = 0
+		then	insert Staatus values ('Vaade "v_asulasuurus"', 'Kirje kontroll', '-', 'OK', v_asulasuurus_kirje, v_asulasuurus_kirje, '', vaated_jr)
+		else	insert Staatus values ('Vaade "v_asulasuurus"', 'Kirje kontroll', 'Tartus või Elvas on vale arv isikuid.', 'VIGA', v_asulasuurus_kirje*0, v_asulasuurus_kirje, '', vaated_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values ('Vaade "v_asulasuurus"', 'Kirje kontroll', 'Ei kompileeru', 'VIGA', v_asulasuurus_kirje*0, v_asulasuurus_kirje, '', vaated_jr)
+	end catch;
 end catch;
 	
 end;
