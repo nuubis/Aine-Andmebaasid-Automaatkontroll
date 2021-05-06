@@ -3325,13 +3325,30 @@ begin try
 	endif;
 end try
 begin catch
-	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', 
-    sp_voit_viik_kaotus_kirjete_arv*0, sp_voit_viik_kaotus_kirjete_arv, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
+	begin try
+		if		(select count(*) from sp_võit_viik_kaotus(41)) > 11
+		then	insert 	Staatus values('Protseduur "sp_võit_viik_kaotus"', 'Kirjete arv turniiril 41', 'Kirjeid on ROHKEM kui vaja.', 'VIGA', sp_voit_viik_kaotus_kirjete_arv*0, sp_voit_viik_kaotus_kirjete_arv, '', protseduurid_jr)
+		elseif	(select count(*) from sp_võit_viik_kaotus(41)) < 11
+		then	insert 	Staatus values('Protseduur "sp_võit_viik_kaotus"', 'Kirjete arv turniiril 41', 'Kirjeid on VÄHEM kui vaja.', 'VIGA', sp_voit_viik_kaotus_kirjete_arv*0, sp_voit_viik_kaotus_kirjete_arv, '', protseduurid_jr)
+		else	insert 	Staatus values('Protseduur "sp_võit_viik_kaotus"', 'Kirjete arv turniiril 41', '-', 'OK', sp_voit_viik_kaotus_kirjete_arv, sp_voit_viik_kaotus_kirjete_arv, '', protseduurid_jr)
+		endif;
+	end try
+	begin catch
+		insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', 
+		sp_voit_viik_kaotus_kirjete_arv*0, sp_voit_viik_kaotus_kirjete_arv, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
+	end catch;
 end catch;
 
 begin try
 	create	table #Temp (id integer, eesnimi varchar(50), perenimi varchar(50), võite int, viike int, kaotusi int);
-	unload 	select * from sp_voit_viik_kaotus(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+	
+	begin try
+		unload 	select * from sp_voit_viik_kaotus(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+	end try
+	begin catch
+		unload 	select * from sp_võit_viik_kaotus(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+	end catch;
+	
 	load 	table #Temp from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
     
 	if		(select võite from #Temp where id = 75) = 4
@@ -3763,21 +3780,21 @@ if 	versioon > 3 then
 		delete 	partiid;
 	end try
 	begin catch
-		raiserror 17000 ('Ei saanus kustutada tabeli "Partiid" kirjeid!')
+		raiserror 17000 ('Ei saanud kustutada tabeli "Partiid" kirjeid!')
 	end catch;
 	
 	begin try
 		delete 	turniirid;
 	end try
 	begin catch
-		raiserror 17000 ('Ei saanus kustutada tabeli "Turniirid" kirjeid!')
+		raiserror 17000 ('Ei saanud kustutada tabeli "Turniirid" kirjeid!')
 	end catch;
 	
 	begin try
 		delete 	isikud;
 	end try
 	begin catch
-		raiserror 17000 ('Ei saanus kustutada tabeli "Isikud" kirjeid!')
+		raiserror 17000 ('Ei saanud kustutada tabeli "Isikud" kirjeid!')
 	end catch;
 	
 	begin try
