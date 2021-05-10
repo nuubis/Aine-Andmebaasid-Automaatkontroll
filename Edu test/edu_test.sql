@@ -821,25 +821,34 @@ call	check_foreign_key('Institutes', 'Id', 'Persons', 'InstituteId', 	 välisvõ
 select 	count(*) into trigger_count_C		from systrigger
 where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 if 		trigger_count_C = 8				
-then 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme update tingimuse kogus', '-', 'Välisvõtme update tingmuste arv on vale. Olemas on ' || trigger_count_C || ', peab olema 6.',  	'VIGA', trigger_cascade*0, trigger_cascade, 
-								'kui välisvõti on tehtud siis kontrollida kas on lisatud on update cascade', välisvõtmed_tg_jr)			
+then 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
+elseif trigger_count_C > 8	
+then	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on ÜLE.',  	
+								'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
+else	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on PUUDU.',  	
+								'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)								
 endif;
 
 /* Kahe järgneva delete triggerite kontrollide vahe on see, et ühe tingimus kustutamisel on CASCADE ja teisel on NULL*/
 select 	count(*) into trigger_count_DC		from systrigger
 where	event = 'D' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 if 		(trigger_count_DC = 5) or (trigger_count_DC = 6 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
-then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_cascade, trigger_delete_cascade, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 5.', 
+then 	insert Staatus values ('Välisvõtme tingimus "ON DELETE CASCADE"', '-', '-',	'OK', trigger_delete_cascade, trigger_delete_cascade, '', välisvõtmed_tg_jr)
+elseif trigger_count_DC > 5	
+then	insert Staatus values ('Välisvõtme tingimus "ON DELETE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON DELETE CASCADE" tingimus on ÜLE.', 
+								'VIGA', trigger_delete_cascade*0, trigger_delete_cascade, '', välisvõtmed_tg_jr)
+else	insert Staatus values ('Välisvõtme tingimus "ON DELETE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON DELETE CASCADE" tingimus on PUUDU.', 
 								'VIGA', trigger_delete_cascade*0, trigger_delete_cascade, '', välisvõtmed_tg_jr)
 endif;
 
 select 	count(*) into trigger_count_DN		from systrigger
 where	event = 'D' and trigger_time = 'A' 	and referential_action = 'N' and trigger_name is null;
 if 		(trigger_count_DN = 3) or (trigger_count_DN = 4 and exists (select * from systable where table_name = 'maint_name') or exists (select * from systable where table_name = 'maint_plan'))				
-then 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', '-',	'OK', trigger_delete_null, trigger_delete_null, '', välisvõtmed_tg_jr)
-else 	insert Staatus values ('Välisvõtme delete tingimuse kogus', '-', 'Välisvõtme delete tingimuste arv on vale. Olemas on ' || trigger_count_DC || ', peab olema 3.', 
+then 	insert Staatus values ('Välisvõtme tingimus "ON DELETE SET NULL"', '-', '-',	'OK', trigger_delete_null, trigger_delete_null, '', välisvõtmed_tg_jr)
+elseif trigger_count_DN > 3
+then	insert Staatus values ('Välisvõtme tingimus "ON DELETE SET NULL"', '-', 'Vähemalt ühe välisvõtme "ON DELETE SET NULL" tingimus on ÜLE.', 
+								'VIGA', trigger_delete_null*0, trigger_delete_null, '', välisvõtmed_tg_jr)
+else 	insert Staatus values ('Välisvõtme tingimus "ON DELETE SET NULL"', '-', 'Vähemalt ühe välisvõtme "ON DELETE SET NULL" tingimus on PUUDU.', 
 								'VIGA', trigger_delete_null*0, trigger_delete_null, '', välisvõtmed_tg_jr)
 endif;
 
