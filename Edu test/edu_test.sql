@@ -890,7 +890,7 @@ set 	v_table_id = find_table_id('v_persons_atleast_4eap');
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
 if      v_size != 2 
-then 	insert Staatus values ('Vaade "v_persons_atleast_4eap"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_persons_atleast_4eap_veergude_arv*0, v_persons_atleast_4eap_veergude_arv, '', vaated_jr)
+then 	insert Staatus values ('Vaade "v_persons_atleast_4eap"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_persons_atleast_4eap_veergude_arv*0, v_persons_atleast_4eap_veergude_arv, '', vaated_jr)
 else	insert Staatus values ('Tabel "v_persons_atleast_4eap"', 'Veergude arv', '-', 'OK', v_persons_atleast_4eap_veergude_arv, v_persons_atleast_4eap_veergude_arv, '', vaated_jr)
 endif;
 
