@@ -1,6 +1,6 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
 create or replace variable versioon int = 7;
-/* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "S" = Sissejuhatus andmebaasidesse */
+/* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "AA" = Andmebaaside alused */
 create or replace variable aine varchar(5) = 'A';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
 if exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
@@ -874,7 +874,7 @@ endif;
 
 /* Hindepunktide välja arvutamine */
 select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
-if 		versioon = 7 
+if 		versioon = 7 and aine = 'A'
 then	
 set 	hindepunkt = (summa / max_summa) * 2;
 set		max_hindepunkt = 2.0 
@@ -3658,13 +3658,8 @@ if		kodutöö >= 3 then
 endif;
 if 		kodutöö >= 5 then
 		call view_edetabelid();
-		if   aine = 'A' then
-			 call view_klubipartiikogused_1();
-			 call view_klubipartiikogused_2();
-		endif;
-		if	 aine = 'S' then
-			 call view_klubipartiikogused();
-		endif;
+		call view_klubipartiikogused_1();
+		call view_klubipartiikogused_2();
 		call view_mangijad();
 		call view_partiid();
 		call view_punktid();
@@ -3724,15 +3719,13 @@ elseif	kodutöö = 7 then
 endif;
 
 begin try
-	if		kodutöö = 7 then
-			select max(sisestatud) into aeg from inimesed;
-			set aja_muutuja = aeg;
-			begin try
-				insert into Staatus values ('-', (select eesnimi from inimesed where sisestatud = aeg) || ', ' || (select perenimi from inimesed where sisestatud = aeg), aja_muutuja, 'Aeg', 0, 0, '', tudeng_jr);
-			end try
-			begin catch
-			end catch;
-	endif;
+	select max(sisestatud) into aeg from inimesed;
+	set aja_muutuja = aeg;
+	begin try
+		insert into Staatus values ('-', (select eesnimi from inimesed where sisestatud = aeg) || ', ' || (select perenimi from inimesed where sisestatud = aeg), aja_muutuja, 'Aeg', 0, 0, '', tudeng_jr);
+	end try
+	begin catch
+	end catch;
 end try
 begin catch
 end catch;
@@ -3942,15 +3935,13 @@ Siin on tüüpiline error sest tihti tudengitel pole sp_infopump olemas ja siis 
 */
 
 begin try
-	if 		versioon >= 6 and aine = 'A' and exists (select * from sysprocedure where proc_name = 'sp_infopump') 
+	if 		versioon >= 6 and exists (select * from sysprocedure where proc_name = 'sp_infopump') 
 	then 	call sp_infopump() endif;
 end try
 begin catch
 end catch;
 
-output 	to 'c:\\temp\\info.txt'
-delimited by ','
-format	text;
+output 	to 'c:\\temp\\info.txt' delimited by ',' format	text;
 
 
 /*
@@ -3959,7 +3950,7 @@ Kui on kodutöö 6 või 7 ja aine = 'A', siis käivitatakse protseduuri "sp_info
 Seejärel käivitatakse antud versiooniga protseduur "käivita", mis siis käivitab kõik vajalikud protseduurid teatud kodutöö kontrolliks.
 */
 call 	deleteS();
-if 		versioon >= 6 and aine = 'A' then call procedure_infopump() endif;
+if 		versioon >= 6 then call procedure_infopump() endif;
 call 	käivita(versioon);
 
 /* Tulemuste väljastamine ekraanile ning kirjutamine txt ja csv failidesse */
