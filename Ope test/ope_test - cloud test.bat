@@ -24,9 +24,6 @@ copy c:\TEMP\AB.sql . /Y
 curl -u "N6rKsdYKizFoTZ3:" -T Vead.sql "https://owncloud.ut.ee/owncloud/public.php/webdav/Vead.sql"
 curl -u "N6rKsdYKizFoTZ3:" -T Vead_AB.sql "https://owncloud.ut.ee/owncloud/public.php/webdav/Vead_AB.sql"
 curl -u "N6rKsdYKizFoTZ3:" -T AB.sql "https://owncloud.ut.ee/owncloud/public.php/webdav/AB.sql"
-del Vead.sql
-del Vead_AB.sql
-del AB.sql
 
 del DBTest.zip
 cd DBTest
