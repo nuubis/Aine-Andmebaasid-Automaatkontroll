@@ -2,7 +2,14 @@
 create or replace variable versioon int = 3;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
-if 	exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'find_table_name') 						then drop function find_table_name 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'find_table_id') 						then drop function find_table_id 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'find_column_name') 						then drop function find_column_name 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'kolmas_praktikum') 						then drop function kolmas_praktikum 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'kolmas_iseseisev') 						then drop function kolmas_iseseisev 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'käivita') 						then drop function käivita 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'find_table_id') 						then drop function find_table_id 						endif;
 
 
 
@@ -27,12 +34,6 @@ Punktid - mitu punkti sai teatud ülesande osa eest
 Max punktid - maksimum punktid, kui palju selle osa eest saab
 Soovitus - soovitus, kust võib viga leida või kas sul on olemas X asi?
 */
-
--- delete staatus protseduur - protseduur, mis kustutab Staatus tabeli andmed
-create procedure deleteS()
-	begin
-		delete Staatus;
-	end;
 
 -- Abifunktsioonid, et saada tabeli ID-st tabeli nimi, sissetulev muutujaks on tabeli ID süsteemis ja tagastus on tabeli nimi
 create  function find_table_name(a_id int)
@@ -96,13 +97,17 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 
 create procedure kolmas_praktikum()
 	begin
-		declare punkt = 0.04 numeric;
-		declare Jr = 1 int;
+		declare punktid numeric;
+		declare Jr int;
+		set punktid = 0.04;
+		set Jr = 1;
 		
 		-- Tabel Turniirid veerg nimi
 		if 		not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('turniirid')) 
 		then 	insert 	Staatus values ('Tabel "' || 'Turniirid' || '"', 'Veergu "' || 'Nimi' || '" ei eksisteeri.', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabel "' || 'Turniirid' || '"', 'Veerg "' || 'Nimi' || '".', '-', 'OK', punktid*0, punktid, '', Jr);
 		endif;
+		
 
 	end;
 
@@ -116,22 +121,22 @@ create procedure kolmas_iseseisev()
 
 
 
-create procedure käivita(versioon)
+create procedure käivita(versioon int)
 	begin
 
 		if versioon = 3 then
 			call kolmas_praktikum();
-			call kolmas_iseseisev()
+			call kolmas_iseseisev();
 		endif;
 		
-		call arvuta_punktid();
+		--call arvuta_punktid();
 	end;
 
 
 
+call	käivita(versioon);
 
-
-select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' or Olek = 'Aeg' 
+select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus --where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' or Olek = 'Aeg' 
 order by Jr;
 output to 'C:\TEMP\tulemus.csv' format excel;
 output to 'C:\TEMP\tulemus.txt' format text;
