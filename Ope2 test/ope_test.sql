@@ -67,7 +67,6 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 
 create 	procedure arvuta_punktid()
 	begin
-		--declare summa, max_summa, hindepunkt, max_hindepunkt numeric;
 		declare max_punktid_jr, õiged, vead, puudu, kokku int;
 		set 	max_punktid_jr = 2;
 
@@ -76,20 +75,6 @@ create 	procedure arvuta_punktid()
 		select count(*) into vead from Staatus where olek = 'VIGA';
 		select count(*) into puudu from Staatus where olek = 'PUUDU';
 		
-		-- Hindepunktide välja arvutamine 
-		/*select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
-		if 		versioon = 7 and aine = 'A'
-			then	
-			set 	hindepunkt = (summa / max_summa) * 2;
-			set		max_hindepunkt = 2.0 
-		else
-			set 	hindepunkt = (summa / max_summa);
-			set 	max_hindepunkt = 1.0
-		endif;*/
-
-		-- Punktide sisestamine 
-		--insert into Staatus values ('-', '-', '-', 'Kokku', summa, max_summa, '', max_punktid_jr);
-		--insert into Staatus values ('-', '-', '-', 'Hindepunktid', hindepunkt, max_hindepunkt, '', hindepunktid_jr);
 		--
 		set kokku = õiged + vead + puudu;
 		insert into Staatus values ('-', '-', '-', 'Õiged kokku', õiged, kokku, '', max_punktid_jr);
@@ -108,10 +93,15 @@ create procedure kolmas_praktikum()
 		
 		-- Tabel Turniirid veerg nimi
 		if 		not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('turniirid')) 
-		then 	insert 	Staatus values ('Tabel "' || 'Turniirid' || '"', 'Veergu "' || 'Nimi' || '" ei eksisteeri.', '-', 'VIGA', punktid*0, punktid, '', Jr);
-		else 	insert 	Staatus values ('Tabel "' || 'Turniirid' || '"', 'Veerg "' || 'Nimi' || '".', '-', 'OK', punktid*0, punktid, '', Jr);
+		then 	insert 	Staatus values ('Tabel "Turniirid"', 'Veergu "Nimi" ei eksisteeri.', 	'-', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Nimi".', 					'-', 'OK', punktid*0, punktid, '', Jr);
 		endif;
 		
+		-- UPDATE isikud SET perenimi = 'Kompvek' WHERE eesnimi = 'Irys';
+		if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
+		then 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		endif;
 
 	end;
 
