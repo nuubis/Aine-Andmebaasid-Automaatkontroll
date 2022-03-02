@@ -97,10 +97,16 @@ create procedure kolmas_praktikum()
 		else 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Nimi".', 					'-', 'OK', punktid*0, punktid, '', Jr);
 		endif;
 		
-		-- UPDATE isikud SET perenimi = 'Kompvek' WHERE eesnimi = 'Irys';
+		-- Tabel Isikud perenime muutmine
 		if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
 		then 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'OK', punktid*0, punktid, '', Jr);
 		else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		endif;
+		
+		-- Tabel klubid asukoht suuurus = 100
+		if		(select width from syscolumn where table_id = find_table_id('klubid') and column_name = 'asukoht') = 100
+		then 	insert 	Staatus values ('Tabelis "Klubid"', 'Veerg "Asukoht" suurus.', '-', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Veerg "Asukoht" suurus on vales.', '-', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 
 	end;
