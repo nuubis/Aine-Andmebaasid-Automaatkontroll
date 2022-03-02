@@ -10,6 +10,7 @@ if 	exists (select * from sysprocedure where proc_name = 'kolmas_praktikum') 			
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_iseseisev') 						then drop function kolmas_iseseisev 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'käivita') 						then drop function käivita 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'arvuta_punktid') 						then drop function arvuta_punktid 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'check_check') 						then drop function check_check 						endif;
 
 
 
@@ -83,6 +84,30 @@ create 	procedure arvuta_punktid()
 	end;
 
 
+/* Protseduur, mis kontrollib, kas teatud tabelis on olemas vastav check kitsendus 
+Sissetulevad andmed:
+Check-i definitsioon = check_defn ehk see on selle checki kirjeldus süsteemis
+tabeli nimi = table_name
+veeru nimi = column_name
+
+Protseduuri sisesne muutuja: check_count = check kogus antud tingimustel.
+
+Kõigepealt loetakse kokku tabelist "syscheck" mitu check kitsendust on vastavalt sellele definitsioonile, peab olema ÜKS
+seejärel kui tulemus ei ole 1 siis lisatakse veateade Staatus tabelisse ja kui on 1 siis lisatakse 'OK' Staatus tabelisse
+*/
+create 	procedure check_check(p_check_defn varchar(500), p_table_name varchar(30), p_column_name varchar(50), punktid numeric, Jr integer)
+begin
+declare check_count int;
+declare soovitus varchar(5000) = '';
+
+select 	count(*) into check_count		from syscheck where check_defn = p_check_defn;
+if 		check_count = 1				
+then 	insert Staatus values ('Tabel "' || p_table_name || '" check', p_column_name, '-',  								'OK', 	punktid, 	punktid, soovitus, Jr)
+else	insert Staatus values ('Tabel "' || p_table_name || '" check', p_column_name, 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, soovitus, Jr)
+endif;
+
+end;
+
 
 create procedure kolmas_praktikum()
 	begin
@@ -109,12 +134,30 @@ create procedure kolmas_praktikum()
 		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Veerg "Asukoht" suurus on vales.', '-', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 		
-		-- INSERT INTO klubid (nimi, asukoht) VALUES ('Osav oda', 'Otepää');
+		-- Klubi lisamine
 		if		(select count(*) from klubid where nimi = 'Osav Oda') = 1
 		then 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubi "Osav Oda" olemasolu.', '-', 'OK', punktid*0, punktid, '', Jr);
 		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubi "Osav Oda" on puudu.', '-', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
-
+		
+		-- partii check		
+		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("valge_tulemus"+"musta_tulemus" = 2)') = 1				
+		then 	insert Staatus values ('Tabel "Partiid" check', 'Valge_tulemus + Musta_tulemus', '-',  								'OK', 	punktid, 	punktid, '', Jr)
+		else	insert Staatus values ('Tabel "Partiid" check', 'Valge_tulemus + Musta_tulemus', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		endif;
+		
+		-- sugu puudumine
+		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("sugu" in( ''m'',''n'' ) )') = 0				
+		then 	insert Staatus values ('Tabel "Isikud" check', 'sugu kustutamine', '-',  								'OK', 	punktid, 	punktid, '', Jr)
+		else	insert Staatus values ('Tabel "Isikud" check', 'sugu kustutamine', 'Kitsendust ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		endif;
+		
+		-- unique puudumine?
+		if 		(select 	count(*) into unique_count 	from sysindex where creator = 1 and table_id = find_table_id('isikud') and "unique" = 'U') = 1				
+		then 	insert Staatus values ('Tabel "Isikud" unique', 'un_nimi kustutamine', '-',  								'OK', 	punktid, 	punktid, '', Jr)
+		else	insert Staatus values ('Tabel "Isikud" unique', 'un_nimi kustutamine', 'Kitsendust ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		endif;
+		
 	end;
 
 
