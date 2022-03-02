@@ -9,7 +9,7 @@ if 	exists (select * from sysprocedure where proc_name = 'find_column_name') 			
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_praktikum') 						then drop function kolmas_praktikum 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_iseseisev') 						then drop function kolmas_iseseisev 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'käivita') 						then drop function käivita 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'find_table_id') 						then drop function find_table_id 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'arvuta_punktid') 						then drop function arvuta_punktid 						endif;
 
 
 
@@ -20,8 +20,8 @@ create table Staatus(
 	Veerg varchar(100), 
 	Tagasiside varchar(1000), 
 	Olek varchar(100), 
-	Punktid numeric, 
-	Max_punktid numeric, 
+	Punktid int, 
+	Max_punktid int, 
 	Soovitus varchar(1000), 
 	Jr int default 100);
 /* 
@@ -65,20 +65,19 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 		return 	c_name;
 	end;
 
-/*create 	procedure arvuta_punktid(versioon int)
+create 	procedure arvuta_punktid()
 	begin
-		declare summa, max_summa, hindepunkt, max_hindepunkt numeric;
-		set 	summa = 0.0;
+		--declare summa, max_summa, hindepunkt, max_hindepunkt numeric;
+		declare max_punktid_jr, õiged, vead, puudu, kokku int;
+		set 	max_punktid_jr = 2;
 
-		if		versioon = 3 then set max_summa = kodutöö_3
-		elseif	versioon = 5 then set max_summa = kodutöö_5
-		elseif	versioon = 6 then set max_summa = kodutöö_6
-		elseif	versioon = 7 then set max_summa = kodutöö_7
-		else					  set max_summa = 1
-		endif;
-
+		-- Protsendi arvutamine
+		select count(*) into õiged from Staatus where olek = 'OK';
+		select count(*) into vead from Staatus where olek = 'VIGA';
+		select count(*) into puudu from Staatus where olek = 'PUUDU';
+		
 		-- Hindepunktide välja arvutamine 
-		select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
+		/*select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
 		if 		versioon = 7 and aine = 'A'
 			then	
 			set 	hindepunkt = (summa / max_summa) * 2;
@@ -86,12 +85,17 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 		else
 			set 	hindepunkt = (summa / max_summa);
 			set 	max_hindepunkt = 1.0
-		endif;
+		endif;*/
 
 		-- Punktide sisestamine 
-		insert into Staatus values ('-', '-', '-', 'Kokku', summa, max_summa, '', max_punktid_jr);
-		insert into Staatus values ('-', '-', '-', 'Hindepunktid', hindepunkt, max_hindepunkt, '', hindepunktid_jr);
-	end;*/
+		--insert into Staatus values ('-', '-', '-', 'Kokku', summa, max_summa, '', max_punktid_jr);
+		--insert into Staatus values ('-', '-', '-', 'Hindepunktid', hindepunkt, max_hindepunkt, '', hindepunktid_jr);
+		--
+		set kokku = õiged + vead + puudu;
+		insert into Staatus values ('-', '-', '-', 'Õiged kokku', õiged, kokku, '', max_punktid_jr);
+		insert into Staatus values ('-', '-', '-', 'Vead Kokku', vead, kokku, '', max_punktid_jr);
+		insert into Staatus values ('-', '-', '-', 'Puudu Kokku', puudu, kokku, '', max_punktid_jr);
+	end;
 
 
 
@@ -99,7 +103,7 @@ create procedure kolmas_praktikum()
 	begin
 		declare punktid numeric;
 		declare Jr int;
-		set punktid = 0.04;
+		set punktid = 0;
 		set Jr = 1;
 		
 		-- Tabel Turniirid veerg nimi
@@ -129,7 +133,7 @@ create procedure käivita(versioon int)
 			call kolmas_iseseisev();
 		endif;
 		
-		--call arvuta_punktid();
+		call arvuta_punktid();
 	end;
 
 
