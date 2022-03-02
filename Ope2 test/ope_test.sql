@@ -213,6 +213,20 @@ create procedure kolmas_iseseisev()
 			endif;
 		end catch;
 		
+		-- Tabel Isikud lisamine klubisse Osav Oda
+		begin try
+			if 		(select count(*) from isikud where klubis = 62) = 5
+			then 	insert 	Staatus values ('Tabelis "Isikud"', 'Klubi "Osav Oda" liikmed on olemas.', '-', 'OK', punktid*0, punktid, '', Jr);
+			else 	insert 	Staatus values ('Tabelis "Isikud"', 'Klubi "Osav Oda" liikmeid ei ole lisatud', '-', 'VIGA', punktid*0, punktid, '', Jr);
+			endif;
+		end try
+		begin catch
+			if 		(select count(*) from isikud where klubi = 62) = 5
+			then 	insert 	Staatus values ('Tabelis "Isikud"', 'Klubi "Osav Oda" liikmed on olemas.', '-', 'OK', punktid*0, punktid, '', Jr);
+			else 	insert 	Staatus values ('Tabelis "Isikud"', 'Klubi "Osav Oda" liikmeid ei ole lisatud', '-', 'VIGA', punktid*0, punktid, '', Jr);
+			endif;
+		end catch;
+		
 
 
 	end;
