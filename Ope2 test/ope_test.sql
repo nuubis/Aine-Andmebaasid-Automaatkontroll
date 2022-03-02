@@ -93,9 +93,9 @@ create procedure kolmas_praktikum()
 		set Jr = 1;
 		
 		-- Tabel Turniirid veerg nimi
-		if 		not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('turniirid')) 
-		then 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Nimi" ', 	'ei eksisteeri.', 'VIGA', punktid*0, punktid, '', Jr);
-		else 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Nimi".', 					'-', 'OK', punktid*0, punktid, '', Jr);
+		if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid')) 
+		then 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Asukoht" ', 	'ei eksisteeri.', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabel "Turniirid"', 'Veerg "Asukoht".', 					'-', 'OK', punktid*0, punktid, '', Jr);
 		endif;
 		
 		-- Tabel Isikud perenime muutmine
