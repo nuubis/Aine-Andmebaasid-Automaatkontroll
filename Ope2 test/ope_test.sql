@@ -163,6 +163,35 @@ create procedure kolmas_praktikum()
 
 create procedure kolmas_iseseisev()
 	begin
+		declare punktid numeric;
+		declare Jr int;
+		set punktid = 0;
+		set Jr = 1;
+		
+		-- Tabel Isikud veerg klubis
+		if 		not exists (select * from syscolumn where column_name = 'klubis' and table_id = find_table_id('isikud')) 
+		then 	insert 	Staatus values ('Tabel "Isikud"', 'Veergu "Klubis" ei eksisteeri.', 	'-', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabel "Isikud"', 'Veerg "Klubis".', 					'-', 'OK', punktid*0, punktid, '', Jr);
+		endif;
+		
+		-- Tabel partiid veerg kokkuvõte
+		if 		exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('partiid')) 
+		then 	insert 	Staatus values ('Tabel "Partiid"', 'Veergu "Kokkuvote" ei ole kustutatud.', 	'-', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabel "Partiid"', 'Veerg "Kokkuvote" on kustutatud.', 					'-', 'OK', punktid*0, punktid, '', Jr);
+		endif;
+		
+		-- partii check ajakontroll
+		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("lopphetk" > "algushetk")') = 1				
+		then 	insert Staatus values ('Tabel "Partiid" check', 'Lopphetk > algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
+		else	insert Staatus values ('Tabel "Partiid" check', 'Lopphetk > algushetk', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		endif;
+		--
+		
+		-- turniirid check	ajakontroll	
+		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("alguskuupaev" <= "loppkuupaev")') = 1				
+		then 	insert Staatus values ('Tabel "Turniirid" check', 'Lopphetk <= algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
+		else	insert Staatus values ('Tabel "Turniirid" check', 'Lopphetk <= algushetk', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		endif;
 
 
 
