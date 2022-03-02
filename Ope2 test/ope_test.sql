@@ -108,6 +108,12 @@ create procedure kolmas_praktikum()
 		then 	insert 	Staatus values ('Tabelis "Klubid"', 'Veerg "Asukoht" suurus.', '-', 'OK', punktid*0, punktid, '', Jr);
 		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Veerg "Asukoht" suurus on vales.', '-', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
+		
+		-- INSERT INTO klubid (nimi, asukoht) VALUES ('Osav oda', 'Otepää');
+		if		(select count(*) from klubid where nimi = 'Osav Oda') = 1
+		then 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubi "Osav Oda" olemasolu.', '-', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubi "Osav Oda" on puudu.', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		endif;
 
 	end;
 
