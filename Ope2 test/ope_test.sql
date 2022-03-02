@@ -69,7 +69,7 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 create 	procedure arvuta_punktid()
 	begin
 		declare max_punktid_jr, õiged, vead, puudu, kokku int;
-		set 	max_punktid_jr = 2;
+		set 	max_punktid_jr = 3;
 
 		-- Protsendi arvutamine
 		select count(*) into õiged from Staatus where olek = 'OK';
@@ -125,7 +125,7 @@ create procedure kolmas_praktikum()
 		-- Tabel Isikud perenime muutmine
 		if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
 		then 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'OK', punktid*0, punktid, '', Jr);
-		else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isik "Irys"', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isiku "Irys" perenimi on vale.', '-', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 		
 		-- Tabel klubid asukoht suuurus = 100
@@ -166,7 +166,7 @@ create procedure kolmas_iseseisev()
 		declare punktid numeric;
 		declare Jr int;
 		set punktid = 0;
-		set Jr = 1;
+		set Jr = 2;
 		
 		-- Tabel Isikud veerg klubis
 		if 		not exists (select * from syscolumn where column_name = 'klubis' and table_id = find_table_id('isikud')) 
@@ -192,7 +192,27 @@ create procedure kolmas_iseseisev()
 		then 	insert Staatus values ('Tabel "Turniirid" check', 'Lopphetk <= algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
 		else	insert Staatus values ('Tabel "Turniirid" check', 'Lopphetk <= algushetk', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
 		endif;
+		
+		-- Tabel klubid klubi asukoha muutmine
+		if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
+		then 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubi "Valge mask"', '-', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Tabelis "Klubid"', 'Klubid "Valge mask" asukoht on vale.', '-', 'VIGA', punktid*0, punktid, '', Jr);
+		endif;
 
+		-- Tabel isikud isiku klubi muutmine
+		begin try
+			if 		(select klubis from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
+			then 	insert 	Staatus values ('Tabelis "Isikud"', 'Isiku "Siim Susi" klubi on õige.', '-', 'OK', punktid*0, punktid, '', Jr);
+			else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isiku "Siim Susi" klubi on vale.', '-', 'VIGA', punktid*0, punktid, '', Jr);
+			endif;
+		end try
+		begin catch
+			if 		(select klubi from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
+			then 	insert 	Staatus values ('Tabelis "Isikud"', 'Isiku "Siim Susi" klubi on õige.', '-', 'OK', punktid*0, punktid, '', Jr);
+			else 	insert 	Staatus values ('Tabelis "Isikud"', 'Isiku "Siim Susi" klubi on vale.', '-', 'VIGA', punktid*0, punktid, '', Jr);
+			endif;
+		end catch;
+		
 
 
 	end;
