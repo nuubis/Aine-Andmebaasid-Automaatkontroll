@@ -1,5 +1,5 @@
 -- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn)
-create or replace variable versioon int = 3;
+create or replace variable versioon int = 2;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
 if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
@@ -29,12 +29,12 @@ Soovitus - soovitus, kust võib viga leida või kas sul on olemas X asi?
 Jr - määrab järjestuse kuidas tulemused on näha
 */
 create table Staatus(
-	Nimi varchar(1000), 
+	Ülesanne varchar(1000), 
 	Kontroll varchar(1000), 
 	Tagasiside varchar(1000), 
 	Olek varchar(100), 
-	Punktid int, 
-	Max_punktid int, 
+	Punktid numeric(7,2), 
+	Max_punktid numeric(7,2), 
 	Soovitus varchar(1000), 
 	Jr int default 100);
 
@@ -72,24 +72,33 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 create 	procedure arvuta_punktid(versioon int)
 	begin
 		declare max_punktid_jr, õiged, vead, kokku int;
-		set 	max_punktid_jr = 3;
+		declare punktid, max_punktid numeric;
+		set 	max_punktid_jr = 10;
+		
+		if 		versioon = 2 then set max_punktid = 0.35;
+		endif;
 
 		-- Protsendi arvutamine
 		select count(*) into õiged from Staatus where olek = 'OK' and nimi = 'Praktikum';
 		select count(*) into vead from Staatus where olek = 'VIGA' and nimi = 'Praktikum';
 		
-		--
+		-- Praktikumi õiged ja valed
 		set kokku = õiged + vead;
 		insert into Staatus values ('Praktikum', '-', '-', 'Õiged kokku', õiged, kokku, '', max_punktid_jr);
-		insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, kokku, '', max_punktid_jr);
+		insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', max_punktid_jr);
+		
+		--Iseseisev punktid
+		select sum(punktid) into punktid from staatus where nimi = 'Iseseisev';
+		insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', max_punktid_jr+1);
+		
+		
 	end;
 
 
 create procedure kolmas_praktikum()
 	begin
-		declare punktid numeric;
+		declare punktid numeric = 0;
 		declare Jr int;
-		set punktid = 0;
 		set Jr = 1;
 		
 		-- Tabel Turniirid veerg nimi
@@ -139,52 +148,50 @@ create procedure kolmas_praktikum()
 
 create procedure kolmas_iseseisev()
 	begin
-		declare punktid numeric;
-		declare Jr int;
-		set punktid = 0;
-		set Jr = 2;
+		declare punktid numeric = 0.05;
+		declare Jr int = 2;
 		
 		-- Tabel Isikud veerg klubis
 		if 		not exists (select * from syscolumn where column_name = 'klubis' and table_id = find_table_id('isikud')) 
 		then 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veergu "Klubis" ', 	'ei eksisteeri.', 'VIGA', punktid*0, punktid, '', Jr);
-		else 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 					'-', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 					'-', 'OK', punktid, punktid, '', Jr);
 		endif;
 		
 		-- Tabel partiid veerg kokkuvõte
 		if 		exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('partiid')) 
 		then 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 	'ei ole kustutatud.', 'VIGA', punktid*0, punktid, '', Jr);
-		else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 					'on kustutatud.', 'OK', punktid*0, punktid, '', Jr);
+		else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 					'on kustutatud.', 'OK', punktid, punktid, '', Jr);
 		endif;
 		
 		-- partii check ajakontroll
 		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("lopphetk" > "algushetk")') = 1				
 		then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		else	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
 		endif;
 		--
 		
 		-- turniirid check	ajakontroll	
 		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("alguskuupaev" <= "loppkuupaev")') = 1				
 		then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', 'Tabelis ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		else	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', 'ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
 		endif;
 		
 		-- Tabel klubid klubi asukoha muutmine
 		if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
-		then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', '-', 'OK', punktid*0, punktid, '', Jr);
+		then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', '-', 'OK', punktid, punktid, '', Jr);
 		else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" ', 'asukoht on vale.', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 
 		-- Tabel isikud isiku klubi muutmine
 		begin try
 			if 		(select klubis from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on õige.', 'OK', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on õige.', 'OK', punktid, punktid, '', Jr);
 			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', Jr);
 			endif;
 		end try
 		begin catch
 			if 		(select klubi from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on õige.', 'OK', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on õige.', 'OK', punktid, punktid, '', Jr);
 			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" ', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', Jr);
 			endif;
 		end catch;
@@ -192,13 +199,13 @@ create procedure kolmas_iseseisev()
 		-- Tabel Isikud lisamine klubisse Osav Oda
 		begin try
 			if 		(select count(*) from isikud where klubis = 62) = 5
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmed on olemas.', 'OK', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmed on olemas.', 'OK', punktid, punktid, '', Jr);
 			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', Jr);
 			endif;
 		end try
 		begin catch
 			if 		(select count(*) from isikud where klubi = 62) = 5
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmed on olemas.', 'OK', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmed on olemas.', 'OK', punktid, punktid, '', Jr);
 			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda" ', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', Jr);
 			endif;
 		end catch;
@@ -210,7 +217,7 @@ create procedure kolmas_iseseisev()
 create procedure käivita(versioon int)
 	begin
 
-		if versioon = 3 then
+		if versioon = 2 then
 			call kolmas_praktikum();
 			call kolmas_iseseisev();
 		endif;
@@ -220,6 +227,6 @@ create procedure käivita(versioon int)
 
 call	käivita(versioon);
 
-select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku'
+select  Ülesanne, Kontroll, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku' or olek = 'Hindepunktid'
 order by Jr;
 output to 'C:\TEMP\tulemus.csv' format excel;
