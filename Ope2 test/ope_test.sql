@@ -33,8 +33,8 @@ create table Staatus(
 	Kontroll varchar(1000), 
 	Tagasiside varchar(1000), 
 	Olek varchar(100), 
-	Punktid numeric(7,2), 
-	Max_punktid numeric(7,2), 
+	Punktid numeric(7,3), 
+	Max_punktid numeric(7,3), 
 	Soovitus varchar(1000), 
 	Jr int default 100);
 
@@ -136,18 +136,6 @@ create procedure kolmas_praktikum()
 			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	punktid, 	punktid, '', Jr)
 		end catch;
 		
-		/*-- sugu puudumine
-		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("sugu" in( ''m'',''n'' ) )') = 0				
-		then 	insert Staatus values ('Praktikum', 'Tabel "Isikud" check sugu', 'on kustutatud', 'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Praktikum', 'Tabel "Isikud" check sugu', 'ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
-		endif; 
-		
-		-- unique puudumine?
-		if 		(select 	count(*) into unique_count 	from sysindex where creator = 1 and table_id = find_table_id('isikud') and "unique" = 'U') = 1				
-		then 	insert Staatus values ('Praktikum', 'Tabel "Isikud" unique un_nimi', 'on kustutatud', 'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Praktikum', 'Tabel "Isikud" unique un_nimi ', 'ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
-		endif;*/
-		
 	end;
 
 
@@ -173,36 +161,43 @@ create procedure kolmas_iseseisev()
 			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
 			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:01:28.000', 73, 92, 1, 1);
 			
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada väiksemat lõpphetke', 	'VIGA', punktid*0, 	punktid, '', Jr)
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada väiksemat lõpphetke', 	'VIGA', punktid*0, 	punktid, '', Jr);
+			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
+			
 		end try
 		begin catch
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid, punktid, '', Jr)
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid, '', Jr);
 		end catch;
-		-- opphetk = algushetk 
+		-- lopphetk = algushetk 
 		begin try
 			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
 			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:02:00.000', 73, 92, 1, 1);
 			
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada võrdset algus ja lõpphetke', 	'VIGA', punktid*0, 	punktid, '', Jr)
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada võrdset algus ja lõpphetke', 'VIGA', punktid*0, punktid, '', Jr);
+			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
 		end try
 		begin catch
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid, punktid, '', Jr)
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid, '', Jr);
 		end catch;
 		
 		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
 		
 		begin try
+			insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1','Kambja','2005-01-13','2005-01-12');
+
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', Jr);
 		end try
 		begin catch
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid, '', Jr)
 		end catch;		
-		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("alguskuupaev" <= "loppkuupaev")') = 1				
-		then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', 'ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
-		endif;
 		-- alguskuupaev = loppkupäev
 		begin try
+			insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2','Kambja','2005-01-12','2005-01-12');
+			
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid, '', Jr)
 		end try
 		begin catch
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', Jr);
 		end catch;
 		
 		-- Tabel klubid klubi asukoha muutmine
