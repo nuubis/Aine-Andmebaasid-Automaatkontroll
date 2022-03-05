@@ -181,11 +181,17 @@ create procedure kolmas_iseseisev()
 		end catch;
 		
 		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
+		begin try
+			select nimi from turniirid;
+		end try
+		begin catch
+			alter table turniirid rename nimetus to nimi;
+		end catch;
 		
 		begin try
 			insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1','Kambja','2005-01-13','2005-01-12');
-
-			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', Jr);
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', punktid*0, punktid, '', Jr);
+			delete from turniirid where nimi = 'Ajakontroll Check1';
 		end try
 		begin catch
 			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid, '', Jr)
@@ -193,17 +199,17 @@ create procedure kolmas_iseseisev()
 		-- alguskuupaev = loppkupäev
 		begin try
 			insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2','Kambja','2005-01-12','2005-01-12');
-			
 			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid, '', Jr)
 		end try
 		begin catch
 			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', Jr);
+			delete from turniirid where nimi = 'Ajakontroll Check2';
 		end catch;
 		
 		-- Tabel klubid klubi asukoha muutmine
 		if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
-		then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', '-', 'OK', punktid, punktid, '', Jr);
-		else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" ', 'asukoht on vale.', 'VIGA', punktid*0, punktid, '', Jr);
+		then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', punktid, punktid, '', Jr);
+		else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" ', 'asukoht on vale', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 
 		-- Tabel isikud isiku klubi muutmine
