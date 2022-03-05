@@ -29,7 +29,7 @@ Soovitus - soovitus, kust võib viga leida või kas sul on olemas X asi?
 Jr - määrab järjestuse kuidas tulemused on näha
 */
 create table Staatus(
-	Ülesanne varchar(1000), 
+	ylesanne varchar(1000), 
 	Kontroll varchar(1000), 
 	Tagasiside varchar(1000), 
 	Olek varchar(100), 
@@ -79,8 +79,8 @@ create 	procedure arvuta_punktid(versioon int)
 		endif;
 
 		-- Protsendi arvutamine
-		select count(*) into õiged from Staatus where olek = 'OK' and nimi = 'Praktikum';
-		select count(*) into vead from Staatus where olek = 'VIGA' and nimi = 'Praktikum';
+		select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
+		select count(*) into vead from Staatus where olek = 'VIGA' and ylesanne = 'Praktikum';
 		
 		-- Praktikumi õiged ja valed
 		set kokku = õiged + vead;
@@ -88,7 +88,7 @@ create 	procedure arvuta_punktid(versioon int)
 		insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', max_punktid_jr);
 		
 		--Iseseisev punktid
-		select sum(punktid) into punktid from staatus where nimi = 'Iseseisev';
+		select sum(punktid) into punktid from staatus where ylesanne = 'Iseseisev';
 		insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', max_punktid_jr+1);
 		
 		
@@ -125,13 +125,18 @@ create procedure kolmas_praktikum()
 		else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on puudu', 'VIGA', punktid*0, punktid, '', Jr);
 		endif;
 		
-		-- partii check		
-		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("valge_tulemus"+"musta_tulemus" = 2)') = 1				
-		then 	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendust ei ole', 'VIGA', punktid*0, 	punktid, '', Jr)
-		endif;
+		-- partii check
+		begin try
+			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
+			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:19:28.000', 73, 92, 0, 1);
+			
+			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendust ei ole', 'VIGA', punktid*0, 	punktid, '', Jr)
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	punktid, 	punktid, '', Jr)
+		end catch;
 		
-		-- sugu puudumine
+		/*-- sugu puudumine
 		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("sugu" in( ''m'',''n'' ) )') = 0				
 		then 	insert Staatus values ('Praktikum', 'Tabel "Isikud" check sugu', 'on kustutatud', 'OK', 	punktid, 	punktid, '', Jr)
 		else	insert Staatus values ('Praktikum', 'Tabel "Isikud" check sugu', 'ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
@@ -141,7 +146,7 @@ create procedure kolmas_praktikum()
 		if 		(select 	count(*) into unique_count 	from sysindex where creator = 1 and table_id = find_table_id('isikud') and "unique" = 'U') = 1				
 		then 	insert Staatus values ('Praktikum', 'Tabel "Isikud" unique un_nimi', 'on kustutatud', 'OK', 	punktid, 	punktid, '', Jr)
 		else	insert Staatus values ('Praktikum', 'Tabel "Isikud" unique un_nimi ', 'ei ole kustutatud', 	'VIGA', punktid*0, 	punktid, '', Jr)
-		endif;
+		endif;*/
 		
 	end;
 
@@ -163,18 +168,42 @@ create procedure kolmas_iseseisev()
 		else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 					'on kustutatud.', 'OK', punktid, punktid, '', Jr);
 		endif;
 		
-		-- partii check ajakontroll
-		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("lopphetk" > "algushetk")') = 1				
-		then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
-		else	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
-		endif;
-		--
+		-- partii check ajakontroll, lopphetk väiksem, l
+		begin try
+			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
+			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:01:28.000', 73, 92, 1, 1);
+			
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada väiksemat lõpphetke', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		end try
+		begin catch
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid, punktid, '', Jr)
+		end catch;
+		-- opphetk = algushetk 
+		begin try
+			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
+			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:02:00.000', 73, 92, 1, 1);
+			
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada võrdset algus ja lõpphetke', 	'VIGA', punktid*0, 	punktid, '', Jr)
+		end try
+		begin catch
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid, punktid, '', Jr)
+		end catch;
 		
-		-- turniirid check	ajakontroll	
+		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
+		
+		begin try
+		end try
+		begin catch
+		end catch;		
 		if 		(select 	count(*) into check_count		from syscheck where check_defn = 'check("alguskuupaev" <= "loppkuupaev")') = 1				
 		then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', '-',  								'OK', 	punktid, 	punktid, '', Jr)
 		else	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Lopphetk <= algushetk', 'ei ole check kitsendust', 	'VIGA', punktid*0, 	punktid, '', Jr)
 		endif;
+		-- alguskuupaev = loppkupäev
+		begin try
+		end try
+		begin catch
+		end catch;
 		
 		-- Tabel klubid klubi asukoha muutmine
 		if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
@@ -227,6 +256,6 @@ create procedure käivita(versioon int)
 
 call	käivita(versioon);
 
-select  Ülesanne, Kontroll, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku' or olek = 'Hindepunktid'
+select  ylesanne, Kontroll, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku' or olek = 'Hindepunktid'
 order by Jr;
 output to 'C:\TEMP\tulemus.csv' format excel;
