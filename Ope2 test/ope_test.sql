@@ -14,6 +14,20 @@ if 	exists (select * from sysprocedure where proc_name = 'check_check') 						th
 
 
 
+-- Erinevate ülesannete järjekorrad
+create or replace variable praktikum_2 int = 1;
+create or replace variable praktikum_punktid_2 int = 3;
+create or replace variable iseseisev_2 int = 2;
+create or replace variable iseseisev_punktid_2 int = 4;
+
+create or replace variable praktikum_3 int = 2;
+create or replace variable kodutöö_3 int = 2;
+
+
+-- Ülesannete punktid
+create or replace variable praktikum numeric = 1;
+create or replace variable kodutöö numeric = 2;
+
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -76,20 +90,23 @@ create 	procedure arvuta_punktid(versioon int)
 		set 	max_punktid_jr = 10;
 		
 		if 		versioon = 2 then set max_punktid = 0.35;
+		else	set max_punktid = 1;
 		endif;
-
-		-- Protsendi arvutamine
-		select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
-		select count(*) into vead from Staatus where olek = 'VIGA' and ylesanne = 'Praktikum';
 		
-		-- Praktikumi õiged ja valed
-		set kokku = õiged + vead;
-		insert into Staatus values ('Praktikum', '-', '-', 'Õiged kokku', õiged, kokku, '', max_punktid_jr);
-		insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', max_punktid_jr);
-		
+		if 		versioon = 2 then
+			-- Protsendi arvutamine
+			select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
+			select count(*) into vead from Staatus where olek = 'VIGA' and ylesanne = 'Praktikum';
+			
+			-- Praktikumi õiged ja valed
+			set kokku = õiged + vead;
+			insert into Staatus values ('Praktikum', '-', '-', 'Õiged kokku', õiged, kokku, '', praktikum_punktid_2);
+			insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', praktikum_punktid_2);
+			
+		endif;
 		--Iseseisev punktid
 		select sum(punktid) into punktid from staatus where ylesanne = 'Iseseisev';
-		insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', max_punktid_jr+1);
+		insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', iseseisev_punktid_2);
 		
 		
 	end;
@@ -105,46 +122,46 @@ create procedure kolmas_praktikum()
 		-- Tabel Turniirid veerg nimi
 		begin try
 			if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid')) 
-			then 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht"', 'on olemas', 'OK', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, '', praktikum_2);
+			else 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht"', 'on olemas', 'OK', punktid*0, punktid, '', praktikum_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+			insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', praktikum_2);
 		end catch;
 		
 		-- Tabel Isikud perenime muutmine
 		begin try
 				if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys"', 'perenimi on õige', 'OK', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'perenimi on vale', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys"', 'perenimi on õige', 'OK', punktid*0, punktid, '', praktikum_2);
+			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'perenimi on vale', 'VIGA', punktid*0, punktid, '', praktikum_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr)
+			insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', praktikum_2)
 		end catch;
 		
 		-- Tabel klubid asukoht suuurus = 100
 		begin try
 			if		(select width from syscolumn where table_id = find_table_id('klubid') and column_name = 'asukoht') = 100
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on õige', 'OK', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on vale', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on õige', 'OK', punktid*0, punktid, '', praktikum_2);
+			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on vale', 'VIGA', punktid*0, punktid, '', praktikum_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+			insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', praktikum_2);
 		end catch;
 		
 		-- Klubi lisamine
 		
 		begin try
 			if		(select count(*) from klubid where nimi = 'Osav Oda') = 1
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on olemas', 'OK', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on puudu', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on olemas', 'OK', punktid*0, punktid, '', praktikum_2);
+			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on puudu', 'VIGA', punktid*0, punktid, '', praktikum_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+			insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', praktikum_2);
 		end catch;
 		
 		-- partii check
@@ -152,12 +169,12 @@ create procedure kolmas_praktikum()
 			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
 			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:19:28.000', 73, 92, 0, 1);
 			
-			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendust ei ole', 'VIGA', punktid*0, 	punktid, '', Jr);
+			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendust ei ole', 'VIGA', punktid*0, 	punktid, '', praktikum_2);
 		end try
 		begin catch
 			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Automaatkontrollis on viga!', 'OK', punktid*0, 	punktid, 'Veerg lopphetk on täpitähega.', Jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	punktid, 	punktid, '', Jr);
+			then 	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, 	punktid, 'Veerg lopphetk on täpitähega.', praktikum_2);
+			else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	punktid, 	punktid, '', praktikum_2);
 			endif;
 		end catch;		
 	end;
@@ -171,23 +188,23 @@ create procedure kolmas_iseseisev()
 		-- Tabel Isikud veerg klubis
 		begin try
 			if 		not exists (select * from syscolumn where column_name = 'klubis' and table_id = find_table_id('isikud')) 
-			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veergu "Klubis" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 'on olemas', 'OK', punktid, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veergu "Klubis" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, '', iseseisev_2);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 'on olemas', 'OK', punktid, punktid, '', iseseisev_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 'Automaatkontrollis on viga!', 'OK', punktid, punktid, '', Jr);
+			insert 	Staatus values ('Iseseisev', 'Tabel "Isikud" Veerg "Klubis".', 'Automaatkontrollis on viga!', 'VIGA', punktid, punktid, '', iseseisev_2);
 		end catch;
 		
 		-- Tabel partiid veerg kokkuvõte
 		begin try
 			if 		exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('partiid')) 
-			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'ei ole kustutatud.', 'VIGA', punktid*0, punktid, '', Jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 'on kustutatud.', 'OK', punktid, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'ei ole kustutatud.', 'VIGA', punktid*0, punktid, '', iseseisev_2);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 'on kustutatud.', 'OK', punktid, punktid, '', iseseisev_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+			insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 		end catch;
 		
 		-- partii check ajakontroll, lopphetk väiksem, l
@@ -195,13 +212,13 @@ create procedure kolmas_iseseisev()
 			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
 			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:01:28.000', 73, 92, 1, 1);
 			
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada väiksemat lõpphetke', 	'VIGA', punktid*0, 	punktid*0.5, '', Jr);
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada väiksemat lõpphetke', 	'VIGA', punktid*0, 	punktid*0.5, '', iseseisev_2);
 			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
 		end try
 		begin catch
 			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'OK', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', Jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid*0.5, '', Jr);
+			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', iseseisev_2);
+			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid*0.5, '', iseseisev_2);
 			endif;
 		end catch;
 		
@@ -210,13 +227,13 @@ create procedure kolmas_iseseisev()
 			insert into partiid (turniir, algushetk, lopphetk, valge, must, valge_tulemus, musta_tulemus) 
 			values (41, '2005-01-12 08:02:00.000','2005-01-12 08:02:00.000', 73, 92, 1, 1);
 			
-			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada võrdset algus ja lõpphetke', 'VIGA', punktid*0, punktid*0.5, '', Jr);
+			insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'kitsendus ei tohi lubada võrdset algus ja lõpphetke', 'VIGA', punktid*0, punktid*0.5, '', iseseisev_2);
 			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
 		end try
 		begin catch
 			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'OK', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', Jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid*0.5, '', Jr);
+			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', iseseisev_2);
+			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', punktid*0.5, punktid*0.5, '', iseseisev_2);
 			endif;
 		end catch;
 		
@@ -230,76 +247,76 @@ create procedure kolmas_iseseisev()
 			endif;
 			
 			insert into turniirid (Nimetus,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1','Kambja','2005-01-13','2005-01-12');
-			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', punktid*0, punktid, '', Jr);
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', punktid*0, punktid, '', iseseisev_2);
+			delete from turniirid where nimetus = 'Ajakontroll Check1';	
 		end try
 		begin catch
 			if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
 			or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'OK', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', Jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid*0.5, '', Jr)
+			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', iseseisev_2);
+			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid*0.5, '', iseseisev_2)
 			endif;
-		end catch;
-		delete from turniirid where nimetus = 'Ajakontroll Check1';		
+		end catch;	
 		-- alguskuupaev = loppkupäev
 		begin try
 			insert into turniirid (Nimetus,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2','Kambja','2005-01-12','2005-01-12');
-			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid*0.5, '', Jr)
+			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	punktid*0.5, 	punktid*0.5, '', iseseisev_2);
+			delete from turniirid where nimetus = 'Ajakontroll Check2';
 		end try
 		begin catch
 			if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
 			or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'OK', punktid*0, 	punktid*0.5, 'Veerg lopphetk on täpitähega.', Jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', Jr);
+			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, 	punktid*0.5, 'Veerg alguskuupaev või loppkuupaev on täpitähega.', iseseisev_2);
+			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', punktid*0, 	punktid, '', iseseisev_2);
 			endif;
 		end catch;
-		delete from turniirid where nimetus = 'Ajakontroll Check2';
 		
 		-- Tabel klubid klubi asukoha muutmine
 		begin try
 			if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', punktid, punktid, '', Jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', punktid, punktid, '', iseseisev_2);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+			insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 		end catch;
 		
 		-- Tabel isikud isiku klubi muutmine
 		begin try
 			if 		(select klubis from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', punktid, punktid, '', Jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', punktid, punktid, '', iseseisev_2);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 			endif;
 		end try
 		begin catch
 			begin try 
 				if 		(select klubi from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', punktid, punktid, '', Jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', Jr);
+				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', punktid, punktid, '', iseseisev_2);
+				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 			end catch;
 		end catch;
 		
 		-- Tabel Isikud lisamine klubisse Osav Oda
 		begin try
 			if 		(select count(*) from isikud where klubis = 62) = 5
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', punktid, punktid, '', Jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', Jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', punktid, punktid, '', iseseisev_2);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 			endif;
 		end try
 		begin catch
 			begin try
 				if 		(select count(*) from isikud where klubi = 62) = 5
-				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', punktid, punktid, '', Jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', Jr);
+				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', punktid, punktid, '', iseseisev_2);
+				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', Jr);
+				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, '', iseseisev_2);
 			end catch;
 		end catch;
 		
@@ -310,7 +327,7 @@ create procedure kolmas_iseseisev()
 create procedure käivita(versioon int)
 	begin
 
-		if versioon = 2 then
+		if versioon >= 2 then
 			call kolmas_praktikum();
 			call kolmas_iseseisev();
 		endif;
