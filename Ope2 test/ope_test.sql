@@ -434,6 +434,29 @@ create procedure kolmas_praktikum()
 			insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
 		end catch;
 		
+		-- klubid veerg asula
+		begin try
+			if 		not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('klubid'))
+			then 	insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asula"', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asula"', 'on puudu', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		-- klubid veerg asukoht kustutamine
+		begin try
+			if 		exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('klubid'))
+			then 	insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asukoht"', 'on kustutatud', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asukoht"', 'ei ole kustutatud', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Klubid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		
 		
 	end;
 	
