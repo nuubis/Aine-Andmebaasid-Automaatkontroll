@@ -412,6 +412,28 @@ create procedure kolmas_praktikum()
 			insert Staatus values ('Praktikum', 'Tabel "Riigid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
 		end catch;
 		
+		-- tabeli riigid andmed
+		begin try
+			if 		(select count(*) from riigid) = 63
+			then 	insert Staatus values ('Praktikum', 'Tabel "Riigid" andmed', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Riigid" andmed', 'on puudu', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Riigid" andmed', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		-- tabeli asulad andmed
+		begin try
+			if 		(select count(*) from asulad) = 10
+			then 	insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'on puudu', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
 		
 	end;
 	
