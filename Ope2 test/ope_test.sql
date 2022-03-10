@@ -126,10 +126,15 @@ create 	procedure arvuta_punktid(versioon int)
 			insert into Staatus values ('Praktikum', '-', '-', 'Õiged kokku', õiged, kokku, '', praktikum_punktid_2_jr);
 			insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', praktikum_punktid_2_jr);
 			
+			--Iseseisev punktid
+			select sum(punktid) into punktid from staatus where ylesanne = 'Iseseisev';
+			insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', kodutöö_punktid_2_jr);
 		endif;
-		--Iseseisev punktid
-		select sum(punktid) into punktid from staatus where ylesanne = 'Iseseisev';
-		insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', kodutöö_punktid_2_jr);
+		
+		if 		versioon > 2 then
+			select sum(punktid) into punktid from staatus; -- where ylesanne = 'Iseseisev'
+			insert into Staatus values ('-','-','-', 'Hindepunktid', punktid, max_punktid, '', kodutöö_punktid_2_jr);
+		endif;
 		
 	end;
 
@@ -146,7 +151,7 @@ create procedure teine_praktikum()
 			begin try
 				if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid')) 
 				then 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht" ', 'ei ole olemas', 'VIGA', praktikum_2_turniirid_asukoht*0, praktikum_2_turniirid_asukoht, '', praktikum_2_jr);
-				else 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht"', 'on olemas', 'OK', praktikum_2_turniirid_asukoht*0, praktikum_2_turniirid_asukoht, '', praktikum_2_jr);
+				else 	insert 	Staatus values ('Praktikum', 'Tabel "Turniirid" Veergu "Asukoht"', 'on olemas', 'OK', praktikum_2_turniirid_asukoht, praktikum_2_turniirid_asukoht, '', praktikum_2_jr);
 				endif;
 			end try
 			begin catch
@@ -156,7 +161,7 @@ create procedure teine_praktikum()
 			-- Tabel klubid asukoht suuurus = 100
 			begin try
 				if		(select width from syscolumn where table_id = find_table_id('klubid') and column_name = 'asukoht') = 100
-				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on õige', 'OK', praktikum_2_klubid_100*0, praktikum_2_klubid_100, '', praktikum_2_jr);
+				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on õige', 'OK', praktikum_2_klubid_100, praktikum_2_klubid_100, '', praktikum_2_jr);
 				else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'on vale', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, '', praktikum_2_jr);
 				endif;
 			end try
@@ -168,8 +173,8 @@ create procedure teine_praktikum()
 		
 		-- Tabel Isikud perenime muutmine
 		begin try
-				if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys"', 'perenimi on õige', 'OK', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, '', praktikum_2_jr);
+			if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys"', 'perenimi on õige', 'OK', praktikum_2_isikud_perenimi, praktikum_2_isikud_perenimi, '', praktikum_2_jr);
 			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'perenimi on vale', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, '', praktikum_2_jr);
 			endif;
 		end try
@@ -181,7 +186,7 @@ create procedure teine_praktikum()
 		
 		begin try
 			if		(select count(*) from klubid where nimi = 'Osav Oda') = 1
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on olemas', 'OK', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, '', praktikum_2_jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on olemas', 'OK', praktikum_2_uus_klubi, praktikum_2_uus_klubi, '', praktikum_2_jr);
 			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on puudu', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, '', praktikum_2_jr);
 			endif;
 		end try
@@ -232,19 +237,21 @@ create procedure teine_kodutöö()
 		
 		-- Tabel klubid klubi asukoha muutmine
 		begin try
-			if versioon = 2 then
-				if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
-				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
-				endif;
-			else
+			if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
+			endif;
+		end try
+		begin catch
+			begin try
 				if 		(select asulad.nimi from asulad, klubid where klubid.nimi = 'Valge mask' and klubid.asula = asulad.id) = 'Valga'
 				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
 				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
 				endif;
-		end try
-		begin catch
-			insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
+			end try
+			begin catch
+				insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, '', kodutöö_2_jr);
+			end catch;
 		end catch;
 		
 		-- Tabel isikud isiku klubi muutmine
@@ -329,11 +336,19 @@ create procedure teine_kodutöö()
 			delete from turniirid where nimetus = 'Ajakontroll Check1';	
 		end try
 		begin catch
-			if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
-			or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
-			endif;
+			begin try
+				insert into turniirid (Nimetus,asula,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1',1,'2005-01-13','2005-01-12');
+				insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
+				
+				delete from turniirid where nimetus = 'Ajakontroll Check1';	
+			end try
+			begin catch
+				if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
+				or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
+				then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
+				endif;
+			end catch;
 		end catch;	
 		-- alguskuupaev = loppkupäev
 		begin try
@@ -342,11 +357,18 @@ create procedure teine_kodutöö()
 			delete from turniirid where nimetus = 'Ajakontroll Check2';
 		end try
 		begin catch
-			if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
-			or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 'Veerg alguskuupaev või loppkuupaev on täpitähega.', kodutöö_2_jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
-			endif;
+			begin try
+				insert into turniirid (Nimetus,asula,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2',1,'2005-01-12','2005-01-12');
+				insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
+				delete from turniirid where nimetus = 'Ajakontroll Check2';
+			end try
+			begin catch
+				if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
+				or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
+				then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 'Veerg alguskuupaev või loppkuupaev on täpitähega.', kodutöö_2_jr);
+				else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
+				endif;
+			end catch;
 		end catch;
 		
 		
@@ -357,19 +379,53 @@ create procedure teine_kodutöö()
 create procedure kolmas_praktikum()
 	begin
 	
+		-- tabeli inimesed kontroll
+		begin try
+			if 		not exists (select * from systable where table_name = 'Inimesed')
+			then 	insert Staatus values ('Praktikum', 'Tabel "Inimesed"', 'ei ole olemas', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Inimesed"', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Inimesed"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		-- tabeli asulad kontroll
+		begin try
+			if 		not exists (select * from systable where table_name = 'Asulad')
+			then 	insert Staatus values ('Praktikum', 'Tabel "Asulad"', 'ei ole olemas', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Asulad"', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Asulad"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		-- tabeli riigid kontroll
+		begin try
+			if 		not exists (select * from systable where table_name = 'Riigid')
+			then 	insert Staatus values ('Praktikum', 'Tabel "Riigid"', 'ei ole olemas', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+			else	insert Staatus values ('Praktikum', 'Tabel "Riigid"', 'on olemas', 'OK', praktikum_3, praktikum_3, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Tabel "Riigid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3*0, praktikum_3, '', praktikum_3_jr);
+		end catch;
+		
+		
 	end;
 	
 create procedure kolmas_kodutöö()
 	begin
-	
+		
 	end;
 	
 create procedure käivita(versioon int)
 	begin
 
 		if versioon >= 2 then
-			call teine_praktikum();
-			call teine_kodutöö();
+			--call teine_praktikum();
+			--call teine_kodutöö();
 		endif;
 		
 		if versioon >= 3 then
