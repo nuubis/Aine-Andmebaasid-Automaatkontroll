@@ -13,22 +13,32 @@ if 	exists (select * from sysprocedure where proc_name = 'arvuta_punktid') 					
 if 	exists (select * from sysprocedure where proc_name = 'check_check') 						then drop function check_check 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_praktikum') 						then drop function kolmas_praktikum 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_kodutöö') 						then drop function kolmas_kodutöö 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'check_foreign_key') 						then drop function check_foreign_key 						endif;
 
 
 
 -- Erinevate ülesannete järjekorrad
 -- 1-9
 create or replace variable praktikum_2_jr int = 1; 
-create or replace variable praktikum_punktid_2_jr int = 3; 
-create or replace variable kodutöö_2_jr int = 2;
-create or replace variable kodutöö_punktid_2_jr int = 4;
--- 10
-create or replace variable tudengi_nimi int = 10;
--- 11 - 19
-create or replace variable praktikum_3_jr int = 2;
-create or replace variable kodutöö_3_jr int = 2;
--- 100
-create or replace variable lõpp_punktid int = 100;
+create or replace variable praktikum_punktid_2_jr int = 2; 
+
+create or replace variable kodutöö_2_jr int = 5;
+create or replace variable kodutöö_punktid_2_jr int = 6;
+
+create or replace variable praktikum_3_jr int = 10;
+create or replace variable praktikum_punktid_3_jr int = 11;
+
+-- 50 praktikumide punktid
+create or replace variable praks_lõpp_punktid int = 50;
+
+-- Kodutööde punktid
+create or replace variable kodutöö_3_jr int = 54;
+create or replace variable kodutöö_punktid_3_jr int = 55;
+-- 100 kodutööde punktid
+create or replace variable kodu_lõpp_punktid int = 100;
+
+-- 101
+create or replace variable tudengi_nimi int = 101;
 
 
 -- Ülesannete punktid
@@ -151,11 +161,12 @@ create  function find_column_name(a_table_id int, a_column_name varchar(100))
 create 	procedure arvuta_punktid(versioon int)
 	begin
 		declare max_punktid_jr, õiged, vead, kokku int;
-		declare punktid, max_punktid numeric;
+		declare kodu_punktid, kodu_max_punktid, praks_punktid, praks_max_punktid numeric;
 		set 	max_punktid_jr = 10;
 		
 		if 		versioon = 2 then set max_punktid = 0.35;
-		else	set max_punktid = 1.5;
+		else	set praks_max_punktid = 1; 
+				set kodu_max_punktid = 0.5;
 		endif;
 		
 		if 		versioon = 2 then
@@ -169,16 +180,77 @@ create 	procedure arvuta_punktid(versioon int)
 			insert into Staatus values ('Praktikum', '-', '-', 'Vead Kokku', vead, 0, '', praktikum_punktid_2_jr);
 			
 			--Iseseisev punktid
-			select sum(punktid) into punktid from staatus where ylesanne = 'Iseseisev';
-			insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', punktid, max_punktid, '', kodutöö_punktid_2_jr);
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Iseseisev';
+			insert into Staatus values ('Iseseisev','-','-', 'Hindepunktid', kodu_punktid, max_punktid, '', kodutöö_punktid_2_jr);
 		endif;
 		
 		if 		versioon > 2 then
-			select sum(punktid) into punktid from staatus; -- where ylesanne = 'Iseseisev'
-			insert into Staatus values ('-','-','-', 'Hindepunktid', punktid, max_punktid, '', lõpp_punktid);
+			select sum(punktid) into praks_punktid from staatus where ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
+			insert into Staatus values ('Praktikum','-','-', 'Hindepunktid', praks_punktid, praks_max_punktid, '', praks_lõpp_punktid);
+			
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö';
+			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, '', kodu_lõpp_punktid);
 		endif;
 		
 	end;
+
+
+create	procedure check_foreign_key(p_primary_table varchar(30), p_primary_column varchar(30), p_foreign_table varchar(30), p_foreign_column varchar(30), punktid numeric, Jr integer, ylesanne varchar(30))
+
+begin
+declare primary_t_id, foreign_t_id, primary_c_id, foreign_c_id, f_key_id int;
+declare count_f_key, count_fk int;
+
+// Salvestan kõikide vajalike tabelite ja veergude ID-d ning samal ajal kontrollin, kas need on olemas
+select 	table_id into primary_t_id 	from systable where upper(table_name) = upper(p_primary_table);
+
+select 	column_id into primary_c_id from syscolumn where table_id = primary_t_id
+and 	upper(column_name) 			= upper(p_primary_column);
+
+select 	table_id into foreign_t_id 	from systable where table_name = p_foreign_table;
+
+select 	column_id into foreign_c_id from syscolumn where table_id = foreign_t_id
+and 	upper(column_name) 			= upper(p_foreign_column);
+
+// Loen kokku mitu välisvõtit vastab nendele andmetele (peaks olema 1)
+select 	count(foreign_key_id) 		into count_f_key from sysfkcol
+where 	foreign_table_id = foreign_t_id 
+and 	foreign_column_id = foreign_c_id
+and 	primary_column_id = primary_c_id;
+
+
+
+// Kui 	on rohkem kui üks, siis tagastan veateate
+if 		count_f_key != 1 	then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
+														p_primary_column || ' <-> ' || p_foreign_column, 
+														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
+														'VIGA', punktid*0, punktid, '', Jr)
+
+else
+select 	foreign_key_id 		into f_key_id 		from sysfkcol
+where 	foreign_table_id 	= foreign_t_id 
+and 	foreign_column_id 	= foreign_c_id
+and 	primary_column_id 	= primary_c_id;
+endif;
+
+select 	count(*) 			into count_fk 		from sysforeignkey
+where	foreign_table_id 	= foreign_t_id 
+and 	primary_table_id 	= primary_t_id
+and		foreign_key_id		= f_key_id;
+
+if 		count_fk != 1 		and count_f_key = 1	then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
+														p_primary_column || ' <-> ' || p_foreign_column, 
+														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
+														'VIGA', punktid*0, punktid, '', Jrr)
+endif;
+
+if		count_fk = 1		and count_f_key = 1 then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
+														p_primary_column || ' <-> ' || p_foreign_column, 
+														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
+														'VIGA', punktid*0, punktid, '', Jr)
+endif;
+
+end;
 
 
 create procedure teine_praktikum()
@@ -359,15 +431,27 @@ create procedure teine_kodutöö()
 			endif;
 		end catch;
 		
-		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
+		-- turniirid ajakontroll ettevalmistus
 		begin try
 			if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid'))
 			then 	alter table turniirid rename toimumiskoht to asukoht
 			endif;
+		end try
+		begin catch
+		end catch;
+		
+		begin try
 			if 		not exists (select * from syscolumn where column_name = 'nimetus' and table_id = find_table_id('turniirid'))
 			then 	alter table turniirid rename nimi to nimetus
 			endif;
+		end try
+		begin catch
+		end catch;
+		
 			
+		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
+		begin try
+				
 			insert into turniirid (Nimetus,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1','Kambja','2005-01-13','2005-01-12');
 			insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
 			delete from turniirid where nimetus = 'Ajakontroll Check1';	
@@ -505,6 +589,8 @@ create procedure kolmas_praktikum()
 		end catch;
 		
 		-- välisvõtme kontroll klubid ja asulad vahel
+		call check_foreign_key('Asulad','id','Klubid','asula',praktikum_3_välisvõti_klubid_asulad,praktikum_3_jr, 'Praktikum')
+		
 		
 	end;
 	
@@ -513,46 +599,49 @@ create procedure kolmas_kodutöö()
 		-- tabeli inimesed andmed
 		begin try
 			if 		(select count(*) from inimesed) >= 1
-			then 	insert Staatus values ('Praktikum', 'Tabel "Inimesed" andmed', 'on olemas', 'OK', kodutöö_3_inimesed_andmed, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Inimesed" andmed', 'on puudu', 'VIGA', kodutöö_3_inimesed_andmed*0, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
+			then 	insert Staatus values ('Kodutöö', 'Tabel "Inimesed" andmed', 'on olemas', 'OK', kodutöö_3_inimesed_andmed, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
+			else	insert Staatus values ('Kodutöö', 'Tabel "Inimesed" andmed', 'on puudu', 'VIGA', kodutöö_3_inimesed_andmed*0, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Tabel "Inimesed" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_inimesed_andmed*0, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
+			insert Staatus values ('Kodutöö', 'Tabel "Inimesed" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_inimesed_andmed*0, kodutöö_3_inimesed_andmed, '', kodutöö_3_jr);
 		end catch;
 		
 		-- Turniirid veerg asula
 		begin try
 			if 		exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('Turniirid'))
-			then 	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula"', 'on olemas', 'OK', kodutöö_3_turniirid_asula, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula"', 'on puudu', 'VIGA', kodutöö_3_turniirid_asula*0, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
+			then 	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula"', 'on olemas', 'OK', kodutöö_3_turniirid_asula, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
+			else	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula"', 'on puudu', 'VIGA', kodutöö_3_turniirid_asula*0, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asula*0, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
+			insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asula*0, kodutöö_3_turniirid_asula, '', kodutöö_3_jr);
 		end catch;
 		
 		-- Turniirid veerg asula andmed
 		begin try
 			if 		(select count(*) from Turniirid where asula is null) = 0
-			then 	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula" andmed', 'on olemas', 'OK', kodutöö_3_turniirid_asula_andmed, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula" andmed', 'on puudu', 'VIGA', kodutöö_3_turniirid_asula_andmed*0, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
+			then 	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula" andmed', 'on olemas', 'OK', kodutöö_3_turniirid_asula_andmed, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
+			else	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula" andmed', 'on puudu', 'VIGA', kodutöö_3_turniirid_asula_andmed*0, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asula_andmed*0, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
+			insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asula_andmed*0, kodutöö_3_turniirid_asula_andmed, '', kodutöö_3_jr);
 		end catch;
 		
 		-- turniirid veerg asukoht kustutamine
 		begin try
 			if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid'))
-			then 	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asukoht"', 'on kustutatud', 'OK', kodutöö_3_turniirid_asukoht_kustutamine, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asukoht"', 'ei ole kustutatud', 'VIGA', kodutöö_3_turniirid_asukoht_kustutamine*0, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
+			then 	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asukoht"', 'on kustutatud', 'OK', kodutöö_3_turniirid_asukoht_kustutamine, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
+			else	insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asukoht"', 'ei ole kustutatud', 'VIGA', kodutöö_3_turniirid_asukoht_kustutamine*0, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Tabel "Turniirid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asukoht_kustutamine*0, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
+			insert Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_turniirid_asukoht_kustutamine*0, kodutöö_3_turniirid_asukoht_kustutamine, '', kodutöö_3_jr);
 		end catch;
+		
+		-- välisvõti turniirid ja asulad vahel
+		call check_foreign_key('Asulad','id','Turniirid','asula',kodutöö_3_välisvõti_turniirid_asulad,kodutöö_3_jr, 'Kodutöö')
 		
 	end;
 	
@@ -574,15 +663,15 @@ create procedure käivita(versioon int)
 		begin try
 			select min(sisestatud) into aeg from inimesed;
 			insert into staatus values ('Tudeng', 	(select eesnimi from inimesed where sisestatud = aeg), 
-													(select perenimi from inimesed where sisestatud = aeg), 'OK', praktikum_3*0, praktikum_3*0, '', tudengi_nimi);
+													(select perenimi from inimesed where sisestatud = aeg), '-', praktikum_3*0, praktikum_3*0, '', tudengi_nimi);
 		end try
 		begin catch
-			insert into staatus values ('Tudeng', 'Eesnimi puudub', 'Perenimi puudub', 'VIGA', praktikum_3*0, praktikum_3*0, '', praktikum_3_jr);
+			insert into staatus values ('Tudeng', 'Eesnimi puudub', 'Perenimi puudub', 'VIGA', praktikum_3*0, praktikum_3*0, '', tudengi_nimi);
 		end catch;
 	end;
 
 call	käivita(versioon);
 
-select  ylesanne, Kontroll, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku' or olek = 'Hindepunktid'
+select  ylesanne, Kontroll, Tagasiside, Olek, Punktid, Max_punktid from staatus where Olek = 'VIGA' or Olek = 'Vead Kokku' or Olek = 'Õiged Kokku' or olek = 'Hindepunktid' or ylesanne = 'Tudeng'
 order by Jr;
 output to 'C:\TEMP\tulemus.csv' format excel;
