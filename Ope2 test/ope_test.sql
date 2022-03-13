@@ -15,6 +15,7 @@ if 	exists (select * from sysprocedure where proc_name = 'check_check') 						th
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_praktikum') 						then drop function kolmas_praktikum 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'kolmas_kodutöö') 						then drop function kolmas_kodutöö 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'check_foreign_key') 						then drop function check_foreign_key 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'neljas_kodutöö') 						then drop function neljas_kodutöö 						endif;
 
 
 
@@ -35,6 +36,9 @@ create or replace variable praks_lõpp_punktid int = 50;
 -- Kodutööde punktid
 create or replace variable kodutöö_3_jr int = 54;
 create or replace variable kodutöö_punktid_3_jr int = 55;
+
+create or replace variable kodutöö_4_jr int = 64;
+create or replace variable kodutöö_punktid_4_jr int = 65;
 -- 100 kodutööde punktid
 create or replace variable kodu_lõpp_punktid int = 100;
 
@@ -82,8 +86,12 @@ create or replace variable kodutöö_3_turniirid_asula_andmed numeric = 0.1;
 create or replace variable kodutöö_3_turniirid_asukoht_kustutamine numeric = 0.1;
 create or replace variable kodutöö_3_välisvõti_turniirid_asulad numeric = 0.1;
 
-
-
+-- kodutöö 4 punktid
+create or replace variable kodutöö_4 numeric = 2;
+create or replace variable kodutöö_4_v_turniiripartiid numeric = 1;
+create or replace variable kodutöö_4_v_klubipartiikogused numeric = 1;
+create or replace variable kodutöö_4_v_keskminepartii numeric = 1;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega numeric = 1;
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
@@ -104,6 +112,23 @@ if 	versioon > 2 then
 	set kodutöö_2_ajakontroll_alguskuupäev_võrdub = 0.005;
 endif;
 
+if versioon > 3 then
+	set kodutöö_3_inimesed_andmed = 0.01;
+	set kodutöö_3_turniirid_asula = 0.01;
+	set kodutöö_3_turniirid_asula_andmed = 0.01;
+	set kodutöö_3_turniirid_asukoht_kustutamine = 0.01;
+	set kodutöö_3_välisvõti_turniirid_asulad = 0.01;
+	set praktikum_3_tabel_inimene = 0.01;
+	set praktikum_3_tabel_asulad = 0.01;
+	set praktikum_3_tabel_riigid = 0.01;
+	set praktikum_3_riigid_andmed = 0.01;
+	set praktikum_3_asulad_andmed = 0.01;
+	set praktikum_3_klubid_asula_andmed = 0.01;
+	set praktikum_3_klubid_asula = 0.01;
+	set praktikum_3_klubid_asukoht_kustutamine = 0.01;
+	set praktikum_3_välisvõti_klubid_asulad = 0.01;
+endif;
+	
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -128,16 +153,6 @@ create table Staatus(
 	Soovitus varchar(1000), 
 	Jr int default 100);
 
-
--- Abifunktsioonid, et saada tabeli ID-st tabeli nimi, sissetulev muutujaks on tabeli ID süsteemis ja tagastus on tabeli nimi
-create  function find_table_name(a_id int)
-	returns varchar(100)
-	begin 
-		declare t_name varchar(100);
-		select  table_name into t_name from systable
-		where   table_id = a_id;
-		return  t_name;
-	end;
 
 -- Abifunktsioon, et saada tabeli nimest tabeli ID, sissetulev muutujaks on tabeli nimi süsteemis ja tagastus on tabeli ID 
 create  function find_table_id(a_table_name varchar(100))
@@ -605,6 +620,61 @@ create procedure kolmas_kodutöö()
 		
 	end;
 	
+	
+create procedure neljas_kodutöö()
+	begin
+	
+		-- vaade v_turniiripartiid
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_turniiripartiid')
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'ei ole olemas', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'on olemas', 'OK', kodutöö_4_v_turniiripartiid, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+		end catch;
+
+		
+		-- vaade v_klubipartiikogused
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_klubipartiikogused')
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'ei ole olemas', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'on olemas', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+		end catch;
+		
+		
+		-- vaade v_keskminepartii
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_keskminepartii')
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'ei ole olemas', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'on olemas', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+		end catch;
+		
+		
+		-- vaade mv_partiide_arv_valgetega
+		begin try
+			if 		not exists (select * from systable where table_name = 'mv_partiide_arv_valgetega')
+			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'ei ole olemas', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'on olemas', 'OK', kodutöö_4_mv_partiide_arv_valgetega, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+		end catch;
+
+	end;
+	
+	
+	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
@@ -618,6 +688,9 @@ create procedure käivita(versioon int)
 			call kolmas_kodutöö();
 		endif;
 		
+		if versioon >= 4 then
+			call neljas_kodutöö();
+		endif;
 		call arvuta_punktid(versioon);
 		
 		begin try
