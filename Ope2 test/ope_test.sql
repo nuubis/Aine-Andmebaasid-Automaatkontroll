@@ -6,6 +6,7 @@ if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then d
 if 	exists (select * from sysprocedure where proc_name = 'find_table_name') 						then drop function find_table_name 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'find_table_id') 						then drop function find_table_id 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'find_column_name') 						then drop function find_column_name 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'find_column_id') 						then drop function find_column_id 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'teine_praktikum') 						then drop function teine_praktikum 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'teine_kodutöö') 						then drop function teine_kodutöö 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'käivita') 						then drop function käivita 						endif;
@@ -148,14 +149,13 @@ create  function find_table_id(a_table_name varchar(100))
 		return  a_id;
 	end;
 
--- Abifunktsioon, et saada tabeli ID-st ja tabeli nimest tudengi andmebaasi veeru nimi, sissetulev muutujaks on tabeli id ja veeru nimi süsteemis ja tagastus on andmebaasis oleva veeru nimi 
-create  function find_column_name(a_table_id int, a_column_name varchar(100))
-	returns varchar(100)
+create  function find_column_id(a_table_name varchar(100), a_column_name varchar(100))
+	returns int
 	begin 
-		declare c_name varchar(100);
-		select  column_name into c_name from syscolumn
-		where   table_id = a_table_id and upper(column_name) = upper(a_column_name);
-		return 	c_name;
+		declare c_id int;
+		select  column_id into c_id from syscolumn
+		where   table_id = find_table_id(a_table_name) and upper(column_name) = upper(a_column_name);
+		return 	c_id;
 	end;
 
 create 	procedure arvuta_punktid(versioon int)
@@ -193,64 +193,6 @@ create 	procedure arvuta_punktid(versioon int)
 		endif;
 		
 	end;
-
-
-create	procedure check_foreign_key(p_primary_table varchar(30), p_primary_column varchar(30), p_foreign_table varchar(30), p_foreign_column varchar(30), punktid numeric, Jr integer, ylesanne varchar(30))
-
-begin
-declare primary_t_id, foreign_t_id, primary_c_id, foreign_c_id, f_key_id int;
-declare count_f_key, count_fk int;
-
-// Salvestan kõikide vajalike tabelite ja veergude ID-d ning samal ajal kontrollin, kas need on olemas
-select 	table_id into primary_t_id 	from systable where upper(table_name) = upper(p_primary_table);
-
-select 	column_id into primary_c_id from syscolumn where table_id = primary_t_id
-and 	upper(column_name) 			= upper(p_primary_column);
-
-select 	table_id into foreign_t_id 	from systable where table_name = p_foreign_table;
-
-select 	column_id into foreign_c_id from syscolumn where table_id = foreign_t_id
-and 	upper(column_name) 			= upper(p_foreign_column);
-
-// Loen kokku mitu välisvõtit vastab nendele andmetele (peaks olema 1)
-select 	count(foreign_key_id) 		into count_f_key from sysfkcol
-where 	foreign_table_id = foreign_t_id 
-and 	foreign_column_id = foreign_c_id
-and 	primary_column_id = primary_c_id;
-
-
-
-// Kui 	on rohkem kui üks, siis tagastan veateate
-if 		count_f_key != 1 	then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
-														p_primary_column || ' <-> ' || p_foreign_column, 
-														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
-														'VIGA', punktid*0, punktid, '', Jr)
-
-else
-select 	foreign_key_id 		into f_key_id 		from sysfkcol
-where 	foreign_table_id 	= foreign_t_id 
-and 	foreign_column_id 	= foreign_c_id
-and 	primary_column_id 	= primary_c_id;
-endif;
-
-select 	count(*) 			into count_fk 		from sysforeignkey
-where	foreign_table_id 	= foreign_t_id 
-and 	primary_table_id 	= primary_t_id
-and		foreign_key_id		= f_key_id;
-
-if 		count_fk != 1 		and count_f_key = 1	then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
-														p_primary_column || ' <-> ' || p_foreign_column, 
-														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
-														'VIGA', punktid*0, punktid, '', Jrr)
-endif;
-
-if		count_fk = 1		and count_f_key = 1 then insert Staatus values (ylesanne, 'Välisvõti "' || p_primary_table || '" <-> "' || p_foreign_table || '"' || 
-														p_primary_column || ' <-> ' || p_foreign_column, 
-														'Välisvõtit pole nende tabelite ja/või veergude vahel.',
-														'VIGA', punktid*0, punktid, '', Jr)
-endif;
-
-end;
 
 
 create procedure teine_praktikum()
@@ -589,8 +531,17 @@ create procedure kolmas_praktikum()
 		end catch;
 		
 		-- välisvõtme kontroll klubid ja asulad vahel
-		call check_foreign_key('Asulad','id','Klubid','asula',praktikum_3_välisvõti_klubid_asulad,praktikum_3_jr, 'Praktikum')
-		
+		begin try
+			if 		(select count(foreign_key_id) into count_f_key from sysfkcol where 	foreign_table_id = find_table_id('Klubid') 
+					and foreign_column_id = find_column_id('Klubid','Asula') and primary_column_id = find_column_id('Asulad', 'Id')) = 1
+			then	insert Staatus values ('Praktikum', 'Välisvõti "fk_klubi_2_asula"', 'on olemas', 'OK', praktikum_3_välisvõti_klubid_asulad, praktikum_3_välisvõti_klubid_asulad, '', praktikum_3_jr);		
+			else	insert Staatus values ('Praktikum', 'Välisvõti "fk_klubi_2_asula"', 'pole olemas vajalike tabelite ja/või veergude vahel', 'VIGA', praktikum_3_välisvõti_klubid_asulad*0, praktikum_3_välisvõti_klubid_asulad, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+					insert Staatus values ('Praktikum', 'Välisvõti "fk_klubi_2_asula"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_3_välisvõti_klubid_asulad*0, praktikum_3_välisvõti_klubid_asulad, '', praktikum_3_jr);
+		end catch;
+
 		
 	end;
 	
@@ -641,7 +592,16 @@ create procedure kolmas_kodutöö()
 		end catch;
 		
 		-- välisvõti turniirid ja asulad vahel
-		call check_foreign_key('Asulad','id','Turniirid','asula',kodutöö_3_välisvõti_turniirid_asulad,kodutöö_3_jr, 'Kodutöö')
+		begin try
+			if 		(select count(foreign_key_id) into count_f_key from sysfkcol where 	foreign_table_id = find_table_id('Turniirid') 
+					and foreign_column_id = find_column_id('Turniirid','Asula') and primary_column_id = find_column_id('Asulad', 'Id')) = 1
+			then	insert Staatus values ('Kodutöö', 'Välisvõti "fk_turniir_2_asula"', 'on olemas', 'OK', kodutöö_3_välisvõti_turniirid_asulad, kodutöö_3_välisvõti_turniirid_asulad, '', praktikum_3_jr);		
+			else	insert Staatus values ('Kodutöö', 'Välisvõti "fk_turniir_2_asula"', 'pole olemas vajalike tabelite ja/või veergude vahel', 'VIGA', kodutöö_3_välisvõti_turniirid_asulad*0, kodutöö_3_välisvõti_turniirid_asulad, '', praktikum_3_jr);
+			endif;
+		end try
+		begin catch
+					insert Staatus values ('Kodutöö', 'Välisvõti "fk_turniir_2_asula"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_3_välisvõti_turniirid_asulad*0, kodutöö_3_välisvõti_turniirid_asulad, '', praktikum_3_jr);
+		end catch;
 		
 	end;
 	
