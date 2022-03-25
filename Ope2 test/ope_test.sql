@@ -666,6 +666,17 @@ create procedure view_turniiripartiid()
 			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
 		end catch;
 		
+		-- partii id 204 - must
+		begin try
+		end try
+		begin catch
+		end catch;
+		
+		-- partii id 20 807 - valge
+		begin try
+		end try
+		begin catch
+		end catch;
 	
 	end;
 	
