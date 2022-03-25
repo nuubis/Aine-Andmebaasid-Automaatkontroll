@@ -713,7 +713,7 @@ create procedure view_klubipartiikogused()
 		
 		-- klubi Areng kogus 33
 		begin try
-			if 		(select partiisid from syscolumn where klubi_nimi = 'Areng') >= 33
+			if 		(select partiisid from v_klubipartiikogused where klubi_nimi = 'Areng') >= 33
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 			endif;
@@ -724,7 +724,7 @@ create procedure view_klubipartiikogused()
 		
 		-- klubi Ajurebend kogus 70
 		begin try
-			if 		(select partiisid from syscolumn where klubi_nimi = 'Ajurebend') >= 70
+			if 		(select partiisid from v_klubipartiikogused where klubi_nimi = 'Ajurebend') >= 70
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 			endif;
@@ -732,6 +732,7 @@ create procedure view_klubipartiikogused()
 		begin catch
 			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 		end catch;
+		
 		
 	end;
 	
@@ -763,6 +764,28 @@ create procedure view_keskminepartii()
 		end try
 		begin catch
 			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_keskminepartii) = 5
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+		end catch;
+		
+		-- kolme klub kohtumine 23,04
+		begin try
+			if 		(select keskmine_partii from v_keskminepartii where turniiri_nimi = 'Kolme klubi kohtumine') = 23.04
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on õige', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
 		end catch;
 		
 	end;
