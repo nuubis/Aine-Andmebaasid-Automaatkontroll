@@ -711,6 +711,27 @@ create procedure view_klubipartiikogused()
 			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 		end catch;
 		
+		-- klubi Areng kogus 33
+		begin try
+			if 		(select partiisid from syscolumn where klubi_nimi = 'Areng') >= 33
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+		end catch;
+		
+		-- klubi Ajurebend kogus 70
+		begin try
+			if 		(select partiisid from syscolumn where klubi_nimi = 'Ajurebend') >= 70
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+		end catch;
 		
 	end;
 	
