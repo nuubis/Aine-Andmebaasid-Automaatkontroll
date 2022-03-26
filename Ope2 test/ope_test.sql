@@ -90,17 +90,54 @@ create or replace variable kodutöö_3_välisvõti_turniirid_asulad numeric = 0.
 
 -- kodutöö 4 punktid
 create or replace variable kodutöö_4 numeric = 2;
-create or replace variable kodutöö_4_v_turniiripartiid numeric = 0.5;
-create or replace variable kodutöö_4_v_klubipartiikogused numeric = 0.5;
-create or replace variable kodutöö_4_v_keskminepartii numeric = 0.5;
-create or replace variable kodutöö_4_mv_partiide_arv_valgetega numeric = 0.5;
+-- v_turniiripartiid
+create or replace variable kodutöö_4_v_turniiripartiid numeric = 0.4;
+create or replace variable kodutöö_4_v_turniiripartiid_olemasolu numeric = 0.1;
+create or replace variable kodutöö_4_v_turniiripartiid_turniir_nimi numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_toimumiskoht numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_partii_id numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_partii_algus numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_partii_lopp numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_kes_voitis numeric = 0.01;
+create or replace variable kodutöö_4_v_turniiripartiid_veergude_arv numeric = 0.12;
+create or replace variable kodutöö_4_v_turniiripartiid_viigid numeric = 0.12;
+create or replace variable kodutöö_4_v_turniiripartiid_partii numeric = 0.12;
+
+-- v_klubipartiikogused
+create or replace variable kodutöö_4_v_klubipartiikogused numeric = 0.4;
+create or replace variable kodutöö_4_v_klubipartiikogused_olemasolu numeric = 0.1;
+create or replace variable kodutöö_4_v_klubipartiikogused_klubi_nimi numeric = 0.05;
+create or replace variable kodutöö_4_v_klubipartiikogused_partiisid numeric = 0.05;
+create or replace variable kodutöö_4_v_klubipartiikogused_veergude_arv numeric = 0.1;
+create or replace variable kodutöö_4_v_klubipartiikogused_areng_kogus numeric = 0.05;
+create or replace variable kodutöö_4_v_klubipartiikogused_ajurebend_kogus numeric = 0.05;
+
+-- v_keskminepartii
+create or replace variable kodutöö_4_v_keskminepartii numeric = 0.4;
+create or replace variable kodutöö_4_v_keskminepartii_olemasolu numeric = 0.1;
+create or replace variable kodutöö_4_v_keskminepartii_turniiri_nimi numeric = 0.05;
+create or replace variable kodutöö_4_v_keskminepartii_keskmine_partii numeric = 0.05;
+create or replace variable kodutöö_4_v_keskminepartii_veergude_arv numeric = 0.05;
+create or replace variable kodutöö_4_v_keskminepartii_kirjete_arv numeric = 0.05;
+create or replace variable kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine numeric = 0.1;
+
+-- mvpartiide_arv_valgetega
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega numeric = 0.4;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_olemasolu numeric = 0.1;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_eesnimi numeric = 0.05;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_perenimi numeric = 0.05;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_kogus numeric = 0.05;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_veergude_arv numeric = 0.05;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur numeric = 0.05;
+create or replace variable kodutöö_4_mv_partiide_arv_valgetega_artur_muld numeric = 0.05;
+
+
+
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
-if 	versioon > 2 then
-	set praktikum_2_turniirid_asukoht = 0.01;
+if 	versioon > 2 then -- 0.10
 	set praktikum_2_isikud_perenimi  = 0.01;
-	set praktikum_2_klubid_100 = 0.01;
 	set praktikum_2_uus_klubi = 0.01;
 	set praktikum_2_vastavus_check = 0.01;
 	set kodutöö_2_isikud_klubis = 0.01;
@@ -114,21 +151,21 @@ if 	versioon > 2 then
 	set kodutöö_2_ajakontroll_alguskuupäev_võrdub = 0.005;
 endif;
 
-if versioon > 3 then
-	set kodutöö_3_inimesed_andmed = 0.01;
-	set kodutöö_3_turniirid_asula = 0.01;
-	set kodutöö_3_turniirid_asula_andmed = 0.01;
-	set kodutöö_3_turniirid_asukoht_kustutamine = 0.01;
-	set kodutöö_3_välisvõti_turniirid_asulad = 0.01;
-	set praktikum_3_tabel_inimene = 0.01;
-	set praktikum_3_tabel_asulad = 0.01;
-	set praktikum_3_tabel_riigid = 0.01;
-	set praktikum_3_riigid_andmed = 0.01;
-	set praktikum_3_asulad_andmed = 0.01;
-	set praktikum_3_klubid_asula_andmed = 0.01;
-	set praktikum_3_klubid_asula = 0.01;
-	set praktikum_3_klubid_asukoht_kustutamine = 0.01;
-	set praktikum_3_välisvõti_klubid_asulad = 0.01;
+if versioon > 3 then -- 0.14
+	set kodutöö_3_inimesed_andmed = 0.02;
+	set kodutöö_3_turniirid_asula = 0.02;
+	set kodutöö_3_turniirid_asula_andmed = 0.02;
+	set kodutöö_3_turniirid_asukoht_kustutamine = 0.02;
+	set kodutöö_3_välisvõti_turniirid_asulad = 0.03;
+	set praktikum_3_tabel_inimene = 0.02;
+	set praktikum_3_tabel_asulad = 0.02;
+	set praktikum_3_tabel_riigid = 0.02;
+	set praktikum_3_riigid_andmed = 0.02;
+	set praktikum_3_asulad_andmed = 0.02;
+	set praktikum_3_klubid_asula_andmed = 0.02;
+	set praktikum_3_klubid_asula = 0.02;
+	set praktikum_3_klubid_asukoht_kustutamine = 0.02;
+	set praktikum_3_välisvõti_klubid_asulad = 0.03;
 endif;
 	
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
@@ -188,7 +225,7 @@ create 	procedure arvuta_punktid(versioon int)
 				set kodu_max_punktid = 0.5;
 		endif;
 		if		versioon = 4 then 	
-				set kodu_max_punktid = 4;
+				set kodu_max_punktid = 2;
 		endif;
 		
 		if 		versioon = 2 then
@@ -621,7 +658,7 @@ create procedure kolmas_kodutöö()
 	end;
 	
 	
-	
+	-- mitte tuvastatav viga 555
 -- vaade v_turniiripartiid
 create procedure view_turniiripartiid()
 	begin
@@ -629,54 +666,47 @@ create procedure view_turniiripartiid()
 			if 		not exists (select * from systable where table_name = 'v_turniiripartiid')
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'ei ole olemas', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
 					return;
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'on olemas', 'OK', kodutöö_4_v_turniiripartiid, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'on olemas', 'OK', kodutöö_4_v_turniiripartiid_olemasolu, kodutöö_4_v_turniiripartiid_olemasolu, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
 			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			return;
 		end catch;
 		
 		-- turniir_nimi, toimumiskoht, partii_id, partii_algus, partii_lopp, kes_voitis
-		call check_column('v_turniiripartiid', 'Turniir_nimi', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_turniiripartiid', 'Toimumiskoht', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_turniiripartiid', 'Partii_id', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_turniiripartiid', 'Partii_algus', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_turniiripartiid', 'Partii_lopp', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_turniiripartiid', 'kes_voitis', kodutöö_4_v_turniiripartiid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'Turniir_nimi', kodutöö_4_v_turniiripartiid_turniir_nimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'Toimumiskoht', kodutöö_4_v_turniiripartiid_toimumiskoht, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'Partii_id', kodutöö_4_v_turniiripartiid_partii_id, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'Partii_algus', kodutöö_4_v_turniiripartiid_partii_algus, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'Partii_lopp', kodutöö_4_v_turniiripartiid_partii_lopp, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_turniiripartiid', 'kes_voitis', kodutöö_4_v_turniiripartiid_kes_voitis, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		
 		-- vaate veergude arv
 		begin try
-			if 		(select count(*) from syscolumn where table_id = find_table_id('v_turniiripartiid')) >= 6
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'on õige', 'OK', kodutöö_4_v_turniiripartiid, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_turniiripartiid')) = 6
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'on õige', 'OK', kodutöö_4_v_turniiripartiid_veergude_arv, kodutöö_4_v_turniiripartiid_veergude_arv, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_turniiripartiid_veergude_arv*0, kodutöö_4_v_turniiripartiid_veergude_arv, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid_veergude_arv*0, kodutöö_4_v_turniiripartiid_veergude_arv, '', kodutöö_4_jr);
 		end catch;
 		
 		-- kes võitis viike
 		begin try
 			if 		(select count(*) from v_turniiripartiid where kes_voitis = 'viik') > 0
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'viigid on olemas', 'OK', kodutöö_4_v_turniiripartiid, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'viigid on puudu', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'viigid on olemas', 'OK', kodutöö_4_v_turniiripartiid_viigid, kodutöö_4_v_turniiripartiid_viigid, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'viigid on puudu', 'VIGA', kodutöö_4_v_turniiripartiid_viigid*0, kodutöö_4_v_turniiripartiid_viigid, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid*0, kodutöö_4_v_turniiripartiid, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_turniiripartiid" kes_voitis "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_turniiripartiid_viigid*0, kodutöö_4_v_turniiripartiid_viigid, '', kodutöö_4_jr);
 		end catch;
 		
-		-- partii id 204 - must
-		begin try
-		end try
-		begin catch
-		end catch;
+		-- üks partii kontroll
 		
-		-- partii id 20 807 - valge
-		begin try
-		end try
-		begin catch
-		end catch;
+		-- kodutöö_4_v_turniiripartiid_partii
 	
 	end;
 	
@@ -689,48 +719,49 @@ create procedure view_klubipartiikogused()
 			if 		not exists (select * from systable where table_name = 'v_klubipartiikogused')
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'ei ole olemas', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
 					return;
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'on olemas', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'on olemas', 'OK', kodutöö_4_v_klubipartiikogused_olemasolu, kodutöö_4_v_klubipartiikogused_olemasolu, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
 			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			return;
 		end catch;
 		
 		-- klubi_nimi, partiisid
-		call check_column('v_klubipartiikogused', 'klubi_nimi', kodutöö_4_v_klubipartiikogused, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_klubipartiikogused', 'partiisid', kodutöö_4_v_klubipartiikogused, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_klubipartiikogused', 'klubi_nimi', kodutöö_4_v_klubipartiikogused_klubi_nimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_klubipartiikogused', 'partiisid', kodutöö_4_v_klubipartiikogused_partiisid, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		
 		-- vaate veergude arv
 		begin try
-			if 		(select count(*) from syscolumn where table_id = find_table_id('v_klubipartiikogused')) >= 2
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_klubipartiikogused')) = 2
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused_veergude_arv, kodutöö_4_v_klubipartiikogused_veergude_arv, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused_veergude_arv*0, kodutöö_4_v_klubipartiikogused_veergude_arv, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused_veergude_arv*0, kodutöö_4_v_klubipartiikogused_veergude_arv, '', kodutöö_4_jr);
 		end catch;
 		
 		-- klubi Areng kogus 33
 		begin try
 			if 		(select partiisid from v_klubipartiikogused where klubi_nimi = 'Areng') >= 33
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused_areng_kogus, kodutöö_4_v_klubipartiikogused_areng_kogus, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused_areng_kogus*0, kodutöö_4_v_klubipartiikogused_areng_kogus, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Areng" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused_areng_kogus*0, kodutöö_4_v_klubipartiikogused_areng_kogus, '', kodutöö_4_jr);
 		end catch;
 		
 		-- klubi Ajurebend kogus 70
 		begin try
 			if 		(select partiisid from v_klubipartiikogused where klubi_nimi = 'Ajurebend') >= 70
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on õige', 'OK', kodutöö_4_v_klubipartiikogused_ajurebend_kogus, kodutöö_4_v_klubipartiikogused_ajurebend_kogus, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'on vale', 'VIGA', kodutöö_4_v_klubipartiikogused_ajurebend_kogus*0, kodutöö_4_v_klubipartiikogused_ajurebend_kogus, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused*0, kodutöö_4_v_klubipartiikogused, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_klubipartiikogused" klubi "Ajurebend" partiide arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_klubipartiikogused_ajurebend_kogus*0, kodutöö_4_v_klubipartiikogused_ajurebend_kogus, '', kodutöö_4_jr);
 		end catch;
 		
 		
@@ -744,48 +775,48 @@ create procedure view_keskminepartii()
 			if 		not exists (select * from systable where table_name = 'v_keskminepartii')
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'ei ole olemas', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
 					return;
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'on olemas', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'on olemas', 'OK', kodutöö_4_v_keskminepartii_olemasolu, kodutöö_4_v_keskminepartii_olemasolu, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii_olemasolu*0, kodutöö_4_v_keskminepartii_olemasolu, '', kodutöö_4_jr);
 		end catch;
 		
 		-- turniiri_nimi ja keskmine_partii
-		call check_column('v_keskminepartii', 'turniiri_nimi', kodutöö_4_v_keskminepartii, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('v_keskminepartii', 'keskmine_partii', kodutöö_4_v_keskminepartii, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_keskminepartii', 'turniiri_nimi', kodutöö_4_v_keskminepartii_turniiri_nimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('v_keskminepartii', 'keskmine_partii', kodutöö_4_v_keskminepartii_keskmine_partii, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		
 		-- vaate veergude arv 
 		begin try
-			if 		(select count(*) from syscolumn where table_id = find_table_id('v_keskminepartii')) >= 2
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_keskminepartii')) = 2
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii_veergude_arv, kodutöö_4_v_keskminepartii_veergude_arv, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii_veergude_arv*0, kodutöö_4_v_keskminepartii_veergude_arv, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii_veergude_arv*0, kodutöö_4_v_keskminepartii_veergude_arv, '', kodutöö_4_jr);
 		end catch;
 		
 		-- vaate kirjete arv 
 		begin try
 			if 		(select count(*) from v_keskminepartii) = 5
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii_kirjete_arv, kodutöö_4_v_keskminepartii_kirjete_arv, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii_kirjete_arv*0, kodutöö_4_v_keskminepartii_kirjete_arv, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii_kirjete_arv*0, kodutöö_4_v_keskminepartii_kirjete_arv, '', kodutöö_4_jr);
 		end catch;
 		
 		-- kolme klub kohtumine 23,04
 		begin try
 			if 		(select keskmine_partii from v_keskminepartii where turniiri_nimi = 'Kolme klubi kohtumine') = 23.04
-			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on õige', 'OK', kodutöö_4_v_keskminepartii, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on õige', 'OK', kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine, kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine*0, kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii*0, kodutöö_4_v_keskminepartii, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine partii', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine*0, kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine, '', kodutöö_4_jr);
 		end catch;
 		
 	end;
@@ -798,26 +829,61 @@ create procedure m_view_keskminepartii()
 			if 		not exists (select * from systable where table_name = 'mv_partiide_arv_valgetega')
 			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'ei ole olemas', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
 					return;
-			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'on olemas', 'OK', kodutöö_4_mv_partiide_arv_valgetega, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'on olemas', 'OK', kodutöö_4_mv_partiide_arv_valgetega_olemasolu, kodutöö_4_mv_partiide_arv_valgetega_olemasolu, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
 			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
 		end catch;
 		
-		call check_column('mv_partiide_arv_valgetega', 'eesnimi', kodutöö_4_mv_partiide_arv_valgetega, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('mv_partiide_arv_valgetega', 'perenimi', kodutöö_4_mv_partiide_arv_valgetega, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('mv_partiide_arv_valgetega', 'eesnimi', kodutöö_4_mv_partiide_arv_valgetega_eesnimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('mv_partiide_arv_valgetega', 'perenimi', kodutöö_4_mv_partiide_arv_valgetega_perenimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('mv_partiide_arv_valgetega', 'kogus', kodutöö_4_mv_partiide_arv_valgetega_kogus, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		
 		-- vaate veergude arv 
 		begin try
-			if 		(select count(*) from syscolumn where table_id = find_table_id('mv_partiide_arv_valgetega')) >= 3
-			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
-			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+			if 		(select count(*) from syscolumn where table_id = find_table_id('mv_partiide_arv_valgetega')) = 3
+			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_veergude_arv*0, kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, '', kodutöö_4_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega*0, kodutöö_4_mv_partiide_arv_valgetega, '', kodutöö_4_jr);
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_veergude_arv*0, kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, '', kodutöö_4_jr);
 		end catch;
+		
+		-- select * from mv_partiide_arv_valgetega where eesnimi = 'Vahur' and perenimi = 'Kahur'
+		refresh materialized view mv_partiide_arv_valgetega;
+		create	table #Temp (eesnimi varchar(50), perenimi varchar(50), arv int);
+		begin try
+			unload 	select * from mv_partiide_arv_valgetega to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+			load 	table #Temp from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+		end try
+		begin catch
+		end catch;
+		
+		-- 0
+		begin try
+			if 		(select arv from #Temp where eesnimi = 'Vahur' and perenimi = 'Kahur') = 0
+			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Vahur Kahur" valgete võitude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Vahur Kahur" valgete võitude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur*0, kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Vahur Kahur" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur*0, kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, '', kodutöö_4_jr);
+		end catch;
+		
+		-- 14
+		begin try
+			if 		(select arv from #Temp where eesnimi = 'Artur' and perenimi = 'Muld') = 14
+			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega_artur_muld, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+		end catch;
+		
+		
 	end;
 	
 	
