@@ -838,7 +838,7 @@ create procedure m_view_keskminepartii()
 		
 		call check_column('mv_partiide_arv_valgetega', 'eesnimi', kodutöö_4_mv_partiide_arv_valgetega_eesnimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		call check_column('mv_partiide_arv_valgetega', 'perenimi', kodutöö_4_mv_partiide_arv_valgetega_perenimi, kodutöö_4_jr, 'Kodutöö', 'Vaade');
-		call check_column('mv_partiide_arv_valgetega', 'kogus', kodutöö_4_mv_partiide_arv_valgetega_kogus, kodutöö_4_jr, 'Kodutöö', 'Vaade');
+		call check_column('mv_partiide_arv_valgetega', 'partiisid_valgetega', kodutöö_4_mv_partiide_arv_valgetega_kogus, kodutöö_4_jr, 'Kodutöö', 'Vaade');
 		
 		-- vaate veergude arv 
 		begin try
@@ -851,19 +851,11 @@ create procedure m_view_keskminepartii()
 			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_veergude_arv*0, kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, '', kodutöö_4_jr);
 		end catch;
 		
-		-- select * from mv_partiide_arv_valgetega where eesnimi = 'Vahur' and perenimi = 'Kahur'
 		refresh materialized view mv_partiide_arv_valgetega;
-		create	table #Temp (eesnimi varchar(50), perenimi varchar(50), arv int);
-		begin try
-			unload 	select * from mv_partiide_arv_valgetega to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
-			load 	table #Temp from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
-		end try
-		begin catch
-		end catch;
-		
+				
 		-- 0
 		begin try
-			if 		(select arv from #Temp where eesnimi = 'Vahur' and perenimi = 'Kahur') = 0
+			if 		(select partiisid_valgetega from mv_partiide_arv_valgetega where eesnimi = 'Vahur' and perenimi = 'Kahur') = 0
 			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Vahur Kahur" valgete võitude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, '', kodutöö_4_jr);
 			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Vahur Kahur" valgete võitude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur*0, kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur, '', kodutöö_4_jr);
 			endif;
@@ -874,7 +866,7 @@ create procedure m_view_keskminepartii()
 		
 		-- 14
 		begin try
-			if 		(select arv from #Temp where eesnimi = 'Artur' and perenimi = 'Muld') = 14
+			if 		(select partiisid_valgetega from mv_partiide_arv_valgetega where eesnimi = 'Artur' and perenimi = 'Muld') = 14
 			then 	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'on õige', 'OK', kodutöö_4_mv_partiide_arv_valgetega_artur_muld, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
 			else	insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'on vale', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
 			endif;
