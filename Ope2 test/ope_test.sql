@@ -21,6 +21,12 @@ if 	exists (select * from sysprocedure where proc_name = 'view_keskminepartii') 
 if 	exists (select * from sysprocedure where proc_name = 'view_turniiripartiid') 						then drop function view_turniiripartiid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_klubipartiikogused') 						then drop function view_klubipartiikogused 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'm_view_keskminepartii') 						then drop function m_view_keskminepartii 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'function_liida') 						then drop function function_liida 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'function_klubisuurus') 						then drop function function_klubisuurus 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'procedure_uus_isik') 						then drop function procedure_uus_isik 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'procedure_top10') 						then drop function procedure_top10 						endif;
+
+
 -- Erinevate ülesannete järjekorrad
 -- 1-9
 create or replace variable praktikum_2_jr int = 1; 
@@ -132,7 +138,23 @@ create or replace variable kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur num
 create or replace variable kodutöö_4_mv_partiide_arv_valgetega_artur_muld numeric = 0.05;
 
 
+-- kodutöö 5 punktid
+create or replace variable kodutöö_5 numeric = 2;
+create or replace variable kodutöö_5_f_liida numeric = 0.5;
+create or replace variable kodutöö_5_f_liida_olemasolu numeric = 0.25;
+create or replace variable kodutöö_5_f_liida numeric = 0.25;
 
+create or replace variable kodutöö_5_f_klubisuurus numeric = 0.5;
+create or replace variable kodutöö_5_f_klubisuurus_olemasolu numeric = 0.25;
+create or replace variable kodutöö_5_f_klubisuurus numeric = 0.25;
+
+create or replace variable kodutöö_5_sp_uus_isik numeric = 0.5;
+create or replace variable kodutöö_5_sp_uus_isik_olemasolu numeric = 0.25;
+create or replace variable kodutöö_5_sp_uus_isik numeric = 0.25;
+
+create or replace variable kodutöö_5_sp_top10 numeric = 0.5;
+create or replace variable kodutöö_5_sp_top10_olemasolu numeric = 0.25;
+create or replace variable kodutöö_5_sp_top10 numeric = 0.25;
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
@@ -166,6 +188,11 @@ if versioon > 3 then -- 0.14
 	set praktikum_3_klubid_asula = 0.02;
 	set praktikum_3_klubid_asukoht_kustutamine = 0.02;
 	set praktikum_3_välisvõti_klubid_asulad = 0.03;
+endif;
+
+if versioon > 4 then --
+	
+	
 endif;
 	
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
@@ -883,10 +910,117 @@ create procedure m_view_keskminepartii()
 			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
 		end catch;
 		
+	end;
+
+
+create 	procedure function_liida()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_liida') 
+			then	insert Staatus values('Funktsioon "f_klubisuurus"', '-', 'Funktsiooni ei eksisteeri', 'VIGA', f_klubisuurus*0, f_klubisuurus, '', funktsioonid_jr);
+			return;
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+		end catch;
+		
+		begin try
+			if 		f_liida(100,100) = 200
+			then	insert Staatus values ('Funktsioon "f_klubisuurus"', '-', '-', 'OK', f_klubisuurus, f_klubisuurus, '', funktsioonid_jr)
+			else	insert Staatus values ('Funktsioon "f_klubisuurus"', '-', 'Funktsioon on vigane', 'VIGA', f_klubisuurus*0, f_klubisuurus, 'Kas on ikka count(*) tabelist isikud?', funktsioonid_jr)
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Funktsioon "f_klubisuurus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_klubisuurus*0, f_klubisuurus, 'Kas on ikka count(*) tabelist isikud?', funktsioonid_jr);
+		end catch;
 		
 	end;
 	
 	
+create 	procedure function_klubisuurus()
+	begin
+	begin try
+		if 		not exists (select * from sysprocedure where proc_name = 'f_klubisuurus') 
+		then	insert Staatus values('Funktsioon "f_klubisuurus"', '-', 'Funktsiooni ei eksisteeri', 'VIGA', f_klubisuurus*0, f_klubisuurus, '', funktsioonid_jr);
+		return;
+		endif;
+	end try
+	begin catch
+		insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+	end catch;
+
+	begin try
+		if 		f_klubisuurus(51) = 3
+		then	insert Staatus values ('Funktsioon "f_klubisuurus"', '-', '-', 'OK', f_klubisuurus, f_klubisuurus, '', funktsioonid_jr)
+		else	insert Staatus values ('Funktsioon "f_klubisuurus"', '-', 'Funktsioon on vigane', 'VIGA', f_klubisuurus*0, f_klubisuurus, 'Kas on ikka count(*) tabelist isikud?', funktsioonid_jr)
+		endif;
+	end try
+	begin catch
+		insert Staatus values ('Funktsioon "f_klubisuurus"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli funktsiooni.', 'VIGA', f_klubisuurus*0, f_klubisuurus, 'Kas on ikka count(*) tabelist isikud?', funktsioonid_jr);
+	end catch;
+	/* Klubide Id-d ja nende klubiliikmete arv: 51 = 3, 54 = 4, 55 = 3, 57 = 4, 58 = 5, 59 = 4 */
+	end;
+
+create 	procedure procedure_uus_isik()
+	begin
+		declare nimi varchar(50);
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_uus_isik') 
+			then	insert Staatus values('Protseduur "sp_uus_isik"', '-', 'Protseduuri ei eksisteeri', 'VIGA', sp_uus_isik*0, sp_uus_isik, '', protseduurid_jr);
+			return;
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+		end catch;
+
+		// Eesnimi, perenimi, klubi_id
+		begin try
+			create or replace variable isiku_id int;
+			call 	sp_uus_isik('Test_ees', 'Test_pere', 51, isiku_id);
+			select 	eesnimi into nimi from isikud where eesnimi = 'Test_ees';
+			if 		upper(nimi) = upper('Test_ees')
+			then	insert Staatus values('Protseduur "sp_uus_isik"', '-', '-', 'OK', sp_uus_isik, sp_uus_isik, '', protseduurid_jr)
+			else	insert Staatus values('Protseduur "sp_uus_isik"', '-', 'Protseduur on vigane', 'VIGA', sp_uus_isik*0, sp_uus_isik, '', protseduurid_jr)
+			endif;
+		end try
+		begin catch
+			insert Staatus values('Protseduur "sp_uus_isik"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_uus_isik*0, sp_uus_isik, 'Kas käivitasid protseduuri nelja parameetriga?', protseduurid_jr)
+		end catch;
+
+		delete	from isikud where eesnimi = 'Test_ees';
+
+	end;
+
+
+
+create	procedure procedure_top10()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_top10') 
+			then	insert Staatus values('Protseduur "sp_top10"', '-', 'Protseduuri ei eksisteeri', 'VIGA', sp_top10*0, sp_top10, '', protseduurid_jr);
+			return;
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
+		end catch;
+
+		begin try
+			create	table #Temp (id integer not null default autoincrement, mangija varchar(102), punkte numeric(5,1));
+			unload 	select * from sp_top10(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+			load 	table #Temp (mangija, punkte) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+
+			if 		(select mangija from #Temp where id = 1) = 'Maasikas, Malle' 
+			then  	insert 	Staatus values('Protseduur "sp_top10"', 'sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', sp_top10, sp_top10, '', protseduurid_jr)
+			else	insert 	Staatus values('Protseduur "sp_top10"', 'sp_top10(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', sp_top10*0, sp_top10, 'Kas nime kirjapilt õige?', protseduurid_jr)
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Protseduur "sp_top10"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_top10*0, sp_top10, '', protseduurid_jr)
+		end catch;
+	end;
 	
 create procedure käivita(versioon int)
 	begin
@@ -907,8 +1041,16 @@ create procedure käivita(versioon int)
 			call view_keskminepartii();
 			call m_view_keskminepartii();
 		endif;
-		call arvuta_punktid(versioon);
 		
+		
+		if versioon >= 5 then
+			call function_liida()
+			call function_klubisuurus()
+			call procedure_uus_isik()
+			call procedure_top10();
+		endif;
+		
+		call arvuta_punktid(versioon);
 		begin try
 			select min(sisestatud) into aeg from inimesed;
 			insert into staatus values ('Tudeng', 	(select eesnimi from inimesed where sisestatud = aeg), 
