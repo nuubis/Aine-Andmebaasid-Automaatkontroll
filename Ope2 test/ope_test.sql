@@ -440,24 +440,7 @@ create procedure teine_kodutöö()
 			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_ajakontroll_lopphetk_võrdub, '', kodutöö_2_jr);
 			endif;
 		end catch;
-		
-		-- turniirid ajakontroll ettevalmistus
-		begin try
-			if 		not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('turniirid'))
-			then 	alter table turniirid rename toimumiskoht to asukoht
-			endif;
-		end try
-		begin catch
-		end catch;
-		
-		begin try
-			if 		not exists (select * from syscolumn where column_name = 'nimetus' and table_id = find_table_id('turniirid'))
-			then 	alter table turniirid rename nimi to nimetus
-			endif;
-		end try
-		begin catch
-		end catch;
-		
+				
 			
 		-- turniirid check	ajakontroll, alguskuupaev suurem kui lopp
 		begin try
@@ -474,11 +457,26 @@ create procedure teine_kodutöö()
 				delete from turniirid where nimetus = 'Ajakontroll Check1';	
 			end try
 			begin catch
-				if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
-				or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-				then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
-				else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
-				endif;
+				begin try
+					insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1','Kambja','2005-01-13','2005-01-12');
+					insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
+					delete from turniirid where nimi = 'Ajakontroll Check1';	
+				end try
+				begin catch
+					begin try
+						insert into turniirid (Nimi,asula,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check1',1,'2005-01-13','2005-01-12');
+						insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus ei tohi lubada väiksemat Loppkuupaev', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
+						
+						delete from turniirid where nimi = 'Ajakontroll Check1';	
+					end try
+					begin catch
+						if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
+						or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
+						then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+						else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, '', kodutöö_2_jr);
+						endif;
+					end catch;
+				end catch;
 			end catch;
 		end catch;	
 		-- alguskuupaev = loppkupäev
@@ -494,11 +492,25 @@ create procedure teine_kodutöö()
 				delete from turniirid where nimetus = 'Ajakontroll Check2';
 			end try
 			begin catch
-				if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
-				or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-				then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 'Veerg alguskuupaev või loppkuupaev on täpitähega.', kodutöö_2_jr);
-				else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
-				endif;
+				begin try
+					insert into turniirid (Nimi,asukoht,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2','Kambja','2005-01-12','2005-01-12');
+					insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
+					delete from turniirid where nimi = 'Ajakontroll Check2';
+				end try
+				begin catch
+					begin try
+						insert into turniirid (Nimi,asula,Alguskuupaev,Loppkuupaev) values ('Ajakontroll Check2',1,'2005-01-12','2005-01-12');
+						insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
+						delete from turniirid where nimi = 'Ajakontroll Check2';
+					end try
+					begin catch
+						if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
+						or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
+						then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, 'Veerg alguskuupaev või loppkuupaev on täpitähega.', kodutöö_2_jr);
+						else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'kitsendus peab lubama võrdset algus ja Loppkuupaev', 	'VIGA', kodutöö_2_ajakontroll_alguskuupäev_võrdub*0, 	kodutöö_2_ajakontroll_alguskuupäev_võrdub, '', kodutöö_2_jr);
+						endif;
+					end catch;
+				end catch;
 			end catch;
 		end catch;
 		
