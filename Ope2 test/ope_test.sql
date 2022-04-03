@@ -863,7 +863,11 @@ create procedure m_view_keskminepartii()
 			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_veergude_arv*0, kodutöö_4_mv_partiide_arv_valgetega_veergude_arv, '', kodutöö_4_jr);
 		end catch;
 		
-		refresh materialized view mv_partiide_arv_valgetega;
+		begin try
+			--refresh materialized view mv_partiide_arv_valgetega;
+		end try
+		begin catch
+		end catch;
 				
 		-- 0
 		begin try
