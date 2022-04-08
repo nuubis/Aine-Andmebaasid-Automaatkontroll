@@ -979,54 +979,14 @@ create procedure view_punktid()
 			insert Staatus values ('Praktikum', 'Vaade "v_punktid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
 		end catch;
 		
-		call check_column('v_punktid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_punktid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_punktid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_punktid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_punktid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'partii', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'turnir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'mangija', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'varv', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'punkt', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 	end;
 
-create procedure view_partiid()
-	begin
-		-- vaade v_partiid
-		begin try
-			if 		not exists (select * from systable where table_name = 'v_partiid')
-			then 	insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
-					return;
-			else	insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
-			endif;
-		end try
-		begin catch
-			insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
-		end catch;
-		
-		call check_column('v_partiid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_partiid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_partiid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_partiid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_partiid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-	end;
 
-create procedure view_isikudklubid()
-	begin
-		-- vaade v_isikudklubid
-		begin try
-			if 		not exists (select * from systable where table_name = 'v_isikudklubid')
-			then 	insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
-					return;
-			else	insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
-			endif;
-		end try
-		begin catch
-			insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
-		end catch;
-		
-		call check_column('v_isikudklubid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_isikudklubid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_isikudklubid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_isikudklubid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_isikudklubid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-	end;
 		
 	
 create 	procedure function_liida()
