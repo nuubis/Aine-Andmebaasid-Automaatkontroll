@@ -151,21 +151,21 @@ create or replace variable kodutöö_4_mv_partiide_arv_valgetega_artur_muld nume
 -- kodutöö 5 punktid
 create or replace variable praktikum_5 numeric = 0;
 create or replace variable kodutöö_5 numeric = 2;
-create or replace variable kodutöö_5_f_liida numeric = 0.5;
-create or replace variable kodutöö_5_f_liida_olemasolu numeric = 0.25;
-create or replace variable kodutöö_5_f_liida_tulemus numeric = 0.25;
+create or replace variable kodutöö_5_f_liida numeric = 0.4;
+create or replace variable kodutöö_5_f_liida_olemasolu numeric = 0.2;
+create or replace variable kodutöö_5_f_liida_tulemus numeric = 0.2;
 
-create or replace variable kodutöö_5_f_klubisuurus numeric = 0.5;
-create or replace variable kodutöö_5_f_klubisuurus_olemasolu numeric = 0.25;
-create or replace variable kodutöö_5_f_klubisuurus_tulemus numeric = 0.25;
+create or replace variable kodutöö_5_f_klubisuurus numeric = 0.4;
+create or replace variable kodutöö_5_f_klubisuurus_olemasolu numeric = 0.2;
+create or replace variable kodutöö_5_f_klubisuurus_tulemus numeric = 0.2;
 
-create or replace variable kodutöö_5_sp_uus_isik numeric = 0.5;
-create or replace variable kodutöö_5_sp_uus_isik_olemasolu numeric = 0.25;
-create or replace variable kodutöö_5_sp_uus_isik_tulemus numeric = 0.25;
+create or replace variable kodutöö_5_sp_uus_isik numeric = 0.4;
+create or replace variable kodutöö_5_sp_uus_isik_olemasolu numeric = 0.2;
+create or replace variable kodutöö_5_sp_uus_isik_tulemus numeric = 0.2;
 
-create or replace variable kodutöö_5_sp_top10 numeric = 0.5;
-create or replace variable kodutöö_5_sp_top10_olemasolu numeric = 0.25;
-create or replace variable kodutöö_5_sp_top10_tulemus numeric = 0.25;
+create or replace variable kodutöö_5_sp_top10 numeric = 0.4;
+create or replace variable kodutöö_5_sp_top10_olemasolu numeric = 0.2;
+create or replace variable kodutöö_5_sp_top10_tulemus numeric = 0.2;
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
@@ -185,25 +185,62 @@ if 	versioon > 2 then -- 0.10
 endif;
 
 if versioon > 3 then -- 0.14
-	set kodutöö_3_inimesed_andmed = 0.02;
-	set kodutöö_3_turniirid_asula = 0.02;
-	set kodutöö_3_turniirid_asula_andmed = 0.02;
-	set kodutöö_3_turniirid_asukoht_kustutamine = 0.02;
-	set kodutöö_3_välisvõti_turniirid_asulad = 0.03;
-	set praktikum_3_tabel_inimene = 0.02;
-	set praktikum_3_tabel_asulad = 0.02;
-	set praktikum_3_tabel_riigid = 0.02;
-	set praktikum_3_riigid_andmed = 0.02;
-	set praktikum_3_asulad_andmed = 0.02;
-	set praktikum_3_klubid_asula_andmed = 0.02;
-	set praktikum_3_klubid_asula = 0.02;
-	set praktikum_3_klubid_asukoht_kustutamine = 0.02;
-	set praktikum_3_välisvõti_klubid_asulad = 0.03;
+	set kodutöö_3_inimesed_andmed = 0.01;
+	set kodutöö_3_turniirid_asula = 0.01;
+	set kodutöö_3_turniirid_asula_andmed = 0.01;
+	set kodutöö_3_turniirid_asukoht_kustutamine = 0.01;
+	set kodutöö_3_välisvõti_turniirid_asulad = 0.01;
+	set praktikum_3_tabel_inimene = 0.01;
+	set praktikum_3_tabel_asulad = 0.01;
+	set praktikum_3_tabel_riigid = 0.01;
+	set praktikum_3_riigid_andmed = 0.01;
+	set praktikum_3_asulad_andmed = 0.01;
+	set praktikum_3_klubid_asula_andmed = 0.01;
+	set praktikum_3_klubid_asula = 0.01;
+	set praktikum_3_klubid_asukoht_kustutamine = 0.01;
+	set praktikum_3_välisvõti_klubid_asulad = 0.01;
 endif;
 
-if versioon > 4 then --
-	
-	
+if versioon > 4 then --0.165
+	create or replace variable kodutöö_4_v_turniiripartiid numeric = 0.055;
+	create or replace variable kodutöö_4_v_turniiripartiid_olemasolu numeric = 0.01;
+	create or replace variable kodutöö_4_v_turniiripartiid_turniir_nimi numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_toimumiskoht numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_partii_id numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_partii_algus numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_partii_lopp numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_kes_voitis numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_veergude_arv numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_viigid numeric = 0.005;
+	create or replace variable kodutöö_4_v_turniiripartiid_partii numeric = 0.005;
+
+	-- v_klubipartiikogused
+	create or replace variable kodutöö_4_v_klubipartiikogused numeric = 0.035;
+	create or replace variable kodutöö_4_v_klubipartiikogused_olemasolu numeric = 0.01;
+	create or replace variable kodutöö_4_v_klubipartiikogused_klubi_nimi numeric = 0.005;
+	create or replace variable kodutöö_4_v_klubipartiikogused_partiisid numeric = 0.005;
+	create or replace variable kodutöö_4_v_klubipartiikogused_veergude_arv numeric = 0.005;
+	create or replace variable kodutöö_4_v_klubipartiikogused_areng_kogus numeric = 0.005;
+	create or replace variable kodutöö_4_v_klubipartiikogused_ajurebend_kogus numeric = 0.005;
+
+	-- v_keskminepartii
+	create or replace variable kodutöö_4_v_keskminepartii numeric = 0.035;
+	create or replace variable kodutöö_4_v_keskminepartii_olemasolu numeric = 0.01;
+	create or replace variable kodutöö_4_v_keskminepartii_turniiri_nimi numeric = 0.005;
+	create or replace variable kodutöö_4_v_keskminepartii_keskmine_partii numeric = 0.005;
+	create or replace variable kodutöö_4_v_keskminepartii_veergude_arv numeric = 0.005;
+	create or replace variable kodutöö_4_v_keskminepartii_kirjete_arv numeric = 0.005;
+	create or replace variable kodutöö_4_v_keskminepartii_kolme_klubi_kohtumine numeric = 0.005;
+
+	-- mvpartiide_arv_valgetega
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega numeric = 0.04;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_olemasolu numeric = 0.01;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_eesnimi numeric = 0.005;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_perenimi numeric = 0.005;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_kogus numeric = 0.005;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_veergude_arv numeric = 0.005;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur numeric = 0.005;
+	create or replace variable kodutöö_4_mv_partiide_arv_valgetega_artur_muld numeric = 0.005;
 endif;
 	
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
@@ -266,7 +303,6 @@ create 	procedure arvuta_punktid(versioon int)
 				set kodu_max_punktid = 2;
 		endif;
 		if		versioon = 5 then
-				set praks_max_punktid = 0;
 				set kodu_max_punktid = 2;
 		endif;
 		
@@ -299,10 +335,7 @@ create 	procedure arvuta_punktid(versioon int)
 		endif;
 		
 		if 		versioon = 5 then
-			select sum(punktid) into praks_punktid from staatus where ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
-			insert into Staatus values ('Praktikum','-','-', 'Hindepunktid', praks_punktid, praks_max_punktid, '', praks_lõpp_punktid);
-			
-			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö';
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö' or ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
 			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, '', kodu_lõpp_punktid);
 		endif;
 		
@@ -1088,7 +1121,7 @@ create 	procedure function_klubisuurus()
 		if 		not exists (select * from sysprocedure where proc_name = 'f_klubisuurus') 
 		then	insert Staatus values('Kodutöö', 'Funktsioon "f_klubisuurus"', 'ei ole olemas', 'VIGA', kodutöö_5_f_klubisuurus*0, kodutöö_5_f_klubisuurus, '', kodutöö_5_jr);
 		return;
-		else 	insert Staatus values('Kodutöö', 'Funktsioon "f_klubisuurus"', 'on olemas', 'OK', kodutöö_5_f_klubisuurus_olemasolu, kodutöö_5_f_klubisuurus, '', kodutöö_5_jr);
+		else 	insert Staatus values('Kodutöö', 'Funktsioon "f_klubisuurus"', 'on olemas', 'OK', kodutöö_5_f_klubisuurus_olemasolu, kodutöö_5_f_klubisuurus_olemasolu, '', kodutöö_5_jr);
 		endif;
 	end try
 	begin catch
@@ -1098,12 +1131,12 @@ create 	procedure function_klubisuurus()
 
 	begin try
 		if 		f_klubisuurus(51) = 4
-		then	insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus" klubi "" suurus', 'on õige', 'OK', kodutöö_5_f_klubisuurus_tulemus, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr)
-		else	insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus" klubi "" suurus', 'on vale', 'VIGA', kodutöö_5_f_klubisuurus_tulemus*0, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr)
+		then	insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus" klubi "Laudnikud" suurus', 'on õige', 'OK', kodutöö_5_f_klubisuurus_tulemus, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr)
+		else	insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus" klubi "Laudnikud" suurus', 'on vale', 'VIGA', kodutöö_5_f_klubisuurus_tulemus*0, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr)
 		endif;
 	end try
 	begin catch
-		insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_f_klubisuurus_tulemus*0, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr);
+		insert Staatus values ('Kodutöö', 'Funktsioon "f_klubisuurus" klubi "Laudnikud" suurus', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_f_klubisuurus_tulemus*0, kodutöö_5_f_klubisuurus_tulemus, '', kodutöö_5_jr);
 	end catch;
 	end;
 
@@ -1134,7 +1167,7 @@ create 	procedure procedure_uus_isik()
 			endif;
 		end try
 		begin catch
-			insert Staatus values('Kodutöö', 'Protseduur "sp_uus_isik"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_uus_isik_tulemus*0, kodutöö_5_sp_uus_isik_tulemus, '', kodutöö_5_jr)
+			insert Staatus values('Kodutöö', 'Protseduur "sp_uus_isik" uus isik', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_uus_isik_tulemus*0, kodutöö_5_sp_uus_isik_tulemus, '', kodutöö_5_jr)
 		end catch;
 
 		delete	from isikud where eesnimi = 'Test_ees';
@@ -1162,12 +1195,12 @@ create	procedure procedure_top10()
 			load 	table #Temp (mangija, punkte) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
 
 			if 		(select mangija from #Temp where id = 1) = 'Maasikas, Malle' 
-			then  	insert 	Staatus values('Kodutöö ', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', kodutöö_5_sp_top10, kodutöö_5_sp_top10, '', kodutöö_5_jr)
-			else	insert 	Staatus values('Kodutöö', 'sp_top10(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, 'Kas nime kirjapilt õige?', kodutöö_5_jr)
+			then  	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', kodutöö_5_sp_top10_tulemus, kodutöö_5_sp_top10_tulemus, '', kodutöö_5_jr)
+			else	insert 	Staatus values('Kodutöö', 'sp_top10(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, 'Kas nime kirjapilt õige?', kodutöö_5_jr)
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values('Protseduur "sp_top10"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, '', kodutöö_5_jr)
+			insert 	Staatus values('Protseduur "sp_top10"', '-', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, '', kodutöö_5_jr)
 		end catch;
 	end;
 	
@@ -1194,16 +1227,6 @@ create procedure käivita(versioon int)
 		if versioon >= 5 then
 			call view_edetabelid();
 			call view_punktid();
-			call function_liida();
-			call function_klubisuurus();
-			call procedure_uus_isik();
-			call procedure_top10();
-		endif;
-		
-		call arvuta_punktid(versioon);
-		
-		
-		if versioon >= 5 then
 			call function_liida();
 			call function_klubisuurus();
 			call procedure_uus_isik();
