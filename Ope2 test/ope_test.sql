@@ -21,6 +21,15 @@ if 	exists (select * from sysprocedure where proc_name = 'view_keskminepartii') 
 if 	exists (select * from sysprocedure where proc_name = 'view_turniiripartiid') 						then drop function view_turniiripartiid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_klubipartiikogused') 						then drop function view_klubipartiikogused 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'm_view_keskminepartii') 						then drop function m_view_keskminepartii 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'function_liida') 						then drop function function_liida 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'function_klubisuurus') 						then drop function function_klubisuurus 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'procedure_uus_isik') 						then drop function procedure_uus_isik 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'procedure_top10') 						then drop function procedure_top10 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'view_edetabel') 						then drop function view_edetabel 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'view_partiid') 						then drop function view_partiid 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'view_isikudklubid') 						then drop function view_isikudklubid 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'view_punktid') 						then drop function view_punktid 						endif;
+
 -- Erinevate ülesannete järjekorrad
 -- 1-9
 create or replace variable praktikum_2_jr int = 1; 
@@ -31,6 +40,9 @@ create or replace variable kodutöö_punktid_2_jr int = 6;
 
 create or replace variable praktikum_3_jr int = 10;
 create or replace variable praktikum_punktid_3_jr int = 11;
+
+create or replace variable praktikum_5_jr int = 15;
+create or replace variable praktikum_punktid_5_jr int = 16;
 
 -- 50 praktikumide punktid
 create or replace variable praks_lõpp_punktid int = 50;
@@ -132,6 +144,13 @@ create or replace variable kodutöö_4_mv_partiide_arv_valgetega_vahur_kahur num
 create or replace variable kodutöö_4_mv_partiide_arv_valgetega_artur_muld numeric = 0.05;
 
 
+-- kodutöö 5 punktid
+create or replace variable praktikum_5 numeric = 0;
+create or replace variable kodutöö_5 numeric = 2;
+create or replace variable kodutöö_5_f_liida numeric = 0.5;
+create or replace variable kodutöö_5_f_liida_olemasolu numeric = 0.25;
+create or replace variable kodutöö_5_f_liida_tulemus numeric = 0.25;
+
 
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
@@ -227,7 +246,10 @@ create 	procedure arvuta_punktid(versioon int)
 		if		versioon = 4 then 	
 				set kodu_max_punktid = 2;
 		endif;
-		
+		if		versioon = 5 then
+				set praks_max_punktid = 0;
+				set kodu_max_punktid = 2;
+		endif;
 		if 		versioon = 2 then
 			-- Protsendi arvutamine
 			select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
@@ -255,7 +277,15 @@ create 	procedure arvuta_punktid(versioon int)
 			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö' or ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
 			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, '', kodu_lõpp_punktid);
 		endif;
-		
+
+		if 		versioon = 5 then
+			select sum(punktid) into praks_punktid from staatus where ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
+			insert into Staatus values ('Praktikum','-','-', 'Hindepunktid', praks_punktid, praks_max_punktid, '', praks_lõpp_punktid);
+			
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö';
+			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, '', kodu_lõpp_punktid);
+		endif;
+	
 	end;
 
 create procedure check_column(a_table_name varchar(100), a_column_name varchar(100), punktid numeric, jr int,
@@ -891,6 +921,117 @@ create procedure m_view_keskminepartii()
 			insert Staatus values ('Kodutöö', 'Vaade "mv_partiide_arv_valgetega" "Artur Muld" valgete võitude arv', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_4_mv_partiide_arv_valgetega_artur_muld*0, kodutöö_4_mv_partiide_arv_valgetega_artur_muld, '', kodutöö_4_jr);
 		end catch;
 		
+	end;
+
+create procedure view_edetabel()
+	begin
+		-- vaade v_edetabel
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_edetabel')
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+					return;
+			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		
+		call check_column('v_edetabel', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabel', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabel', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabel', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabel', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+	end;
+	
+create procedure view_punktid()
+	begin
+		-- vaade v_punktid
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_punktid')
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_punktid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+					return;
+			else	insert Staatus values ('Praktikum', 'Vaade "v_punktid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_punktid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		call check_column('v_punktid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+	end;
+
+create procedure view_partiid()
+	begin
+		-- vaade v_partiid
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_partiid')
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+					return;
+			else	insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_partiid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		call check_column('v_partiid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_partiid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_partiid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_partiid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_partiid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+	end;
+
+create procedure view_isikudklubid()
+	begin
+		-- vaade v_isikudklubid
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_isikudklubid')
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+					return;
+			else	insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_isikudklubid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		call check_column('v_isikudklubid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_isikudklubid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_isikudklubid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_isikudklubid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_isikudklubid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+	end;
+		
+	
+create 	procedure function_liida()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_liida') 
+			then	insert Staatus values('Kodutöö', 'Funktsioon "f_liida"', 'ei ole olemas','VIGA', kodutöö_5_f_liida*0, kodutöö_5_f_liida, '', kodutöö_5_jr);
+			return;
+			else	insert Staatus values('Kodutöö', 'Funktsioon "f_liida"', 'on olemas','OK', kodutöö_5_f_liida_olemasolu, kodutöö_5_f_liida_olemasolu, '', kodutöö_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Vaade Funktsioon "f_liida"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_f_liida*0, kodutöö_5_f_liida, '', kodutöö_5_jr);
+			return;
+		end catch;
+		
+		begin try
+			if 		f_liida(100,100) = 200
+			then	insert Staatus values ('Kodutöö', 'Funktsioon "f_liida" 100 + 100 tulemus', 'on õige','OK', kodutöö_5_f_liida_tulemus, kodutöö_5_f_liida_tulemus, '', kodutöö_5_jr)
+			else	insert Staatus values ('Kodutöö', 'Funktsioon "f_liida" 100 + 100 tulemus', 'on vale','VIGA', kodutöö_5_f_liida_tulemus*0, kodutöö_5_f_liida_tulemus, '', kodutöö_5_jr)
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Funktsioon "f_liida" 100 + 100 tulemus', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_f_liida_tulemus*0, kodutöö_5_f_liida_tulemus, '', kodutöö_5_jr);
+		end catch;
 		
 	end;
 	
@@ -915,6 +1056,19 @@ create procedure käivita(versioon int)
 			call view_keskminepartii();
 			call m_view_keskminepartii();
 		endif;
+	
+		
+		if versioon >= 5 then
+			call view_edetabel();
+			call view_punktid();
+			call view_partiid();
+			call view_isikudklubid();
+			call function_liida();
+			call function_klubisuurus();
+			call procedure_uus_isik();
+			call procedure_top10();
+		endif;
+		
 		call arvuta_punktid(versioon);
 		
 		begin try
