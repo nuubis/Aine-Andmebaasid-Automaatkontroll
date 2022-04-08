@@ -955,6 +955,7 @@ create procedure view_edetabelid()
 		end try
 		begin catch
 			insert Staatus values ('Praktikum', 'Vaade "v_edetabelid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			return;
 		end catch;
 		
 		
@@ -1009,13 +1010,46 @@ create procedure view_punktid()
 		end try
 		begin catch
 			insert Staatus values ('Praktikum', 'Vaade "v_punktid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			return;
 		end catch;
 		
 		call check_column('v_punktid', 'partii', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_punktid', 'turnir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_punktid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_punktid', 'mangija', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_punktid', 'varv', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_punktid', 'punkt', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_punktid')) = 5
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_punktid" veergude arv', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_punktid" veergude arv', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_punktid" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		-- select * from v_punktid where (partii = 1 and mangija = 73 and turniir = 41)or (partii = 2 and mangija = 77)
+		begin try
+			if 		(select punkt from v_punktid where partii = 1 and mangija = 73 and turniir = 41) = 0.5
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_punktid" esimene partii mangija 73 punktid', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_punktid" esimene partii mangija 73 punktid', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_punktid" esimene partii mangija 73 punktid', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		begin try
+			if 		(select punkt from v_punktid where partii = 2 and mangija = 77 and turniir = 41) = 1.0
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_punktid" teine partii mangija 77 punktid', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_punktid" teine partii mangija 77 punktid', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_punktid" teine partii mangija 77 punktid', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
 	end;
 
 
