@@ -1,5 +1,5 @@
 -- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn), 5=kodutöö 5(?õn)
-create or replace variable versioon int = 5;
+create or replace variable versioon int = 2;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
 if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
@@ -351,7 +351,7 @@ create procedure check_column(a_table_name varchar(100), a_column_name varchar(1
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veergu "'||a_column_name||'"', 'Automaatkontrollis on viga!', 'VIGA', punktid*0, punktid, jr);
+			insert 	Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veergu "'||a_column_name||'"', 'Veerukontrollis on viga!', 'VIGA', punktid*0, punktid, jr);
 		end catch;
 	
 	
@@ -374,7 +374,13 @@ create procedure teine_praktikum()
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on viga!', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
+				case
+					when not exists (select * from systable where table_name = 'Klubid')
+					then insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Tabelit "Klubid" pole olemas', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
+					when not exists (select * from syscolumn where column_name = 'Asukoht' and table_id = find_table_id('Klubid'))
+					then insert Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Veergu "Asukoht" pole olemas', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
+					else insert Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
+				end;
 			end catch;
 			
 		endif;
@@ -382,24 +388,38 @@ create procedure teine_praktikum()
 		-- Tabel Isikud perenime muutmine
 		begin try
 			if 		(select perenimi from isikud where eesnimi = 'Irys') = 'Kompvek'
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys"', 'perenimi on õige', 'OK', praktikum_2_isikud_perenimi, praktikum_2_isikud_perenimi, praktikum_2_jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'perenimi on vale', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isik "Irys" perenime muutmine', 'perenimi on õige', 'OK', praktikum_2_isikud_perenimi, praktikum_2_isikud_perenimi, praktikum_2_jr);
+			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'perenimi on vale', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+			case
+				when 	not exists (select * from systable where table_name = 'Isikud')
+				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Tabelit "Isikud" pole olemas', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+				when 	not exists (select * from syscolumn where column_name = 'eesnimi' and table_id = find_table_id('Isikud'))
+				or 		not exists (select * from syscolumn where column_name = 'perenimi' and table_id = find_table_id('Isikud'))
+				then 	insert Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Veergu "eesnimi" või "perenimi" pole olemas', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+				else 	insert Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+			end;
 		end catch;
 		
 		-- Klubi lisamine
 		
 		begin try
 			if		(select count(*) from klubid where nimi = 'Osav Oda') = 1
-			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on olemas', 'OK', praktikum_2_uus_klubi, praktikum_2_uus_klubi, praktikum_2_jr);
-			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'on puudu', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+			then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" klubi "Osav Oda" lisamine', 'klubi on olemas', 'OK', praktikum_2_uus_klubi, praktikum_2_uus_klubi, praktikum_2_jr);
+			else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" klubi "Osav Oda" lisamine', 'klubi on puudu', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" ', 'Automaatkontrollis on viga!', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+			case
+				when 	not exists (select * from systable where table_name = 'Klubid')
+				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Tabelit "Klubid" pole olemas', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+				when 	not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('klubid'))
+				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Veergu "Nimi" pole olemas', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+				else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+			end;
+			
 		end catch;
 		
 		-- partii check
@@ -410,10 +430,13 @@ create procedure teine_praktikum()
 			insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendust ei ole', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
 		end try
 		begin catch
-			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Automaatkontrollis on viga!', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
-			else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	praktikum_2_vastavus_check, 	praktikum_2_vastavus_check, praktikum_2_jr);
-			endif;
+			case
+				when	not exists (select * from systable where table_name = 'Turniirid')
+				then	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Tabelit "Turniirid" pole olemas', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
+				when 	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
+				then	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Veergu "Lopphetk" pole olemas', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
+				else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	praktikum_2_vastavus_check, 	praktikum_2_vastavus_check, praktikum_2_jr);
+			end;
 		end catch;		
 	end;
 
