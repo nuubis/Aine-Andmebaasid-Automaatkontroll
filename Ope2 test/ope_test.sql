@@ -25,7 +25,7 @@ if 	exists (select * from sysprocedure where proc_name = 'function_liida') 					
 if 	exists (select * from sysprocedure where proc_name = 'function_klubisuurus') 						then drop function function_klubisuurus 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'procedure_uus_isik') 						then drop function procedure_uus_isik 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'procedure_top10') 						then drop function procedure_top10 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'view_edetabel') 						then drop function view_edetabel 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'view_edetabelid') 						then drop function view_edetabelid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_partiid') 						then drop function view_partiid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_isikudklubid') 						then drop function view_isikudklubid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_punktid') 						then drop function view_punktid 						endif;
@@ -943,26 +943,58 @@ create procedure m_view_keskminepartii()
 		
 	end;
 
-create procedure view_edetabel()
+create procedure view_edetabelid()
 	begin
 		-- vaade v_edetabel
 		begin try
-			if 		not exists (select * from systable where table_name = 'v_edetabel')
-			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			if 		not exists (select * from systable where table_name = 'v_edetabelid')
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid"', 'ei ole olemas', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
 					return;
-			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid"', 'on olemas', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Vaade "v_edetabel"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabelid"', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
 		end catch;
 		
 		
-		call check_column('v_edetabel', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_edetabel', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_edetabel', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_edetabel', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_edetabel', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_edetabelid')) = 5
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" veergude arv', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" veergude arv', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		-- id 71, turniir 43 = 1.5
+		begin try
+			if 		(select punkte from v_edetabelid where id = 71 and turniir = 43) = 1.5
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Mets, Arvo punktid turniiril 43', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Mets, Arvo punktid turniiril 43', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabel" Mets, Arvo punktid turniiril 43', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
+		
+		begin try
+			if 		(select punkte from v_edetabelid where id = 157 and turniir = 43) = 0.0
+			then 	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Mets Arvo punktid turniiril 43', 'on õige', 'OK', praktikum_5, praktikum_5, '', praktikum_5_jr);
+			else	insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Mets Arvo punktid turniiril 43', 'on vale', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Kirves Kristi punktid turniiril 43', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, '', praktikum_5_jr);
+		end catch;
 	end;
 	
 create procedure view_punktid()
@@ -1126,10 +1158,8 @@ create procedure käivita(versioon int)
 		endif;
 
 		if versioon >= 5 then
-			call view_edetabel();
+			call view_edetabelid();
 			call view_punktid();
-			call view_partiid();
-			call view_isikudklubid();
 			call function_liida();
 			call function_klubisuurus();
 			call procedure_uus_isik();
