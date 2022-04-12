@@ -1,5 +1,5 @@
 -- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn), 5=kodutöö 5(?õn)
-create or replace variable versioon int = 2;
+create or replace variable versioon int = 5;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
 if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
@@ -379,7 +379,7 @@ create procedure teine_praktikum()
 					then insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Tabelit "Klubid" pole olemas', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
 					when not exists (select * from syscolumn where column_name = 'Asukoht' and table_id = find_table_id('Klubid'))
 					then insert Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Veergu "Asukoht" pole olemas', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
-					else insert Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
+					else insert Staatus values ('Praktikum', 'Tabelis "Klubid" Veerg "Asukoht" suurus', 'Automaatkontrollis on muu viga!', 'VIGA', praktikum_2_klubid_100*0, praktikum_2_klubid_100, praktikum_2_jr);
 				end;
 			end catch;
 			
@@ -399,7 +399,7 @@ create procedure teine_praktikum()
 				when 	not exists (select * from syscolumn where column_name = 'eesnimi' and table_id = find_table_id('Isikud'))
 				or 		not exists (select * from syscolumn where column_name = 'perenimi' and table_id = find_table_id('Isikud'))
 				then 	insert Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Veergu "eesnimi" või "perenimi" pole olemas', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
-				else 	insert Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
+				else 	insert Staatus values ('Praktikum', 'Tabelis "Isikud" Isiku "Irys" perenime muutmine', 'Automaatkontrollis on muu viga!', 'VIGA', praktikum_2_isikud_perenimi*0, praktikum_2_isikud_perenimi, praktikum_2_jr);
 			end;
 		end catch;
 		
@@ -417,7 +417,7 @@ create procedure teine_praktikum()
 				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Tabelit "Klubid" pole olemas', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
 				when 	not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('klubid'))
 				then 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Veergu "Nimi" pole olemas', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
-				else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Automaatkontrollis on muu viga! - kirjuta arendajale', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
+				else 	insert 	Staatus values ('Praktikum', 'Tabelis "Klubid" Klubi "Osav Oda" lisamine', 'Automaatkontrollis on muu viga!', 'VIGA', praktikum_2_uus_klubi*0, praktikum_2_uus_klubi, praktikum_2_jr);
 			end;
 			
 		end catch;
@@ -432,7 +432,7 @@ create procedure teine_praktikum()
 		begin catch
 			case
 				when	not exists (select * from systable where table_name = 'Turniirid')
-				then	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Tabelit "Turniirid" pole olemas', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
+				then	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
 				when 	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
 				then	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'Veergu "Lopphetk" pole olemas', 'VIGA', praktikum_2_vastavus_check*0, 	praktikum_2_vastavus_check, praktikum_2_jr);
 				else	insert Staatus values ('Praktikum', 'Tabel "Partiid" check Valge_tulemus + Musta_tulemus', 'kitsendus on olemas', 'OK', 	praktikum_2_vastavus_check, 	praktikum_2_vastavus_check, praktikum_2_jr);
@@ -451,49 +451,73 @@ create procedure teine_kodutöö()
 		-- Tabel partiid veerg kokkuvõte
 		begin try
 			if 		exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('partiid')) 
-			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'ei ole kustutatud.', 'VIGA', kodutöö_2_partiid_kokkuvõte*0, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote" ', 'on kustutatud.', 'OK', kodutöö_2_partiid_kokkuvõte, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote"', 'ei ole kustutatud.', 'VIGA', kodutöö_2_partiid_kokkuvõte*0, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veerg "Kokkuvote"', 'on kustutatud.', 'OK', kodutöö_2_partiid_kokkuvõte, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote" ', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_partiid_kokkuvõte*0, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
+			case
+				when	not exists (select * from systable where table_name = 'Partiid')
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote"', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_partiid_kokkuvõte*0, 	kodutöö_2_partiid_kokkuvõte, praktikum_2_jr);
+				else	insert 	Staatus values ('Iseseisev', 'Tabel "Partiid" Veergu "Kokkuvote"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_partiid_kokkuvõte*0, kodutöö_2_partiid_kokkuvõte, kodutöö_2_jr);
+			end;
+			
 		end catch;
 		
 		-- Tabel klubid klubi asukoha muutmine
 		begin try
 			if 		(select asukoht from klubid where nimi = 'Valge mask') = 'Valga'
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask" asukoha muutmine', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
 			endif;
 		end try
 		begin catch
 			begin try
 				if 		(select asulad.nimi from asulad, klubid where klubid.nimi = 'Valge mask' and klubid.asula = asulad.id) = 'Valga'
-				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask"', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubi "Valge mask" asukoha muutmine', 'asukoht on õige', 'OK', kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask asukoha muutmine"', 'asukoht on vale', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+				case
+					when	not exists (select * from systable where table_name = 'Klubid')
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'Tabelit "Klubid" ei ole olemas', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+					when	not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('klubid')) and versioon = 3
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'Veergu "Asukoht" ei ole olemas', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+					when	not exists (select * from systable where table_name = 'Asulad') and versioon > 3
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'Tabelit "Asulad" ei ole olemas', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+					when	not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('asulad'))
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'Veergu "Asula" ei ole olemas', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+					else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Klubid" Klubid "Valge mask" asukoha muutmine', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_klubi_asukoha_muutmine*0, kodutöö_2_klubi_asukoha_muutmine, kodutöö_2_jr);
+				end;
+				
 			end catch;
 		end catch;
 		
 		-- Tabel isikud isiku klubi muutmine
 		begin try
 			if 		(select klubis from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', kodutöö_2_isiku_klubi_muutmine, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'klubi on õige.', 'OK', kodutöö_2_isiku_klubi_muutmine, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'klubi on vale.', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
 			endif;
 		end try
 		begin catch
 			begin try 
 				if 		(select klubi from isikud where eesnimi = 'Siim' and perenimi = 'Susi') = 51
-				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on õige.', 'OK', kodutöö_2_isiku_klubi_muutmine, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'klubi on vale.', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'klubi on õige.', 'OK', kodutöö_2_isiku_klubi_muutmine, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'klubi on vale.', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+				case
+					when	not exists (select * from systable where table_name = 'Isikud')
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'Tabelit "Isikud" ei ole olemas', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+					when	not exists (select * from syscolumn where column_name = 'eesnimi' and table_id = find_table_id('isikud'))
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'Veergu "Eesnimi" ei ole olemas', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+					when	not exists (select * from syscolumn where column_name = 'perenimi' and table_id = find_table_id('isikud'))
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'Veergu "Perenimi" ei ole olemas', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+					else	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Isiku "Siim Susi" klubi muutmine', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+				end;
 			end catch;
 		end catch;
 		
@@ -512,7 +536,11 @@ create procedure teine_kodutöö()
 				endif;
 			end try
 			begin catch
-				insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
+				case
+					when	not exists (select * from systable where table_name = 'Isikud')
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Tabelit "Isikud" ei ole olemas', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+					else	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
+				end;
 			end catch;
 		end catch;
 		
@@ -525,10 +553,15 @@ create procedure teine_kodutöö()
 			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
 		end try
 		begin catch
-			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
-			endif;
+			case
+				when	not exists (select * from systable where table_name = 'Partiid')
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				when	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('Partiid'))
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				when	exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('Partiid')) and versioon > 2
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
+			end;
 		end catch;
 		
 		-- lopphetk = algushetk 
@@ -540,10 +573,15 @@ create procedure teine_kodutöö()
 			delete from partiid where valge_tulemus = 1 and musta_tulemus = 1;
 		end try
 		begin catch
-			if 		not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('partiid'))
-			then 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
-			else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
-			endif;
+			case
+				when	not exists (select * from systable where table_name = 'Partiid')
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				when	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('Partiid'))
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				when	exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('Partiid')) and versioon > 2
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
+			end;
 		end catch;
 				
 			
@@ -575,11 +613,19 @@ create procedure teine_kodutöö()
 						delete from turniirid where nimi = 'Ajakontroll Check1';	
 					end try
 					begin catch
-						if 		not exists (select * from syscolumn where column_name = 'Alguskuupaev' and table_id = find_table_id('turniirid'))
-						or 		not exists (select * from syscolumn where column_name = 'Loppkuupaev' and table_id = find_table_id('turniirid'))
-						then 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
-						else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
-						endif;
+						case
+							when	not exists (select * from systable where table_name = 'Turniirid')
+							then	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+							when	not exists (select * from syscolumn where column_name = 'alguskuupaev' and table_id = find_table_id('Turniirid'))
+							then	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Veergu "Alguskuupaev" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+							when	not exists (select * from syscolumn where column_name = 'loppkuupaev' and table_id = find_table_id('Turniirid'))
+							then	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+							when	not exists (select * from syscolumn where column_name = 'asukoht' and table_id = find_table_id('Turniirid')) and versioon = 3
+							then	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Veergu "Asukoht" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+							when	not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('Turniirid')) and versioon > 3
+							then	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', 'Veergu "Asula" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_alguskuupäev_suurem*0, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+							else 	insert Staatus values ('Iseseisev', 'Tabel "Turniirid" check Alguskuupaev <= Loppkuupaev', '-',  'OK', 	kodutöö_2_ajakontroll_alguskuupäev_suurem, 	kodutöö_2_ajakontroll_alguskuupäev_suurem, kodutöö_2_jr);
+						end;
 					end catch;
 				end catch;
 			end catch;
