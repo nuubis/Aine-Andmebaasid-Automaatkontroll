@@ -523,14 +523,14 @@ create procedure teine_kodutöö()
 		
 		-- Tabel Isikud lisamine klubisse Osav Oda
 		begin try
-			if 		(select count(*) from isikud where klubis = 62) = 5
+			if 		(select count(*) from isikud where klubis = (select id from klubid where nimi = 'Osav Oda')) = 6
 			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', kodutöö_2_isikute_lisamine, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 			endif;
 		end try
 		begin catch
 			begin try
-				if 		(select count(*) from isikud where klubi = 62) = 5
+				if 		(select count(*) from isikud where klubis = (select id from klubid where nimi = "Osav Oda")) = 6
 				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', kodutöö_2_isikute_lisamine, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 				endif;
@@ -1061,7 +1061,7 @@ create procedure view_edetabelid()
 		
 		
 		call check_column('v_edetabelid', 'id', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
-		call check_column('v_edetabelid', 'isik_nimi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
+		call check_column('v_edetabelid', 'mangija', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_edetabelid', 'klubi', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_edetabelid', 'turniir', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
 		call check_column('v_edetabelid', 'punkte', praktikum_5, praktikum_5_jr, 'Praktikum', 'Vaade');
@@ -1258,9 +1258,9 @@ create	procedure procedure_top10()
 		end catch;
 
 		begin try
-			create	table #Temp (id integer not null default autoincrement, mangija varchar(102), punkte numeric(5,1));
+			create	table #Temp (id integer not null default autoincrement, punkte numeric(5,1), mangija varchar(102));
 			unload 	select * from sp_top10(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
-			load 	table #Temp (mangija, punkte) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+			load 	table #Temp (punkte, mangija) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
 
 			if 		(select mangija from #Temp where id = 1) = 'Maasikas, Malle' 
 			then  	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', kodutöö_5_sp_top10_tulemus, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
