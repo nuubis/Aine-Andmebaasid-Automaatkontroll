@@ -538,7 +538,7 @@ create procedure teine_kodutöö()
 			begin catch
 				case
 					when	not exists (select * from systable where table_name = 'Isikud')
-					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Tabelit "Isikud" ei ole olemas', 'VIGA', kodutöö_2_isiku_klubi_muutmine*0, kodutöö_2_isiku_klubi_muutmine, kodutöö_2_jr);
+					then	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Tabelit "Isikud" ei ole olemas', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 					else	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 				end;
 			end catch;
@@ -1085,7 +1085,7 @@ create procedure view_edetabelid()
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Praktikum', 'Vaade "v_edetabel" Mets, Arvo punktid turniiril 43', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, praktikum_5_jr);
+			insert Staatus values ('Praktikum', 'Vaade "v_edetabelid" Mets, Arvo punktid turniiril 43', 'Automaatkontrollis on viga!', 'VIGA', praktikum_5*0, praktikum_5, praktikum_5_jr);
 		end catch;
 		
 		begin try
