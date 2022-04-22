@@ -555,11 +555,11 @@ create procedure teine_kodutöö()
 		begin catch
 			case
 				when	not exists (select * from systable where table_name = 'Partiid')
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
 				when	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('Partiid'))
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
 				when	exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('Partiid')) and versioon > 2
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_väiksem*0, 	kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
 				else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_ajakontroll_lopphetk_väiksem, kodutöö_2_jr);
 			end;
 		end catch;
@@ -575,11 +575,11 @@ create procedure teine_kodutöö()
 		begin catch
 			case
 				when	not exists (select * from systable where table_name = 'Partiid')
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Tabelit "Partiid" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
 				when	not exists (select * from syscolumn where column_name = 'lopphetk' and table_id = find_table_id('Partiid'))
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veergu "Lopphetk" ei ole olemas', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
 				when	exists (select * from syscolumn where column_name = 'kokkuvote' and table_id = find_table_id('Partiid')) and versioon > 2
-				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, 'Veerg lopphetk on täpitähega.', kodutöö_2_jr);
+				then	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', 'Veerg "Kokkuvote" ei ole kustutatud', 'VIGA', kodutöö_2_ajakontroll_lopphetk_võrdub*0, 	kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
 				else 	insert Staatus values ('Iseseisev', 'Tabel "Partiid" check Lopphetk > algushetk', '-', 'OK', kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_ajakontroll_lopphetk_võrdub, kodutöö_2_jr);
 			end;
 		end catch;
