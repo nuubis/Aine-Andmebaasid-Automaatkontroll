@@ -20,7 +20,7 @@ if 	exists (select * from sysprocedure where proc_name = 'check_column') 						t
 if 	exists (select * from sysprocedure where proc_name = 'view_keskminepartii') 						then drop function view_keskminepartii 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_turniiripartiid') 						then drop function view_turniiripartiid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'view_klubipartiikogused') 						then drop function view_klubipartiikogused 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'm_view_keskminepartii') 						then drop function m_view_keskminepartii 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'mv_partiide_arv_valgetega') 						then drop function mv_partiide_arv_valgetega 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'function_liida') 						then drop function function_liida 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'function_klubisuurus') 						then drop function function_klubisuurus 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'procedure_uus_isik') 						then drop function procedure_uus_isik 						endif;
@@ -567,20 +567,20 @@ create procedure teine_kodutöö()
 		
 		-- Tabel Isikud lisamine klubisse Osav Oda
 		begin try
-			if 		(select count(*) from isikud where klubi = (select id from klubid where nimi = 'Osav Oda')) = 5
-			or		(versioon > 4 and (select count(*) from isikud where klubi = (select id from klubid where nimi = 'Osav Oda')) = 6)
+			if 		(versioon < 5 and (select count(*) from isikud where klubi = (select id from klubid where nimi = 'Osav Oda')) >= 5)
+			or		(versioon > 4 and (select count(*) from isikud where klubi = (select id from klubid where nimi = 'Osav Oda')) >= 6)
 			
 			then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', kodutöö_2_isikute_lisamine, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
-			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
+			else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole piisavalt lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 			endif;
 		end try
 		begin catch
 			begin try
-				if 		(select count(*) from isikud where klubis = (select id from klubid where nimi = 'Osav Oda')) = 5
-				or		(versioon > 4 and (select count(*) from isikud where klubis = (select id from klubid where nimi = 'Osav Oda')) = 6)
+				if 		(versioon < 5 and (select count(*) from isikud where klubis = (select id from klubid where nimi = 'Osav Oda')) >= 5)
+				or		(versioon > 4 and (select count(*) from isikud where klubis = (select id from klubid where nimi = 'Osav Oda')) >= 6)
 				
 				then 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmed on olemas.', 'OK', kodutöö_2_isikute_lisamine, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
-				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
+				else 	insert 	Staatus values ('Iseseisev', 'Tabelis "Isikud" Klubi "Osav Oda"', 'liikmeid ei ole piisavalt lisatud', 'VIGA', kodutöö_2_isikute_lisamine*0, kodutöö_2_isikute_lisamine, kodutöö_2_jr);
 				endif;
 			end try
 			begin catch
@@ -784,7 +784,7 @@ create procedure kolmas_praktikum()
 		
 		-- tabeli asulad andmed
 		begin try
-			if 		(select count(*) from asulad) = 10
+			if 		(select count(*) from asulad) >= 10
 			then 	insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'on olemas', 'OK', praktikum_3_asulad_andmed, praktikum_3_asulad_andmed, praktikum_3_jr);
 			else	insert Staatus values ('Praktikum', 'Tabel "Asulad" andmed', 'on puudu', 'VIGA', praktikum_3_asulad_andmed*0, praktikum_3_asulad_andmed, praktikum_3_jr);
 			endif;
@@ -1086,7 +1086,7 @@ create procedure view_keskminepartii()
 		
 	end;
 	
-create procedure m_view_keskminepartii()
+create procedure mv_partiide_arv_valgetega()
 
 	begin
 		-- vaade mv_partiide_arv_valgetega
@@ -1120,11 +1120,6 @@ create procedure m_view_keskminepartii()
 			refresh materialized view mv_partiide_arv_valgetega;
 		end try
 		begin catch
-			--case
-			--	when
-			--	then
-			--	else
-			--end;
 		end catch;
 				
 		-- 0
@@ -1598,7 +1593,7 @@ create procedure käivita(versioon int)
 			call view_turniiripartiid();
 			call view_klubipartiikogused();
 			call view_keskminepartii();
-			call m_view_keskminepartii();
+			call mv_partiide_arv_valgetega();
 		endif;
 
 		if versioon >= 5 then
