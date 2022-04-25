@@ -173,18 +173,18 @@ create or replace variable kodutöö_5_sp_top10_olemasolu numeric = 0.2;
 create or replace variable kodutöö_5_sp_top10_tulemus numeric = 0.2;
 
 -- kodutöö 6 punktid
-create or replace variable kodutöö_6 numeric = 1;
-create or replace variable kodutöö_6_ix_riiginimi_olemasolu numeric = 0.09;
-create or replace variable kodutöö_6_ix_suurus_olemasolu numeric = 0.08;
-create or replace variable kodutöö_6_klubitud_olemasolu numeric = 0.01;
+create or replace variable kodutöö_6 numeric = 2;
+create or replace variable kodutöö_6_ix_riiginimi_olemasolu numeric = 0.2;
+create or replace variable kodutöö_6_ix_suurus_olemasolu numeric = 0.2;
+create or replace variable kodutöö_6_klubitud_olemasolu numeric = 0.18;
 
-create or replace variable kodutöö_6_tg_partiiaeg numeric = 0.2;
-create or replace variable kodutöö_6_tg_partiiaeg_olemasolu numeric = 0.1;
-create or replace variable kodutöö_6_tg_partiiaeg_tulemus numeric = 0.1;
+create or replace variable kodutöö_6_tg_partiiaeg numeric = 0.5;
+create or replace variable kodutöö_6_tg_partiiaeg_olemasolu numeric = 0.25;
+create or replace variable kodutöö_6_tg_partiiaeg_tulemus numeric = 0.25;
 
-create or replace variable kodutöö_6_tg_klubiolemasolu numeric = 0.2;
-create or replace variable kodutöö_6_tg_klubiolemasolu_olemasolu numeric = 0.1;
-create or replace variable kodutöö_6_tg_klubiolemasolu_tulemus numeric = 0.1;
+create or replace variable kodutöö_6_tg_klubiolemasolu numeric = 0.5;
+create or replace variable kodutöö_6_tg_klubiolemasolu_olemasolu numeric = 0.25;
+create or replace variable kodutöö_6_tg_klubiolemasolu_tulemus numeric = 0.25;
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
