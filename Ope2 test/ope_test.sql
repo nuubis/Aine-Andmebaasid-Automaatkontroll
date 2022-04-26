@@ -342,7 +342,7 @@ create 	procedure arvuta_punktid(versioon int)
 				set kodu_max_punktid = 2;
 		endif;
 		if		versioon = 6 then
-				set kodu_max_punktid = 1;
+				set kodu_max_punktid = 2;
 		endif;
 		
 		if 		versioon = 2 then
@@ -1059,7 +1059,7 @@ create procedure view_keskminepartii()
 		
 		-- vaate kirjete arv 
 		begin try
-			if 		(select count(*) from v_keskminepartii) = 5
+			if 		(select count(*) from v_keskminepartii) >= 5
 			then 	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on õige', 'OK', kodutöö_4_v_keskminepartii_kirjete_arv, kodutöö_4_v_keskminepartii_kirjete_arv, kodutöö_4_jr);
 			else	insert Staatus values ('Kodutöö', 'Vaade "v_keskminepartii" kirjete arv', 'on vale', 'VIGA', kodutöö_4_v_keskminepartii_kirjete_arv*0, kodutöö_4_v_keskminepartii_kirjete_arv, kodutöö_4_jr);
 			endif;
