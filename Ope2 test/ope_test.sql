@@ -1561,13 +1561,13 @@ create procedure trigger_klubi_olemasolu ()
 					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabelit "Isikud" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
 					when	not exists (select * from syscolumn where column_name = 'nimi' and table_id = find_table_id('Klubid'))
 					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Klubid" veergu "nimi" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
-					when	not exists (select * from syscolumn where column_name = 'Eesnimi' and table_id = find_table_id('Klubid'))
-					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Klubid" veergu "Eesnimi" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
-					when	not exists (select * from syscolumn where column_name = 'Perenimi' and table_id = find_table_id('Klubid'))
-					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Klubid" veergu "Perenimi" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
-					when	not exists (select * from syscolumn where column_name = 'Klubis' and table_id = find_table_id('Klubid'))
-					and 	not exists (select * from syscolumn where column_name = 'Klubi' and table_id = find_table_id('Klubid'))
-					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Klubid" veergu "Klubis" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
+					when	not exists (select * from syscolumn where column_name = 'Eesnimi' and table_id = find_table_id('Isikud'))
+					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Isikud" veergu "Eesnimi" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
+					when	not exists (select * from syscolumn where column_name = 'Perenimi' and table_id = find_table_id('Isikud'))
+					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Isikud" veergu "Perenimi" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
+					when	not exists (select * from syscolumn where column_name = 'Klubis' and table_id = find_table_id('Isikud'))
+					and 	not exists (select * from syscolumn where column_name = 'Klubi' and table_id = find_table_id('Isikud'))
+					then	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Tabeli "Isikud" veergu "Klubis" ei ole olemas', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
 					else 	insert Staatus values ('Kodutöö', 'Triger "tg_klubi_olemasolu" isiku lisamine', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_6_tg_klubiolemasolu_tulemus*0, kodutöö_6_tg_klubiolemasolu_tulemus, kodutöö_6_jr);
 				end;
 			end catch;
