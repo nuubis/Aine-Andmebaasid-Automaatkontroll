@@ -1,5 +1,5 @@
--- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn), 5=kodutöö 5(?õn)
-create or replace variable versioon int = 6;
+-- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn), 5=kodutöö 5(?õn), 6=kodutöö 6, 7 = eksam
+create or replace variable versioon int = 7;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
 if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
@@ -62,6 +62,9 @@ create or replace variable kodutöö_punktid_5_jr int = 75;
 
 create or replace variable kodutöö_6_jr int = 84;
 create or replace variable kodutöö_punktid_6_jr int = 85;
+
+create or replace variable eksam_jr int = 94;
+create or replace variable eksam_punktid_jr int = 95;
 -- 100 kodutööde punktid
 create or replace variable kodu_lõpp_punktid int = 100;
 
@@ -344,7 +347,9 @@ create 	procedure arvuta_punktid(versioon int)
 		if		versioon = 6 then
 				set kodu_max_punktid = 2;
 		endif;
-		
+		if versioon = 7 then
+				set kodu_max_punktid = 14;
+		endif;
 		if 		versioon = 2 then
 			-- Protsendi arvutamine
 			select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
@@ -382,6 +387,11 @@ create 	procedure arvuta_punktid(versioon int)
 			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö' or ylesanne = 'Praktikum' or ylesanne = 'Iseseisev';
 			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodu_lõpp_punktid);
 		endif;
+		if 		versioon = 7 then
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Eksam';
+			insert into Staatus values ('Eksam','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodu_lõpp_punktid);
+		endif;
+		
 	end;
 
 create procedure check_column(a_table_name varchar(100), a_column_name varchar(100), punktid numeric, jr int,
@@ -1576,6 +1586,12 @@ create procedure trigger_klubi_olemasolu ()
 		delete from isikud where eesnimi = 'Test_ees';
 	end;
 	
+create procedure eksam()
+	begin
+	
+	end;
+	
+	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
@@ -1610,7 +1626,9 @@ create procedure käivita(versioon int)
 			call trigger_partiiaeg();
 			call trigger_klubi_olemasolu();
 		endif;
-		
+		if versioon >= 7 then
+			call eksam();
+		endif;
 		call arvuta_punktid(versioon);
 		begin try
 			select min(sisestatud) into aeg from inimesed;
