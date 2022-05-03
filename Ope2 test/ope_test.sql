@@ -40,8 +40,8 @@ if 	exists (select * from sysprocedure where proc_name = 'eksam_view_kiirviik') 
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_klubisisesed_viigid') 						then drop function eksam_view_klubisisesed_viigid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_must1') 						then drop function eksam_view_must1 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_nimekiri_partiidest') 						then drop function eksam_view_nimekiri_partiidest 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_rohkem_kolmest') 						then drop function eksam_view_rohkem_kolmest 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_võit_must_valge') 						then drop function eksam_view_võit_must_valge 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
@@ -392,6 +392,24 @@ create or replace variable eksam_v_nimekiri_partiidest_musta_nimi numeric = 0.5;
 create or replace variable eksam_v_nimekiri_partiidest_veergude_arv numeric = 1;
 create or replace variable eksam_v_nimekiri_partiidest_kirjete_arv numeric = 1;
 create or replace variable eksam_v_nimekiri_partiidest_tulemus numeric = 3;
+
+create or replace variable eksam_v_rohkem_kolmest numeric = 7;
+create or replace variable eksam_v_rohkem_kolmest_olemasolu numeric = 1;
+create or replace variable eksam_v_rohkem_kolmest_isikuandmed numeric = 1;
+create or replace variable eksam_v_rohkem_kolmest_veergude_arv numeric = 1;
+create or replace variable eksam_v_rohkem_kolmest_kirjete_arv numeric = 1;
+create or replace variable eksam_v_rohkem_kolmest_tulemus numeric = 3;
+
+create or replace variable eksam_v_võit_must_valge numeric = 7;
+create or replace variable eksam_v_võit_must_valge_olemasolu numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_eesnimi numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_perenimi numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_partiisid_mustadega numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_partiisid_valgetega numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_veergude_arv numeric = 0.5;
+create or replace variable eksam_v_võit_must_valge_kirjete_arv numeric = 1;
+create or replace variable eksam_v_võit_must_valge_arvo_mets numeric = 2;
+create or replace variable eksam_v_võit_must_valge_toomas_umnik numeric = 1;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -2058,7 +2076,7 @@ create procedure eksam_view_klubisisesed_viigid()
 		begin try
 			if 		exists (select * from v_klubisisesed_viigid where klubinimi = 'Valge Mask' and viike = 2)
 			then 	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" Valge Mask 2 viiki', 'on olemas', 'OK', eksam_v_klubisisesed_viigid_tulemus, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
-			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"  Valge Mask 2 viiki', 'ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" Valge Mask 2 viiki', 'ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
 			endif;
 		end try
 		begin catch
@@ -2186,6 +2204,145 @@ create procedure eksam_view_nimekiri_partiidest()
 		end catch;		
 		
 	end;
+
+create procedure eksam_view_rohkem_kolmest()
+	begin
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_rohkem_kolmest')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"', 'ei ole olemas', 'VIGA', eksam_v_rohkem_kolmest*0, eksam_v_rohkem_kolmest, eksam_jr);
+					return;
+			else	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"', 'on olemas', 'OK', eksam_v_rohkem_kolmest_olemasolu, eksam_v_rohkem_kolmest_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_rohkem_kolmest*0, eksam_v_rohkem_kolmest, eksam_jr);
+			return;
+		end catch;
+		
+		call check_column('v_rohkem_kolmest', 'isikuandmed', eksam_v_rohkem_kolmest_isikuandmed, eksam_jr, 'Eksam', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_rohkem_kolmest')) = 1
+			then 	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" veergude arv', 'on õige', 'OK', eksam_v_rohkem_kolmest_veergude_arv, eksam_v_rohkem_kolmest_veergude_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" veergude arv', 'on vale', 'VIGA', eksam_v_rohkem_kolmest_veergude_arv*0, eksam_v_rohkem_kolmest_veergude_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_rohkem_kolmest_veergude_arv*0, eksam_v_rohkem_kolmest_veergude_arv, eksam_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_rohkem_kolmest) = 36
+			then 	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" kirjete arv', 'on õige', 'OK', eksam_v_rohkem_kolmest_kirjete_arv, eksam_v_rohkem_kolmest_kirjete_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" kirjete arv', 'on vale, peab olema 36', 'VIGA', eksam_v_rohkem_kolmest_kirjete_arv*0, eksam_v_rohkem_kolmest_kirjete_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_rohkem_kolmest_kirjete_arv*0, eksam_v_rohkem_kolmest_kirjete_arv, eksam_jr);
+		end catch;
+		
+		-- Puhasmaa, Nadja [Võitmatu Valge]
+		begin try
+			if 		exists (select * from v_rohkem_kolmest where isikuandmed = 'Puhasmaa, Nadja [Võitmatu Valge]')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest" Puhasmaa, Nadja [Võitmatu Valge]', 'on olemas', 'OK', eksam_v_rohkem_kolmest_tulemus, eksam_v_rohkem_kolmest_tulemus, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"  Puhasmaa, Nadja [Võitmatu Valge]', 'ei ole olemas', 'VIGA', eksam_v_rohkem_kolmest_tulemus*0, eksam_v_rohkem_kolmest_tulemus, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'isikuandmed' and table_id = find_table_id('v_rohkem_kolmest'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"  Puhasmaa, Nadja [Võitmatu Valge]', 'Veergu "isikuandmed" ei ole olemas', 'VIGA', eksam_v_rohkem_kolmest_tulemus*0, eksam_v_rohkem_kolmest_tulemus, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_rohkem_kolmest"  Puhasmaa, Nadja [Võitmatu Valge]', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_rohkem_kolmest_tulemus*0, eksam_v_rohkem_kolmest_tulemus, eksam_jr);
+			end;
+		end catch;		
+		
+	end;
+	
+create procedure eksam_view_võit_must_valge()
+	begin
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_võit_must_valge')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge"', 'ei ole olemas', 'VIGA', eksam_v_võit_must_valge*0, eksam_v_võit_must_valge, eksam_jr);
+					return;
+			else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge"', 'on olemas', 'OK', eksam_v_võit_must_valge_olemasolu, eksam_v_võit_must_valge_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge"', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_võit_must_valge*0, eksam_v_võit_must_valge, eksam_jr);
+			return;
+		end catch;
+		
+		call check_column('v_võit_must_valge', 'eesnimi', eksam_v_võit_must_valge_eesnimi, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_võit_must_valge', 'perenimi', eksam_v_võit_must_valge_perenimi, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_võit_must_valge', 'partiisid_mustadega', eksam_v_võit_must_valge_partiisid_mustadega, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_võit_must_valge', 'partiisid_valgetega', eksam_v_võit_must_valge_partiisid_valgetega, eksam_jr, 'Eksam', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_võit_must_valge')) = 4
+			then 	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" veergude arv', 'on õige', 'OK', eksam_v_võit_must_valge_veergude_arv, eksam_v_võit_must_valge_veergude_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" veergude arv', 'on vale', 'VIGA', eksam_v_võit_must_valge_veergude_arv*0, eksam_v_võit_must_valge_veergude_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_võit_must_valge_veergude_arv*0, eksam_v_võit_must_valge_veergude_arv, eksam_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_võit_must_valge) = 27
+			then 	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" kirjete arv', 'on õige', 'OK', eksam_v_võit_must_valge_kirjete_arv, eksam_v_võit_must_valge_kirjete_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" kirjete arv', 'on vale, peab olema 27', 'VIGA', eksam_v_võit_must_valge_kirjete_arv*0, eksam_v_võit_must_valge_kirjete_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_võit_must_valge_kirjete_arv*0, eksam_v_võit_must_valge_kirjete_arv, eksam_jr);
+		end catch;
+		
+		--
+		begin try
+			if 		exists (select * from v_võit_must_valge where eesnimi = 'Arvo' and perenimi = 'Mets' and partiisid_mustadega = 5 and partiisid_valgetega = 0)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'on olemas', 'OK', eksam_v_võit_must_valge_arvo_mets, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'ei ole olemas', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'eesnimi' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'Veergu "eesnimi" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'perenimi' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'Veergu "perenimi" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'partiisid_mustadega' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'Veergu "partiisid_mustadega" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'partiisid_valgetega' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'Veergu "partiisid_valgetega" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Arvo Mets partiid mustad 5 ja valged 0', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_võit_must_valge_arvo_mets*0, eksam_v_võit_must_valge_arvo_mets, eksam_jr);
+			end;
+		end catch;	
+
+		begin try
+			if 		exists (select * from v_võit_must_valge where eesnimi = 'Toomas' and perenimi = 'Umnik' and partiisid_mustadega = 4 and partiisid_valgetega = 2)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'on olemas', 'OK', eksam_v_võit_must_valge_toomas_umnik, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'ei ole olemas', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'eesnimi' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'Veergu "eesnimi" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'perenimi' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'Veergu "perenimi" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'partiisid_mustadega' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'Veergu "partiisid_mustadega" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'partiisid_valgetega' and table_id = find_table_id('v_võit_must_valge'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'Veergu "partiisid_valgetega" ei ole olemas', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_võit_must_valge" Toomas Umnik partiid mustad 4 ja valged 2', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_võit_must_valge_toomas_umnik*0, eksam_v_võit_must_valge_toomas_umnik, eksam_jr);
+			end;
+		end catch;	
+		
+	end;
 	
 create procedure käivita(versioon int)
 	begin
@@ -2231,7 +2388,7 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from systable where table_name = 'v_Must1') then set eksam_kord = eksam_kord+1; call eksam_view_must1(); endif;
 			--if 	exists (select * from systable where table_name = 'v_nimekiri_partiidest') then set eksam_kord = eksam_kord+1; call eksam_view_nimekiri_partiidest(); endif;
 			if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
-			--if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
+			if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
 			
 			--Eksam II vaated
 			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
