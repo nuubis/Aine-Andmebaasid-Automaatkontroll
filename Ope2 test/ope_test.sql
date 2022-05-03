@@ -32,6 +32,7 @@ if 	exists (select * from sysprocedure where proc_name = 'view_punktid') 						t
 if 	exists (select * from sysprocedure where proc_name = 'kuues_kodutöö') 						then drop function kuues_kodutöö 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'trigger_klubi_olemasolu') 						then drop function trigger_klubi_olemasolu 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'trigger_partiiaeg') 						then drop function trigger_partiiaeg 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
 
 -- Erinevate ülesannete järjekorrad
 -- 1-9
@@ -188,6 +189,9 @@ create or replace variable kodutöö_6_tg_partiiaeg_tulemus numeric = 0.25;
 create or replace variable kodutöö_6_tg_klubiolemasolu numeric = 0.5;
 create or replace variable kodutöö_6_tg_klubiolemasolu_olemasolu numeric = 0.25;
 create or replace variable kodutöö_6_tg_klubiolemasolu_tulemus numeric = 0.25;
+
+-- eksami punktid kokku 14=2x7
+create or replace variable eksam numeric = 7;
 
 -- Eelenvate praktikumide ja kodutööde punktide väärtuste panemine 0.01 peale
 --Praktikum ja kodutöö 2
@@ -1586,14 +1590,72 @@ create procedure trigger_klubi_olemasolu ()
 		delete from isikud where eesnimi = 'Test_ees';
 	end;
 	
-create procedure eksam()
+create procedure eksam_view_eelnevussuhe()
 	begin
-	
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_eelnevussuhe')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'ei ole olemas', 'VIGA', eksam*0, eksam, eksam_jr);
+					return;
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'on olemas', 'OK', eksam, eksam, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'Automaatkontrollis on viga!', 'VIGA', eksam*0, eksam, eksam_jr);
+			return;
+		end catch;
+		
+		
+		call check_column('v_eelnevussuhe', 'partii_id', eksam, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'valge', eksam, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'must', eksam, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'valge_tulemus', eksam, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'musta_tulemus', eksam, eksam_jr, 'Eksam', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_eelnevussuhe')) = 5
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'on õige', 'OK', eksam, eksam, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'on vale', 'VIGA', eksam*0, eksam, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', eksam*0, eksam, eksam_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_eelnevussuhe) >= 199
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'on õige', 'OK', eksam, eksam, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'on vale', 'VIGA', eksam*0, eksam, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam*0, eksam, eksam_jr);
+		end catch;
+		
+		-- 
+		begin try
+			if 		(select punkte from v_eelnevussuhe where id = 71 and turniir = 43) = 1.5
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" Mets, Arvo punktid turniiril 43', 'on õige', 'OK', eksam, eksam, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" Mets, Arvo punktid turniiril 43', 'on vale', 'VIGA', eksam*0, eksam, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'id' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" Mets, Arvo punktid turniiril 43', 'Veergu "id" ei ole olemas', 'VIGA', eksam*0, eksam, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'turniir' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" Mets, Arvo punktid turniiril 43', 'Veergu "turniir" ei ole olemas', 'VIGA', eksam*0, eksam, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" Mets, Arvo punktid turniiril 43', 'Automaatkontrollis on viga!', 'VIGA', eksam*0, eksam, eksam_jr);
+			end;
+			
+		end catch;		
 	end;
 	
 	
 create procedure käivita(versioon int)
 	begin
+		declare eksam_kord int = 0;
 		declare aeg datetime;
 		if versioon >= 2 then
 			call teine_praktikum();
@@ -1626,8 +1688,9 @@ create procedure käivita(versioon int)
 			call trigger_partiiaeg();
 			call trigger_klubi_olemasolu();
 		endif;
-		if versioon >= 7 then
-			call eksam();
+		if versioon > 7 then
+			if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
+			
 		endif;
 		call arvuta_punktid(versioon);
 		begin try
@@ -1639,6 +1702,100 @@ create procedure käivita(versioon int)
 			insert into staatus values ('Tudeng', 'Eesnimi puudub', 'Perenimi puudub', 'VIGA', praktikum_3*0, praktikum_3*0, tudengi_nimi);
 		end catch;
 	end;
+
+set option fire_triggers = 'off';
+if versioon = 7 then
+	begin try
+		delete 	partiid;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Partiid" kirjeid!')
+	end catch;
+
+	begin try
+		delete 	turniirid;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Turniirid" kirjeid!')
+	end catch;
+
+	begin try
+		delete 	isikud;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Isikud" kirjeid!')
+	end catch;
+
+	begin try
+		delete 	klubid;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Klubid" kirjeid!')
+	end catch;
+	
+	begin try
+		delete 	Asulad;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Asulad" kirjeid!')
+	end catch;
+	
+	begin try
+		delete 	Riigid;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada tabeli "Riigid" kirjeid!')
+	end catch;
+	
+	load 	table Asulad from 'C:\TEMP\asulad.txt' FORMAT ASCII DELIMITED BY  ',' ;
+	load 	table Turniirid from 'C:\TEMP\turniirid.txt' FORMAT ASCII DELIMITED BY ',' ;
+	load 	table Riigid from 'C:\TEMP\riigid.txt' FORMAT ASCII DELIMITED BY  ',' ;
+	
+	/*begin try
+		load 	table Asulad from 'C:\TEMP\asulad.txt' FORMAT ASCII DELIMITED BY  ',' ;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Asulad" kirjeid!')
+	end catch;
+	begin try
+		load 	table Klubid from 'C:\\TEMP\\klubid.txt' FORMAT ASCII DELIMITED BY ',';
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Klubid" kirjeid!')
+	end catch;
+	
+	begin try
+		load 	table Isikud from 'C:\TEMP\isikud.txt' FORMAT ASCII DELIMITED BY ',' ;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Isikud" kirjeid!')
+	end catch;
+	
+	begin try
+		load 	table Turniirid from 'C:\TEMP\turniirid.txt' FORMAT ASCII DELIMITED BY ',' ;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Turniirid" kirjeid!')
+	end catch;
+	
+	begin try
+		load 	table Partiid from 'C:\TEMP\partiid.txt' FORMAT ASCII DELIMITED BY  ',' ;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Partiid" kirjeid!')
+	end catch;
+	
+	begin try
+		load 	table Riigid from 'C:\TEMP\riigif.txt' FORMAT ASCII DELIMITED BY  ',' ;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud sisestada tabeli "Riigid" kirjeid!')
+	end catch;*/
+endif;
+set option fire_triggers = 'on';
+
+
+
 
 call	käivita(versioon);
 

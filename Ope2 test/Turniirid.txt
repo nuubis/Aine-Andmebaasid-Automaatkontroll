@@ -1,0 +1,5 @@
+41,Kolme klubi kohtumine,2005-01-12,2005-01-12,8
+42,Tartu lahtised meistrivõistlused 2005,2005-03-04,2005-03-17,1
+43,Viljandi lahtised meistrivõistlused 2006,2006-06-04,2006-06-04,10
+44,Eesti meistrivõistlused 2007,2007-09-01,2007-09-01,3
+47,Plekkkarikas 2010,2010-10-14,2010-10-14,9

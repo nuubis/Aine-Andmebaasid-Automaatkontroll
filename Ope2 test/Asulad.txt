@@ -1,0 +1,10 @@
+1,Tartu
+2,Valga
+3,Tallinn
+4,Pärnu
+5,Narva
+6,Viljandi
+7,Otepää
+8,Kambja
+9,Elva
+10,Viiratsi

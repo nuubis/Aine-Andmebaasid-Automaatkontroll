@@ -1,0 +1,14 @@
+50,Raudne Ratsu,3
+51,Laudnikud,1
+52,Pärnu Parimad,4
+53,Vabaettur,5
+54,Ajurebend,1
+55,Ruudu Liine,1
+56,Maletäht,3
+57,Võitmatu Valge,1
+58,Valge Mask,2
+59,Musta kivi kummardajad,1
+60,Chess,6
+61,Areng,3
+62,Osav oda,7
+65,Klubitud
