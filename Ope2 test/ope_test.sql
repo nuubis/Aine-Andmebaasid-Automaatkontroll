@@ -2380,18 +2380,56 @@ create procedure käivita(versioon int)
 			call trigger_klubi_olemasolu();
 		endif;
 		if versioon = 7 then
-			-- Eksam I vaated
+			-- Eksam I vaated - 8/8 tehtud
 			--if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
 			--if 	exists (select * from systable where table_name = 'v_kaotusi_rohkem_ühest') then set eksam_kord = eksam_kord+1; call eksam_kaotusi_rohkem_ühest(); endif;
 			--if 	exists (select * from systable where table_name = 'v_kiirviik') then set eksam_kord = eksam_kord+1; call eksam_view_kiirviik(); endif;
 			--if 	exists (select * from systable where table_name = 'v_klubisisesed_viigid') then set eksam_kord = eksam_kord+1; call eksam_view_klubisisesed_viigid(); endif;
 			--if 	exists (select * from systable where table_name = 'v_Must1') then set eksam_kord = eksam_kord+1; call eksam_view_must1(); endif;
 			--if 	exists (select * from systable where table_name = 'v_nimekiri_partiidest') then set eksam_kord = eksam_kord+1; call eksam_view_nimekiri_partiidest(); endif;
-			if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
-			if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
-			
-			--Eksam II vaated
+			--if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
 			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
+			
+			--Eksam I funktsioonid ja protseduurid
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			
+			--Eksam II vaated 1/8 tehtud
+			--if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
+			
+			--if 	exists (select * from systable where table_name = 'v_rohkemkahestkaotusest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkemkahestkaotusest(); endif;
+			--if 	exists (select * from systable where table_name = 'v_samaeesnimi') then set eksam_kord = eksam_kord+1; call eksam_view_samaeesnimi(); endif;
+			--if 	exists (select * from systable where table_name = 'v_sama_tähega_nimed') then set eksam_kord = eksam_kord+1; call eksam_view_sama_tähega_nimed(); endif;
+			--if 	exists (select * from systable where table_name = 'v_tulemused') then set eksam_kord = eksam_kord+1; call eksam_view_tulemused(); endif;
+			--if 	exists (select * from systable where table_name = 'v_valge1') then set eksam_kord = eksam_kord+1; call eksam_view_valge1(); endif;
+			--if 	exists (select * from systable where table_name = 'v_võrdne_summa') then set eksam_kord = eksam_kord+1; call eksam_view_võrdne_summa(); endif;
+			--if 	exists (select * from systable where table_name = 'v_vähemaltKaksViiki') then set eksam_kord = eksam_kord+1; call eksam_view_vähemaltKaksViiki(); endif;
+			
+			--Eksam II funktsioonid ja protseduurid
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
 			
 		endif;
 		call arvuta_punktid(versioon);
