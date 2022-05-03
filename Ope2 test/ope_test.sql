@@ -32,6 +32,50 @@ if 	exists (select * from sysprocedure where proc_name = 'view_punktid') 						t
 if 	exists (select * from sysprocedure where proc_name = 'kuues_kodutöö') 						then drop function kuues_kodutöö 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'trigger_klubi_olemasolu') 						then drop function trigger_klubi_olemasolu 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'trigger_partiiaeg') 						then drop function trigger_partiiaeg 						endif;
+-- Eksami vaated
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+-- Eksami funktsioonid
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+--Eksami protseduurid
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+
 
 -- Erinevate ülesannete järjekorrad
 -- 1-9
@@ -282,6 +326,21 @@ if versioon > 5 then -- 0.04
 	set kodutöö_5_sp_top10_olemasolu = 0.005;
 	set kodutöö_5_sp_top10_tulemus = 0.005;
 endif;
+
+-- Eksami punktid
+create or replace variable eksam numeric = 7;
+create or replace variable eksam_v_eelnevussuhe numeric = 7;
+create or replace variable eksam_v_eelnevussuhe_olemasolu numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_partii_id numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_valge numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_must numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_valge_tulemus numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_musta_tulemus numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_veergude_arv numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_kirjete_arv numeric = 0.5;
+create or replace variable eksam_v_eelnevussuhe_partii_1_1 numeric = 1;
+create or replace variable eksam_v_eelnevussuhe_partii_2_0 numeric = 1;
+create or replace variable eksam_v_eelnevussuhe_partii_0_2 numeric = 1;
 	
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
@@ -1586,33 +1645,134 @@ create procedure trigger_klubi_olemasolu ()
 		delete from isikud where eesnimi = 'Test_ees';
 	end;
 	
-create procedure eksam()
+create procedure eksam_view_eelnevussuhe()
 	begin
-	
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_eelnevussuhe')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'ei ole olemas', 'VIGA', eksam_v_eelnevussuhe*0, eksam_v_eelnevussuhe, eksam_jr);
+					return;
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'on olemas', 'OK', eksam_v_eelnevussuhe_olemasolu, eksam_v_eelnevussuhe_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe"', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe*0, eksam_v_eelnevussuhe, eksam_jr);
+			return;
+		end catch;
+		
+		
+		call check_column('v_eelnevussuhe', 'partii_id', eksam_v_eelnevussuhe_partii_id, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'valge', eksam_v_eelnevussuhe_valge, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'must', eksam_v_eelnevussuhe_must, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'valge_tulemus', eksam_v_eelnevussuhe_valge_tulemus, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_eelnevussuhe', 'musta_tulemus', eksam_v_eelnevussuhe_musta_tulemus, eksam_jr, 'Eksam', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_eelnevussuhe')) = 5
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'on õige', 'OK', eksam_v_eelnevussuhe_veergude_arv, eksam_v_eelnevussuhe_veergude_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'on vale', 'VIGA', eksam_v_eelnevussuhe_veergude_arv*0, eksam_v_eelnevussuhe_veergude_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe_veergude_arv*0, eksam_v_eelnevussuhe_veergude_arv, eksam_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_eelnevussuhe) >= 199
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'on õige', 'OK', eksam_v_eelnevussuhe_kirjete_arv, eksam_v_eelnevussuhe_kirjete_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'on vale', 'VIGA', eksam_v_eelnevussuhe_kirjete_arv*0, eksam_v_eelnevussuhe_kirjete_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe_kirjete_arv*0, eksam_v_eelnevussuhe_kirjete_arv, eksam_jr);
+		end catch;
+		
+		-- 
+		begin try
+			if 		exists (select * from v_eelnevussuhe where valge = 73 and must = 92 and valge_tulemus = 1 and musta_tulemus = 1)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'tulemused on õiged', 'OK', eksam_v_eelnevussuhe_partii_1_1, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'tulemused on vale', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'valge' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'Veergu "valge" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'must' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'Veergu "must" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'valge_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'Veergu "valge_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'musta_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'Veergu "musta_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 73 ja must 92', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe_partii_1_1*0, eksam_v_eelnevussuhe_partii_1_1, eksam_jr);
+			end;
+		end catch;		
+		
+		begin try
+			if 		exists (select * from v_eelnevussuhe where valge = 92 and must = 87 and valge_tulemus = 2 and musta_tulemus = 0)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'tulemused on õiged', 'OK', eksam_v_eelnevussuhe_partii_2_0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'tulemused on vale', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'valge' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'Veergu "valge" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'must' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'Veergu "must" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'valge_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'Veergu "valge_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'musta_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'Veergu "musta_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 92 ja must 87', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe_partii_2_0*0, eksam_v_eelnevussuhe_partii_2_0, eksam_jr);
+			end;
+		end catch;	
+		
+		begin try
+			if 		exists (select * from v_eelnevussuhe where valge = 71 and must = 93 and valge_tulemus = 0 and musta_tulemus = 2)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'tulemused on õiged', 'OK', eksam_v_eelnevussuhe_partii_0_2, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'tulemused on vale', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'valge' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'Veergu "valge" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'must' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'Veergu "must" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'valge_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'Veergu "valge_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'musta_tulemus' and table_id = find_table_id('v_eelnevussuhe'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'Veergu "musta_tulemus" ei ole olemas', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_eelnevussuhe" partii valge 71 ja must 93', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_eelnevussuhe_partii_0_2*0, eksam_v_eelnevussuhe_partii_0_2, eksam_jr);
+			end;
+		end catch;	
 	end;
 	
 	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
-		if versioon >= 2 then
+		declare eksam_kord int = 0;
+		if versioon >= 2 and versioon < 7 then
 			call teine_praktikum();
 			call teine_kodutöö();
 		endif;
 		
-		if versioon >= 3 then
+		if versioon >= 3 and versioon < 7 then
 			call kolmas_praktikum();
 			call kolmas_kodutöö();
 		endif;
 		
-		if versioon >= 4 then
+		if versioon >= 4 and versioon < 7 then
 			call view_turniiripartiid();
 			call view_klubipartiikogused();
 			call view_keskminepartii();
 			call mv_partiide_arv_valgetega();
 		endif;
 
-		if versioon >= 5 then
+		if versioon >= 5 and versioon < 7 then
 			call view_edetabelid();
 			call view_punktid();
 			call function_liida();
@@ -1621,13 +1781,14 @@ create procedure käivita(versioon int)
 			call procedure_top10();
 		endif;
 		
-		if versioon >= 6 then
+		if versioon = 6 then
 			call kuues_kodutöö();
 			call trigger_partiiaeg();
 			call trigger_klubi_olemasolu();
 		endif;
-		if versioon >= 7 then
-			call eksam();
+		if versioon = 7 then
+			if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
+			
 		endif;
 		call arvuta_punktid(versioon);
 		begin try
