@@ -37,7 +37,7 @@ if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuh
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_kaotusi_rohkem_ühest') 						then drop function eksam_view_kaotusi_rohkem_ühest 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_must_valge') 						then drop function eksam_view_must_valge 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_kiirviik') 						then drop function eksam_view_kiirviik 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_klubisisesed_viigid') 						then drop function eksam_view_klubisisesed_viigid 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
@@ -368,7 +368,14 @@ create or replace variable eksam_v_kiirviik_must numeric = 1;
 create or replace variable eksam_v_kiirviik_veergude_arv numeric = 1;
 create or replace variable eksam_v_kiirviik_kirjete_arv numeric = 1;
 create or replace variable eksam_v_kiirviik_tulemus numeric = 2;
-	
+
+create or replace variable eksam_v_klubisisesed_viigid numeric = 7;
+create or replace variable eksam_v_klubisisesed_viigid_olemasolu numeric = 1;
+create or replace variable eksam_v_klubisisesed_viigid_klubinimi numeric = 1;
+create or replace variable eksam_v_klubisisesed_viigid_viike numeric = 1;
+create or replace variable eksam_v_klubisisesed_viigid_veergude_arv numeric = 1;
+create or replace variable eksam_v_klubisisesed_viigid_kirjete_arv numeric = 1;
+create or replace variable eksam_v_klubisisesed_viigid_tulemus numeric = 2;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -1966,7 +1973,7 @@ create procedure eksam_view_kiirviik()
 		begin try
 			if 		(select count(*) from v_kiirviik) = 1
 			then 	insert Staatus values ('Eksam', 'Vaade "v_kiirviik" kirjete arv', 'on õige', 'OK', eksam_v_kiirviik_kirjete_arv, eksam_v_kiirviik_kirjete_arv, eksam_jr);
-			else	insert Staatus values ('Eksam', 'Vaade "v_kiirviik" kirjete arv', 'on vale, peab olema 26', 'VIGA', eksam_v_kiirviik_kirjete_arv*0, eksam_v_kiirviik_kirjete_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_kiirviik" kirjete arv', 'on vale, peab olema 1', 'VIGA', eksam_v_kiirviik_kirjete_arv*0, eksam_v_kiirviik_kirjete_arv, eksam_jr);
 			endif;
 		end try
 		begin catch
@@ -1987,6 +1994,64 @@ create procedure eksam_view_kiirviik()
 				when	not exists (select * from syscolumn where column_name = 'must' and table_id = find_table_id('v_kiirviik'))
 				then	insert Staatus values ('Eksam', 'Vaade "v_kiirviik"  valge 89 ja must 88', 'Veergu "must" ei ole olemas', 'VIGA', eksam_v_kiirviik_tulemus*0, eksam_v_kiirviik_tulemus, eksam_jr);
 				else	insert Staatus values ('Eksam', 'Vaade "v_kiirviik"  valge 89 ja must 88', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_kiirviik_tulemus*0, eksam_v_kiirviik_tulemus, eksam_jr);
+			end;
+		end catch;		
+		
+	end;
+	
+create procedure eksam_view_klubisisesed_viigid()
+	begin
+		begin try
+			if 		not exists (select * from systable where table_name = 'v_kiirviik')
+			then 	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"', 'ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid*0, eksam_v_klubisisesed_viigid, eksam_jr);
+					return;
+			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"', 'on olemas', 'OK', eksam_v_klubisisesed_viigid_olemasolu, eksam_v_klubisisesed_viigid_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_klubisisesed_viigid*0, eksam_v_klubisisesed_viigid, eksam_jr);
+			return;
+		end catch;
+		
+		call check_column('v_klubisisesed_viigid', 'klubinimi', eksam_v_klubisisesed_viigid_klubinimi, eksam_jr, 'Eksam', 'Vaade');
+		call check_column('v_klubisisesed_viigid', 'viike', eksam_v_klubisisesed_viigid_viike, eksam_jr, 'Eksam', 'Vaade');
+		
+		-- vaate veergude arv 
+		begin try
+			if 		(select count(*) from syscolumn where table_id = find_table_id('v_klubisisesed_viigid')) = 2
+			then 	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" veergude arv', 'on õige', 'OK', eksam_v_klubisisesed_viigid_veergude_arv, eksam_v_klubisisesed_viigid_veergude_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" veergude arv', 'on vale', 'VIGA', eksam_v_klubisisesed_viigid_veergude_arv*0, eksam_v_klubisisesed_viigid_veergude_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" veergude arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_klubisisesed_viigid_veergude_arv*0, eksam_v_klubisisesed_viigid_veergude_arv, eksam_jr);
+		end catch;
+		
+		-- vaate kirjete arv 
+		begin try
+			if 		(select count(*) from v_klubisisesed_viigid) = 6
+			then 	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" kirjete arv', 'on õige', 'OK', eksam_v_klubisisesed_viigid_kirjete_arv, eksam_v_klubisisesed_viigid_kirjete_arv, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" kirjete arv', 'on vale, peab olema 26', 'VIGA', eksam_v_klubisisesed_viigid_kirjete_arv*0, eksam_v_klubisisesed_viigid_kirjete_arv, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_klubisisesed_viigid_kirjete_arv*0, eksam_v_klubisisesed_viigid_kirjete_arv, eksam_jr);
+		end catch;
+		
+		-- 
+		begin try
+			if 		exists (select * from v_klubisisesed_viigid where klubinimi = 'Valge Mask' and viike = 2)
+			then 	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid" Valge Mask 2 viiki', 'on olemas', 'OK', eksam_v_klubisisesed_viigid_tulemus, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"  Valge Mask 2 viiki', 'ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
+			endif;
+		end try
+		begin catch
+			case
+				when	not exists (select * from syscolumn where column_name = 'klubinimi' and table_id = find_table_id('v_klubisisesed_viigid'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"  Valge Mask 2 viiki', 'Veergu "klubinimi" ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
+				when	not exists (select * from syscolumn where column_name = 'viike' and table_id = find_table_id('v_klubisisesed_viigid'))
+				then	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"  Valge Mask 2 viiki', 'Veergu "viike" ei ole olemas', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
+				else	insert Staatus values ('Eksam', 'Vaade "v_klubisisesed_viigid"  Valge Mask 2 viiki', 'Automaatkontrollis on viga!', 'VIGA', eksam_v_klubisisesed_viigid_tulemus*0, eksam_v_klubisisesed_viigid_tulemus, eksam_jr);
 			end;
 		end catch;		
 		
@@ -2028,11 +2093,18 @@ create procedure käivita(versioon int)
 			call trigger_klubi_olemasolu();
 		endif;
 		if versioon = 7 then
+			-- Eksam I vaated
 			--if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
 			--if 	exists (select * from systable where table_name = 'v_kaotusi_rohkem_ühest') then set eksam_kord = eksam_kord+1; call eksam_kaotusi_rohkem_ühest(); endif;
-			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
 			--if 	exists (select * from systable where table_name = 'v_kiirviik') then set eksam_kord = eksam_kord+1; call eksam_view_kiirviik(); endif;
-			if 	exists (select * from systable where table_name = 'v_kiirviik') then set eksam_kord = eksam_kord+1; call eksam_view_kiirviik(); endif;
+			if 	exists (select * from systable where table_name = 'v_klubisisesed_viigid') then set eksam_kord = eksam_kord+1; call eksam_view_klubisisesed_viigid(); endif;
+			--if 	exists (select * from systable where table_name = 'v_Must1') then set eksam_kord = eksam_kord+1; call eksam_view_must1(); endif;
+			--if 	exists (select * from systable where table_name = 'v_nimekiri_partiidest') then set eksam_kord = eksam_kord+1; call eksam_view_nimekiri_partiidest(); endif;
+			--if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
+			--if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
+			
+			--Eksam II vaated
+			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
 			
 		endif;
 		call arvuta_punktid(versioon);
