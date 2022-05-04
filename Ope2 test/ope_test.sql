@@ -42,39 +42,39 @@ if 	exists (select * from sysprocedure where proc_name = 'eksam_view_must1') 			
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_nimekiri_partiidest') 						then drop function eksam_view_nimekiri_partiidest 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_rohkem_kolmest') 						then drop function eksam_view_rohkem_kolmest 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_view_võit_must_valge') 						then drop function eksam_view_võit_must_valge 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_rohkemkahestkaotusest') 						then drop function eksam_view_rohkemkahestkaotusest 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_samaeesnimi') 						then drop function eksam_view_samaeesnimi 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_sama_tähega_nimed') 						then drop function eksam_view_sama_tähega_nimed 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_tulemused') 						then drop function eksam_view_tulemused 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_valge1') 						then drop function eksam_view_valge1 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_võrdne_summa') 						then drop function eksam_view_võrdne_summa 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_view_vähemaltKaksViiki') 						then drop function eksam_view_vähemaltKaksViiki 						endif;
 -- Eksami funktsioonid
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_must_viik_min') 						then drop function eksam_function_must_viik_min 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_mangija_aeg_turniiril') 						then drop function eksam_function_mangija_aeg_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_turniiril_kolmas') 						then drop function eksam_function_turniiril_kolmas 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_võitja_punktid_turniiril') 						then drop function eksam_function_võitja_punktid_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_lyhema_partii_mängijad') 						then drop function eksam_function_lyhema_partii_mängijad 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_viigimeister') 						then drop function eksam_function_viigimeister 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_parimKlubimängijaTurniiril') 						then drop function eksam_function_parimKlubimängijaTurniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_eelviimane') 						then drop function eksam_function_eelviimane 						endif;
 --Eksami protseduurid
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
-if 	exists (select * from sysprocedure where proc_name = 'eksam_view_eelnevussuhe') 						then drop function eksam_view_eelnevussuhe 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_ei_manginud') 						then drop function eksam_procedure_ei_manginud 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_kõige_rohkem_partiisid_turniiril') 						then drop function eksam_procedure_kõige_rohkem_partiisid_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_kõige_vähem_partiisid_turniiril') 						then drop function eksam_procedure_kõige_vähem_partiisid_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_mustadega_mängija_partiid_turniiril') 						then drop function eksam_procedure_mustadega_mängija_partiid_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_teine_kolmas') 						then drop function eksam_procedure_teine_kolmas 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_turniiri_kokkuvote') 						then drop function eksam_procedure_turniiri_kokkuvote 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_manguaeg_turniiril') 						then drop function eksam_procedure_manguaeg_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_võrdne_nime_pikkus') 						then drop function eksam_procedure_võrdne_nime_pikkus 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_asula_viigid') 						then drop function eksam_procedure_asula_viigid 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_pikima_partii_mängijad') 						then drop function eksam_procedure_pikima_partii_mängijad 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_valgetega_parem') 						then drop function eksam_procedure_valgetega_parem 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_must_viik') 						then drop function eksam_procedure_must_viik 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_rohkem_kui_2') 						then drop function eksam_procedure_rohkem_kui_2 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_mänguaeg_valgetega_turniiril') 						then drop function eksam_procedure_mänguaeg_valgetega_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_viik_klubikaaslasega') 						then drop function eksam_procedure_viik_klubikaaslasega 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_Vähem_kui_3') 						then drop function eksam_procedure_Vähem_kui_3 						endif;
 
 
 -- Erinevate ülesannete järjekorrad
@@ -2344,6 +2344,34 @@ create procedure eksam_view_võit_must_valge()
 		
 	end;
 	
+create	procedure procedure_top10()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_top10') 
+			then	insert Staatus values('Kodutöö', 'Protseduur "sp_top10"', 'ei ole olemas', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, kodutöö_5_jr);
+			return;
+			else	insert Staatus values('Kodutöö', 'Protseduur "sp_top10"', 'on olemas', 'OK', kodutöö_5_sp_top10_olemasolu, kodutöö_5_sp_top10_olemasolu, kodutöö_5_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Kodutöö', 'Protseduur "sp_top10"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, kodutöö_5_jr);
+		end catch;
+
+		begin try
+			create	table #Temp (id integer not null default autoincrement, punkte numeric(5,1), mangija varchar(102));
+			unload 	select * from sp_top10(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
+			load 	table #Temp (punkte, mangija) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+
+			if 		(select mangija from #Temp where id = 1) = 'Maasikas, Malle' 
+			then  	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', kodutöö_5_sp_top10_tulemus, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
+			else	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
+		end catch;
+	end;
+	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
@@ -2390,20 +2418,20 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
 			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
 			
-			--Eksam I funktsioonid ja protseduurid
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--Eksam I funktsioonid ja protseduurid 0/12
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_ei_manginud') then set eksam_kord = eksam_kord+1; call eksam_procedure_ei_manginud(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_kõige_rohkem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_kõige_rohkem_partiisid_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_kõige_vähem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_kõige_vähem_partiisid_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_mustadega_mängija_partiid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mustadega_mängija_partiid_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_teine_kolmas') then set eksam_kord = eksam_kord+1; call eksam_procedure_teine_kolmas(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_turniiri_kokkuvote') then set eksam_kord = eksam_kord+1; call eksam_procedure_turniiri_kokkuvote(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_manguaeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_manguaeg_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_võrdne_nime_pikkus') then set eksam_kord = eksam_kord+1; call eksam_procedure_võrdne_nime_pikkus(); endif;
 			
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_must_viik_min') then set eksam_kord = eksam_kord+1; call eksam_function_must_viik_min(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_aeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_mangija_aeg_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') then set eksam_kord = eksam_kord+1; call eksam_function_turniiril_kolmas(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_võitja_punktid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_võitja_punktid_turniiril(); endif;
 			
 			--Eksam II vaated 1/8 tehtud
 			--if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
@@ -2416,20 +2444,20 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from systable where table_name = 'v_võrdne_summa') then set eksam_kord = eksam_kord+1; call eksam_view_võrdne_summa(); endif;
 			--if 	exists (select * from systable where table_name = 'v_vähemaltKaksViiki') then set eksam_kord = eksam_kord+1; call eksam_view_vähemaltKaksViiki(); endif;
 			
-			--Eksam II funktsioonid ja protseduurid
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--Eksam II funktsioonid ja protseduurid 0/12
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_asula_viigid') then set eksam_kord = eksam_kord+1; call eksam_procedure_asula_viigid(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_pikima_partii_mängijad') then set eksam_kord = eksam_kord+1; call eksam_procedure_pikima_partii_mängijad(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_valgetega_parem') then set eksam_kord = eksam_kord+1; call eksam_procedure_valgetega_parem(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_must_viik') then set eksam_kord = eksam_kord+1; call eksam_procedure_must_viik(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_rohkem_kui_2') then set eksam_kord = eksam_kord+1; call eksam_procedure_rohkem_kui_2(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_mänguaeg_valgetega_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mänguaeg_valgetega_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_viik_klubikaaslasega') then set eksam_kord = eksam_kord+1; call eksam_procedure_viik_klubikaaslasega(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_Vähem_kui_3') then set eksam_kord = eksam_kord+1; call eksam_procedure_Vähem_kui_3(); endif;
 			
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_sp_must_valge(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_lyhema_partii_mängijad') then set eksam_kord = eksam_kord+1; call eksam_function_lyhema_partii_mängijad(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_viigimeister') then set eksam_kord = eksam_kord+1; call eksam_function_viigimeister(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_parimKlubimängijaTurniiril') then set eksam_kord = eksam_kord+1; call eksam_function_parimKlubimängijaTurniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_eelviimane') then set eksam_kord = eksam_kord+1; call eksam_function_eelviimane(); endif;
 			
 		endif;
 		call arvuta_punktid(versioon);
