@@ -410,6 +410,14 @@ create or replace variable eksam_v_võit_must_valge_veergude_arv numeric = 0.5;
 create or replace variable eksam_v_võit_must_valge_kirjete_arv numeric = 1;
 create or replace variable eksam_v_võit_must_valge_arvo_mets numeric = 2;
 create or replace variable eksam_v_võit_must_valge_toomas_umnik numeric = 1;
+
+-- Protseduurid
+create or replace variable eksam_sp_ei_manginud numeric = 7;
+create or replace variable eksam_sp_ei_manginud_olemasolu numeric = 1;
+create or replace variable eksam_sp_ei_manginud_sander numeric = 3;
+create or replace variable eksam_sp_ei_manginud_tatjana numeric = 3;
+
+
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -2344,31 +2352,46 @@ create procedure eksam_view_võit_must_valge()
 		
 	end;
 	
-create	procedure procedure_top10()
+create	procedure eksam_procedure_ei_manginud()
 	begin
 		begin try
-			if 		not exists (select * from sysprocedure where proc_name = 'sp_top10') 
-			then	insert Staatus values('Kodutöö', 'Protseduur "sp_top10"', 'ei ole olemas', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, kodutöö_5_jr);
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_ei_manginud') 
+			then	insert Staatus values('Eksam', 'Protseduur "sp_ei_manginud"', 'ei ole olemas', 'VIGA', eksam_sp_ei_manginud*0, eksam_sp_ei_manginud, eksam_jr);
 			return;
-			else	insert Staatus values('Kodutöö', 'Protseduur "sp_top10"', 'on olemas', 'OK', kodutöö_5_sp_top10_olemasolu, kodutöö_5_sp_top10_olemasolu, kodutöö_5_jr);
+			else	insert Staatus values('Eksam', 'Protseduur "sp_ei_manginud"', 'on olemas', 'OK', eksam_sp_ei_manginud_olemasolu, eksam_sp_ei_manginud_olemasolu, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Kodutöö', 'Protseduur "sp_top10"', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_top10*0, kodutöö_5_sp_top10, kodutöö_5_jr);
+			insert Staatus values ('Eksam', 'Protseduur "sp_ei_manginud"', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_ei_manginud*0, eksam_sp_ei_manginud, eksam_jr);
+			return;
 		end catch;
 
 		begin try
-			create	table #Temp (id integer not null default autoincrement, punkte numeric(5,1), mangija varchar(102));
-			unload 	select * from sp_top10(41) to 'C:\\TEMP\\kodutoo_check.txt' ENCODING 'UTF-8';
-			load 	table #Temp (punkte, mangija) from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
+			create	or replace table eksam (eesnimi varchar(100), perenimi varchar(100));
+			unload 	select * from sp_ei_manginud(44) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
+			load 	table eksam from 'C:\\TEMP\\eksam_check.txt';
 
-			if 		(select mangija from #Temp where id = 1) = 'Maasikas, Malle' 
-			then  	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', '-', 'OK', kodutöö_5_sp_top10_tulemus, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
-			else	insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
+			if 		exists (select * from eksam where eesnimi = 'Sander' and perenimi = 'Saabas')
+			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', '-', 'OK', eksam_sp_ei_manginud_sander, eksam_sp_ei_manginud_sander, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', eksam_sp_ei_manginud_sander*0, eksam_sp_ei_manginud_sander, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values('Kodutöö', 'Protseduur "sp_top10" sp_top10(41), esimene koht = Maasikas, Malle', 'Automaatkontrollis on viga!', 'VIGA', kodutöö_5_sp_top10_tulemus*0, kodutöö_5_sp_top10_tulemus, kodutöö_5_jr)
+			insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_ei_manginud_sander*0, eksam_sp_ei_manginud_sander, eksam_jr)
+		end catch;
+		
+		begin try
+			create	or replace table eksam (eesnimi varchar(100), perenimi varchar(100));
+			unload 	select * from sp_ei_manginud(43) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
+			load 	table eksam from 'C:\\TEMP\\eksam_check.txt';
+
+			if 		exists (select * from eksam where eesnimi = 'Tatjana' and perenimi = 'Umnaja')
+			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', '-', 'OK', eksam_sp_ei_manginud_tatjana, eksam_sp_ei_manginud_tatjana, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', 'Kirjete või veergude järjestus on vale.', 'VIGA', eksam_sp_ei_manginud_tatjana*0, eksam_sp_ei_manginud_tatjana, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "sp_ei_manginud" sp_ei_manginud(41), esimene koht = Maasikas, Malle', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_ei_manginud_tatjana*0, eksam_sp_ei_manginud_tatjana, eksam_jr)
 		end catch;
 	end;
 	
@@ -2419,7 +2442,7 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
 			
 			--Eksam I funktsioonid ja protseduurid 0/12
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_ei_manginud') then set eksam_kord = eksam_kord+1; call eksam_procedure_ei_manginud(); endif;
+			if 	exists (select * from sysprocedure where proc_name = 'sp_ei_manginud') then set eksam_kord = eksam_kord+1; call eksam_procedure_ei_manginud(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_kõige_rohkem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_kõige_rohkem_partiisid_turniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_kõige_vähem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_kõige_vähem_partiisid_turniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_mustadega_mängija_partiid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mustadega_mängija_partiid_turniiril(); endif;
