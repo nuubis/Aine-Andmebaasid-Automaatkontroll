@@ -426,6 +426,11 @@ create or replace variable eksam_sp_koige_vahem_partiisid_turniiril numeric = 7;
 create or replace variable eksam_sp_koige_vahem_partiisid_turniiril_olemasolu numeric = 1;
 create or replace variable eksam_sp_koige_vahem_partiisid_turniiril_ere1 numeric = 3;
 create or replace variable eksam_sp_koige_vahem_partiisid_turniiril_ere2 numeric = 3;
+
+create or replace variable eksam_sp_mustadega_mangija_partiid_turniiril numeric = 7;
+create or replace variable eksam_sp_mustadega_mangija_partiid_turniiril_olemasolu numeric = 1;
+create or replace variable eksam_sp_mustadega_mangija_partiid_turniiril_isik2 numeric = 3;
+create or replace variable eksam_sp_mustadega_mangija_partiid_turniiril_isik3 numeric = 3;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -2538,6 +2543,74 @@ create	procedure eksam_procedure_koige_vahem_partiisid_turniiril()
 		
 	end;
 	
+	
+create	procedure eksam_procedure_mustadega_mangija_partiid_turniiril()
+	begin
+		declare turniir1, turniir2, isik1, isik2, isik3 int;
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_mustadega_mangija_partiid_turniiril') 
+			then	insert Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril"', 'ei ole olemas', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril*0, eksam_sp_mustadega_mangija_partiid_turniiril, eksam_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril"', 'on olemas', 'OK', eksam_sp_mustadega_mangija_partiid_turniiril_olemasolu, eksam_sp_mustadega_mangija_partiid_turniiril_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril*0, eksam_sp_mustadega_mangija_partiid_turniiril, eksam_jr);
+			return;
+		end catch;
+		
+		begin try
+			select id into turniir1 from turniirid where nimi = 'Eesti meistrivõistlused 2007';
+		end try
+		begin catch
+			select id into turniir1 from turniirid where nimetus = 'Eesti meistrivõistlused 2007';
+		end catch;
+		
+		begin try
+			select id into isik1 from isikud where eesnimi = 'Toomas' and perenimi = 'Umnik';
+			select id into isik2 from isikud where eesnimi = 'Aljona' and perenimi = 'Aljas'; 
+			select id into isik3 from isikud where eesnimi = 'Pjotr' and perenimi = 'Pustota';
+		end try
+		begin catch
+		end catch;
+		
+		begin try
+			select id into turniir2 from turniirid where nimi = 'Kolme klubi kohtumine';
+		end try
+		begin catch
+			select id into turniir2 from turniirid where nimetus = 'Kolme klubi kohtumine';
+		end catch;
+
+		begin try
+			create	or replace table eksam (partii_id int, algushetk date, valge int, musta_tulemus int);
+			unload 	select * from sp_mustadega_mangija_partiid_turniiril(isik1, turniir1) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
+			load 	table eksam from 'C:\\TEMP\\eksam_check.txt';
+
+			if 		exists (select * from eksam where valge = isik2 and musta_tulemus = 2)
+			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Eesti meistrivõistlused 2007, partii: ' || isik1 ||', ' || isik2, 'on olemas', 'OK', eksam_sp_mustadega_mangija_partiid_turniiril_isik2, eksam_sp_mustadega_mangija_partiid_turniiril_isik2, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Eesti meistrivõistlused 2007, partii: ' || isik1 ||', ' || isik2, 'ei ole olemas', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril_isik2*0, eksam_sp_mustadega_mangija_partiid_turniiril_isik2, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Eesti meistrivõistlused 2007, partii: ' || isik1 ||', ' || isik2, 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril_isik2*0, eksam_sp_mustadega_mangija_partiid_turniiril_isik2, eksam_jr)
+		end catch;
+		
+		begin try
+			create	or replace table eksam (partii_id int, algushetk date, valge int, musta_tulemus int);
+			unload 	select * from sp_mustadega_mangija_partiid_turniiril(isik1, turniir2) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
+			load 	table eksam from 'C:\\TEMP\\eksam_check.txt';
+
+			if 		exists (select * from eksam where valge = isik3 and musta_tulemus = 1)
+			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Kolme klubi kohtumine, partii: ' || isik1 ||', ' || isik3, 'on olemas', 'OK', eksam_sp_mustadega_mangija_partiid_turniiril_isik3, eksam_sp_mustadega_mangija_partiid_turniiril_isik3, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Kolme klubi kohtumine, partii: ' || isik1 ||', ' || isik3, 'ei ole olemas', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril_isik3*0, eksam_sp_mustadega_mangija_partiid_turniiril_isik3, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "sp_mustadega_mangija_partiid_turniiril" turniiril: Kolme klubi kohtumine, partii: ' || isik1 ||', ' || isik3, 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_mustadega_mangija_partiid_turniiril_isik3*0, eksam_sp_mustadega_mangija_partiid_turniiril_isik3, eksam_jr)
+		end catch;
+		
+	end;
+	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
@@ -2584,21 +2657,20 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from systable where table_name = 'v_rohkem_kolmest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkem_kolmest(); endif;
 			--if 	exists (select * from systable where table_name = 'v_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_must_valge(); endif;
 			
-			--Eksam I funktsioonid ja protseduurid 2/12
+			--Eksam I funktsioonid ja protseduurid 4/12
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_ei_manginud') then set eksam_kord = eksam_kord+1; call eksam_procedure_ei_manginud(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_koige_rohkem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_koige_rohkem_partiisid_turniiril(); endif;
-			
-			if 	exists (select * from sysprocedure where proc_name = 'sp_koige_vahem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_koige_vahem_partiisid_turniiril(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_mustadega_mängija_partiid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mustadega_mängija_partiid_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_koige_vahem_partiisid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_koige_vahem_partiisid_turniiril(); endif;
+			if 	exists (select * from sysprocedure where proc_name = 'sp_mustadega_mangija_partiid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mustadega_mangija_partiid_turniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_teine_kolmas') then set eksam_kord = eksam_kord+1; call eksam_procedure_teine_kolmas(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_turniiri_kokkuvote') then set eksam_kord = eksam_kord+1; call eksam_procedure_turniiri_kokkuvote(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_manguaeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_manguaeg_turniiril(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_võrdne_nime_pikkus') then set eksam_kord = eksam_kord+1; call eksam_procedure_võrdne_nime_pikkus(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_vordne_nime_pikkus') then set eksam_kord = eksam_kord+1; call eksam_procedure_vordne_nime_pikkus(); endif;
 			
 			--if 	exists (select * from sysprocedure where proc_name = 'f_must_viik_min') then set eksam_kord = eksam_kord+1; call eksam_function_must_viik_min(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_aeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_mangija_aeg_turniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') then set eksam_kord = eksam_kord+1; call eksam_function_turniiril_kolmas(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'f_võitja_punktid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_võitja_punktid_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_voitja_punktid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_voitja_punktid_turniiril(); endif;
 			
 			--Eksam II vaated 1/8 tehtud
 			--if 	exists (select * from systable where table_name = 'v_võit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_võit_must_valge(); endif;
@@ -2613,17 +2685,17 @@ create procedure käivita(versioon int)
 			
 			--Eksam II funktsioonid ja protseduurid 0/12
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_asula_viigid') then set eksam_kord = eksam_kord+1; call eksam_procedure_asula_viigid(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_pikima_partii_mängijad') then set eksam_kord = eksam_kord+1; call eksam_procedure_pikima_partii_mängijad(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_pikima_partii_mangijad') then set eksam_kord = eksam_kord+1; call eksam_procedure_pikima_partii_mangijad(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_valgetega_parem') then set eksam_kord = eksam_kord+1; call eksam_procedure_valgetega_parem(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_must_viik') then set eksam_kord = eksam_kord+1; call eksam_procedure_must_viik(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_rohkem_kui_2') then set eksam_kord = eksam_kord+1; call eksam_procedure_rohkem_kui_2(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_mänguaeg_valgetega_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_mänguaeg_valgetega_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_manguaeg_valgetega_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_manguaeg_valgetega_turniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_viik_klubikaaslasega') then set eksam_kord = eksam_kord+1; call eksam_procedure_viik_klubikaaslasega(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'sp_Vähem_kui_3') then set eksam_kord = eksam_kord+1; call eksam_procedure_Vähem_kui_3(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_vahem_kui_3') then set eksam_kord = eksam_kord+1; call eksam_procedure_vahem_kui_3(); endif;
 			
-			--if 	exists (select * from sysprocedure where proc_name = 'f_lyhema_partii_mängijad') then set eksam_kord = eksam_kord+1; call eksam_function_lyhema_partii_mängijad(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_lyhema_partii_mangijad') then set eksam_kord = eksam_kord+1; call eksam_function_lyhema_partii_mangijad(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_viigimeister') then set eksam_kord = eksam_kord+1; call eksam_function_viigimeister(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'f_parimKlubimängijaTurniiril') then set eksam_kord = eksam_kord+1; call eksam_function_parimKlubimängijaTurniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_parimKlubimangijaTurniiril') then set eksam_kord = eksam_kord+1; call eksam_function_parimKlubimangijaTurniiril(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_eelviimane') then set eksam_kord = eksam_kord+1; call eksam_function_eelviimane(); endif;
 			
 		endif;
