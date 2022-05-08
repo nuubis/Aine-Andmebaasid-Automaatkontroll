@@ -75,6 +75,12 @@ if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_rohkem
 if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_manguaeg_valgetega_turniiril') 						then drop function eksam_procedure_manguaeg_valgetega_turniiril 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_viik_klubikaaslasega') 						then drop function eksam_procedure_viik_klubikaaslasega 						endif;
 if 	exists (select * from sysprocedure where proc_name = 'eksam_procedure_vahem_kui_3') 						then drop function eksam_procedure_vahem_kui_3 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_nimi') 						then drop function eksam_function_nimi 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_mangija_koormus') 						then drop function eksam_function_mangija_koormus 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_mangija_kaotusi_turniiril') 						then drop function eksam_function_mangija_kaotusi_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_mangija_voite_turniiril') 						then drop function eksam_function_mangija_voite_turniiril 						endif;
+if 	exists (select * from sysprocedure where proc_name = 'eksam_function_mangija_viike_turniiril') 						then drop function eksam_function_mangija_viike_turniiril 						endif;
+
 
 
 -- Erinevate ülesannete järjekorrad
@@ -107,8 +113,10 @@ create or replace variable kodutöö_punktid_5_jr int = 75;
 create or replace variable kodutöö_6_jr int = 84;
 create or replace variable kodutöö_punktid_6_jr int = 85;
 
+create or replace variable eksam_eel_jr int = 94;
 create or replace variable eksam_jr int = 94;
 create or replace variable eksam_punktid_jr int = 95;
+create or replace variable eksam_punktid_kord int = 95;
 -- 100 kodutööde punktid
 create or replace variable kodu_lõpp_punktid int = 100;
 
@@ -481,6 +489,8 @@ create or replace variable eksam_f_turniiril_kolmas_tulemus numeric = 5;
 create or replace variable eksam_f_voitja_punktid_turniiril numeric = 7;
 create or replace variable eksam_f_voitja_punktid_turniiril_olemasolu numeric = 2;
 create or replace variable eksam_f_voitja_punktid_turniiril_tulemus numeric = 5;
+
+create or replace variable eksam_eel numeric = 0;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -3130,6 +3140,136 @@ create	procedure eksam_function_voitja_punktid_turniiril()
 		
 	end;
 	
+create	procedure eksam_function_nimi()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_nimi') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_nimi"', 'ei ole olemas', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_nimi"', 'on olemas', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_nimi"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_nimi('Test','Nimi')) = 'Nimi, Test'
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_nimi" test nimi', 'on õigel kujul', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_nimi" test nimi', 'ei ole õigel kujul', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_nimi" test nimi', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr)
+		end catch;
+		
+	end;
+	
+create	procedure eksam_function_mangija_koormus()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_koormus') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_mangija_koormus"', 'ei ole olemas', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_mangija_koormus"', 'on olemas', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_mangija_koormus"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_mangija_koormus(92)) = 17
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_koormus"', 'on õige', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_koormus"', 'on vale', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_koormus"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr)
+		end catch;
+		
+	end;
+	
+create	procedure eksam_function_mangija_voite_turniiril()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_voite_turniiril') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'ei ole olemas', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'on olemas', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_mangija_voite_turniiril(92,44)) = 1
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'on õige', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'on vale', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_voite_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr)
+		end catch;
+		
+	end;
+	
+create	procedure eksam_function_mangija_viike_turniiril()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_viike_turniiril') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'ei ole olemas', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'on olemas', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_mangija_viike_turniiril(92,44)) = 0
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'on õige', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'on vale', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_viike_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr)
+		end catch;
+		
+	end;
+	
+create	procedure eksam_function_mangija_kaotusi_turniiril()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_kaotusi_turniiril') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'ei ole olemas', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'on olemas', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_mangija_kaotusi_turniiril(92,44)) = 0
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'on õige', 'OK', eksam_eel, eksam_eel, eksam_eel_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'on vale', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_kaotusi_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_eel*0, eksam_eel, eksam_eel_jr)
+		end catch;
+		
+	end;
+	
 create procedure käivita(versioon int)
 	begin
 		declare aeg datetime;
@@ -3167,7 +3307,11 @@ create procedure käivita(versioon int)
 		endif;
 		
 		if versioon > 6 then
-		
+			--if 	exists (select * from sysprocedure where proc_name = 'f_nimi') then call eksam_function_nimi(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_koormus') then call eksam_function_mangija_koormus(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_voite_turniiril') then call eksam_function_mangija_voite_turniiril(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_viike_turniiril') then call eksam_function_mangija_viike_turniiril(); endif;
+			if 	exists (select * from sysprocedure where proc_name = 'f_mangija_kaotusi_turniiril') then call eksam_function_mangija_kaotusi_turniiril(); endif;
 		endif;
 		
 		if versioon = 7 then
