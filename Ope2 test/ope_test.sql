@@ -461,12 +461,18 @@ create or replace variable eksam_sp_manguaeg_turniiril_laine numeric = 2;
 create or replace variable eksam_sp_manguaeg_turniiril_kirjete_arv44 numeric = 1;
 create or replace variable eksam_sp_manguaeg_turniiril_kirjete_arv41 numeric = 1;
 
-create or replace variable eksam_sp_manguaeg_turniiril numeric = 7;
-create or replace variable eksam_sp_manguaeg_turniiril_olemasolu numeric = 1;
-create or replace variable eksam_sp_manguaeg_turniiril_andrei numeric = 2;
-create or replace variable eksam_sp_manguaeg_turniiril_laine numeric = 2;
-create or replace variable eksam_sp_manguaeg_turniiril_kirjete_arv44 numeric = 1;
-create or replace variable eksam_sp_manguaeg_turniiril_kirjete_arv41 numeric = 1;
+create or replace variable eksam_sp_vordne_nime_pikkus numeric = 7;
+create or replace variable eksam_sp_vordne_nime_pikkus_olemasolu numeric = 1;
+create or replace variable eksam_sp_vordne_nime_pikkus_andrei numeric = 4;
+create or replace variable eksam_sp_vordne_nime_pikkus_kirjete_arv44 numeric = 2;
+
+create or replace variable eksam_f_must_viik_min numeric = 7;
+create or replace variable eksam_f_must_viik_min_olemasolu numeric = 2;
+create or replace variable eksam_f_must_viik_min_tulemus numeric = 5;
+
+create or replace variable eksam_f_mangija_aeg_turniiril numeric = 7;
+create or replace variable eksam_f_mangija_aeg_turniiril_olemasolu numeric = 2;
+create or replace variable eksam_f_mangija_aeg_turniiril_tulemus numeric = 5;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -2968,81 +2974,98 @@ create	procedure eksam_procedure_manguaeg_turniiril()
 	end;
 	
 	
-create	procedure eksam_procedure_manguaeg_turniiril()
+create	procedure eksam_procedure_vordne_nime_pikkus()
 	begin
 		declare turniir1, turniir2 int;
 		begin try
-			if 		not exists (select * from sysprocedure where proc_name = 'sp_manguaeg_turniiril') 
-			then	insert Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril"', 'ei ole olemas', 'VIGA', eksam_sp_manguaeg_turniiril*0, eksam_sp_manguaeg_turniiril, eksam_jr);
+			if 		not exists (select * from sysprocedure where proc_name = 'sp_vordne_nime_pikkus') 
+			then	insert Staatus values('Eksam', 'Protseduur "sp_vordne_nime_pikkus"', 'ei ole olemas', 'VIGA', eksam_sp_vordne_nime_pikkus*0, eksam_sp_vordne_nime_pikkus, eksam_jr);
 			return;
-			else	insert Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril"', 'on olemas', 'OK', eksam_sp_manguaeg_turniiril_olemasolu, eksam_sp_manguaeg_turniiril_olemasolu, eksam_jr);
+			else	insert Staatus values('Eksam', 'Protseduur "sp_vordne_nime_pikkus"', 'on olemas', 'OK', eksam_sp_vordne_nime_pikkus_olemasolu, eksam_sp_vordne_nime_pikkus_olemasolu, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_manguaeg_turniiril*0, eksam_sp_manguaeg_turniiril, eksam_jr);
+			insert Staatus values ('Eksam', 'Protseduur "sp_vordne_nime_pikkus"', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_vordne_nime_pikkus*0, eksam_sp_vordne_nime_pikkus, eksam_jr);
 			return;
-		end catch;
-		
-		begin try
-			select id into turniir1 from turniirid where nimi = 'Eesti meistrivõistlused 2007';
-		end try
-		begin catch
-			select id into turniir1 from turniirid where nimetus = 'Eesti meistrivõistlused 2007';
-		end catch;
-		
-		begin try
-			select id into turniir2 from turniirid where nimi = 'Kolme klubi kohtumine';
-		end try
-		begin catch
-			select id into turniir2 from turniirid where nimetus = 'Kolme klubi kohtumine';
 		end catch;
 
 		begin try
-			create	or replace table eksam (mangija varchar(100), aeg varchar(50));
-			unload 	select * from sp_manguaeg_turniiril(turniir1) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
+			create	or replace table eksam (valgetega_mangija varchar(100), mustadega_mangija varchar(100), partii_id int, turniiri_id int);
+			unload 	select * from sp_vordne_nime_pikkus() to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
 			load 	table eksam from 'C:\\TEMP\\eksam_check.txt' defaults on;
 			
-			if 		exists (select * from eksam where mangija = 'Andrei Sosnov' and aeg = '3452')
-			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Andrei Sosnov ajaga 3452s', 'on olemas', 'OK', eksam_sp_manguaeg_turniiril_andrei, eksam_sp_manguaeg_turniiril_andrei, eksam_jr);
-			else	insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Andrei Sosnov ajaga 3452s', 'ei ole olemas', 'VIGA', eksam_sp_manguaeg_turniiril_andrei*0, eksam_sp_manguaeg_turniiril_andrei, eksam_jr);
+			if 		exists (select * from eksam where valgetega_mangija = 'Nadja, Puhasmaa' and mustadega_mangija = 'Malle, Maasikas' and turniiri_id = 41)
+			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_vordne_nime_pikkus" partii Nadja Puhasmaa ja Malle Maasikas', 'on olemas', 'OK', eksam_sp_vordne_nime_pikkus_andrei, eksam_sp_vordne_nime_pikkus_andrei, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "sp_vordne_nime_pikkus" partii Nadja Puhasmaa ja Malle Maasikas', 'ei ole olemas', 'VIGA', eksam_sp_vordne_nime_pikkus_andrei*0, eksam_sp_vordne_nime_pikkus_andrei, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Andrei Sosnov ajaga 3452s', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_manguaeg_turniiril_andrei*0, eksam_sp_manguaeg_turniiril_andrei, eksam_jr)
+			insert 	Staatus values('Eksam', 'Protseduur "sp_vordne_nime_pikkus" turniiril: partii Nadja Puhasmaa ja Malle Maasikas', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_vordne_nime_pikkus_andrei*0, eksam_sp_vordne_nime_pikkus_andrei, eksam_jr)
 		end catch;
 		
 		begin try
-			if 		(select count(*) from eksam) = 63
-			then 	insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'on õige', 'OK', eksam_sp_manguaeg_turniiril_kirjete_arv44, eksam_sp_manguaeg_turniiril_kirjete_arv44, eksam_jr);
-			else	insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'on vale, peab olema 63', 'VIGA', eksam_sp_manguaeg_turniiril_kirjete_arv44*0, eksam_sp_manguaeg_turniiril_kirjete_arv44, eksam_jr);
+			if 		(select count(*) from eksam) = 33
+			then 	insert Staatus values ('Eksam', 'Protseduur "sp_vordne_nime_pikkus" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'on õige', 'OK', eksam_sp_vordne_nime_pikkus_kirjete_arv44, eksam_sp_vordne_nime_pikkus_kirjete_arv44, eksam_jr);
+			else	insert Staatus values ('Eksam', 'Protseduur "sp_vordne_nime_pikkus" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'on vale, peab olema 33', 'VIGA', eksam_sp_vordne_nime_pikkus_kirjete_arv44*0, eksam_sp_vordne_nime_pikkus_kirjete_arv44, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_manguaeg_turniiril_kirjete_arv44*0, eksam_sp_manguaeg_turniiril_kirjete_arv44, eksam_jr);
+			insert Staatus values ('Eksam', 'Protseduur "sp_vordne_nime_pikkus" turniiril: Eesti meistrivõistlused 2007, kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_vordne_nime_pikkus_kirjete_arv44*0, eksam_sp_vordne_nime_pikkus_kirjete_arv44, eksam_jr);
 		end catch;
 		
+		
+	end;
+	
+	
+create	procedure eksam_function_must_viik_min()
+	begin
+		declare turniir1, turniir2 int;
 		begin try
-			create	or replace table eksam (mangija varchar(100), aeg varchar(50));
-			unload 	select * from sp_manguaeg_turniiril(turniir2) to 'C:\\TEMP\\eksam_check.txt' ENCODING 'UTF-8';
-			load 	table eksam from 'C:\\TEMP\\eksam_check.txt' defaults on;
+			if 		not exists (select * from sysprocedure where proc_name = 'f_must_viik_min') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_must_viik_min"', 'ei ole olemas', 'VIGA', eksam_f_must_viik_min*0, eksam_f_must_viik_min, eksam_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_must_viik_min"', 'on olemas', 'OK', eksam_f_must_viik_min_olemasolu, eksam_f_must_viik_min_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_must_viik_min"', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_must_viik_min*0, eksam_f_must_viik_min, eksam_jr);
+			return;
+		end catch;
 
-			if 		exists (select * from eksam where mangija = 'Anna Ristik' and aeg = '4735')
-			then  	insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, Anna Ristik ajaga 4735', 'on olemas', 'OK', eksam_sp_manguaeg_turniiril_laine, eksam_sp_manguaeg_turniiril_laine, eksam_jr);
-			else	insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, Anna Ristik ajaga 4735', 'ei ole olemas', 'VIGA', eksam_sp_manguaeg_turniiril_laine*0, eksam_sp_manguaeg_turniiril_laine, eksam_jr);
+		begin try
+			if 		(select f_must_viik_min()) = 'Hiie Hiid'
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_must_viik_min" Hiie Hiid', 'on olemas', 'OK', eksam_f_must_viik_min_tulemus, eksam_f_must_viik_min_tulemus, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_must_viik_min" Hiie Hiid', 'ei ole olemas', 'VIGA', eksam_f_must_viik_min_tulemus*0, eksam_f_must_viik_min_tulemus, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert 	Staatus values('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, Anna Ristik ajaga 4735', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_manguaeg_turniiril_laine*0, eksam_sp_manguaeg_turniiril_laine, eksam_jr)
+			insert 	Staatus values('Eksam', 'Protseduur "f_must_viik_min" turniiril: Hiie Hiid', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_must_viik_min_tulemus*0, eksam_f_must_viik_min_tulemus, eksam_jr)
 		end catch;
 		
+	end;
+	
+create	procedure eksam_function_mangija_aeg_turniiril()
+	begin
 		begin try
-			if 		(select count(*) from eksam) = 11
-			then 	insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, kirjete arv', 'on õige', 'OK', eksam_sp_manguaeg_turniiril_kirjete_arv41, eksam_sp_manguaeg_turniiril_kirjete_arv41, eksam_jr);
-			else	insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, kirjete arv', 'on vale, peab olema 11', 'VIGA', eksam_sp_manguaeg_turniiril_kirjete_arv41*0, eksam_sp_manguaeg_turniiril_kirjete_arv41, eksam_jr);
+			if 		not exists (select * from sysprocedure where proc_name = 'f_mangija_aeg_turniiril') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril"', 'ei ole olemas', 'VIGA', eksam_f_mangija_aeg_turniiril*0, eksam_f_mangija_aeg_turniiril, eksam_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril"', 'on olemas', 'OK', eksam_f_mangija_aeg_turniiril_olemasolu, eksam_f_mangija_aeg_turniiril_olemasolu, eksam_jr);
 			endif;
 		end try
 		begin catch
-			insert Staatus values ('Eksam', 'Protseduur "sp_manguaeg_turniiril" turniiril: Kolme klubi kohtumine, kirjete arv', 'Automaatkontrollis on viga!', 'VIGA', eksam_sp_manguaeg_turniiril_kirjete_arv41*0, eksam_sp_manguaeg_turniiril_kirjete_arv41, eksam_jr);
+			insert Staatus values ('Eksam', 'Protseduur "f_mangija_aeg_turniiril"', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_mangija_aeg_turniiril*0, eksam_f_mangija_aeg_turniiril, eksam_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_mangija_aeg_turniiril(92,44)) >= 22
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Toomas Umniki aeg', 'on õige', 'OK', eksam_f_mangija_aeg_turniiril_tulemus, eksam_f_mangija_aeg_turniiril_tulemus, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Toomas Umniki aeg', 'on vale, peab olema vähemalt 22 min', 'VIGA', eksam_f_mangija_aeg_turniiril_tulemus*0, eksam_f_mangija_aeg_turniiril_tulemus, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Toomas Umniki aeg', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_mangija_aeg_turniiril_tulemus*0, eksam_f_mangija_aeg_turniiril_tulemus, eksam_jr)
 		end catch;
 		
 	end;
@@ -3102,11 +3125,11 @@ create procedure käivita(versioon int)
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_teine_kolmas') then set eksam_kord = eksam_kord+1; call eksam_procedure_teine_kolmas(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_turniiri_kokkuvote') then set eksam_kord = eksam_kord+1; call eksam_procedure_turniiri_kokkuvote(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'sp_manguaeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_procedure_manguaeg_turniiril(); endif;
-			if 	exists (select * from sysprocedure where proc_name = 'sp_vordne_nime_pikkus') then set eksam_kord = eksam_kord+1; call eksam_procedure_vordne_nime_pikkus(); endif;
+			--if 	exists (select * from sysprocedure where proc_name = 'sp_vordne_nime_pikkus') then set eksam_kord = eksam_kord+1; call eksam_procedure_vordne_nime_pikkus(); endif;
 			
 			--if 	exists (select * from sysprocedure where proc_name = 'f_must_viik_min') then set eksam_kord = eksam_kord+1; call eksam_function_must_viik_min(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_mangija_aeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_mangija_aeg_turniiril(); endif;
-			--if 	exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') then set eksam_kord = eksam_kord+1; call eksam_function_turniiril_kolmas(); endif;
+			if 	exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') then set eksam_kord = eksam_kord+1; call eksam_function_turniiril_kolmas(); endif;
 			--if 	exists (select * from sysprocedure where proc_name = 'f_voitja_punktid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_voitja_punktid_turniiril(); endif;
 			
 			--Eksam II vaated 1/8 tehtud
