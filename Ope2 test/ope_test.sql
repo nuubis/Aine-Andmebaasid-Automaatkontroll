@@ -473,6 +473,10 @@ create or replace variable eksam_f_must_viik_min_tulemus numeric = 5;
 create or replace variable eksam_f_mangija_aeg_turniiril numeric = 7;
 create or replace variable eksam_f_mangija_aeg_turniiril_olemasolu numeric = 2;
 create or replace variable eksam_f_mangija_aeg_turniiril_tulemus numeric = 5;
+
+create or replace variable eksam_f_turniiril_kolmas numeric = 7;
+create or replace variable eksam_f_turniiril_kolmas_olemasolu numeric = 2;
+create or replace variable eksam_f_turniiril_kolmas_tulemus numeric = 5;
 -- Staatus tabeli loomine/kustutamine - kui tabel eksisteerib siis kustutatakse see ära ja siis luuakse uuesti 
 if 	exists (select * from systable where table_name = 'Staatus') then drop table Staatus endif; 
 
@@ -3066,6 +3070,32 @@ create	procedure eksam_function_mangija_aeg_turniiril()
 		end try
 		begin catch
 			insert 	Staatus values('Eksam', 'Protseduur "f_mangija_aeg_turniiril" turniiril: Eesti meistrivõistlused 2007, Toomas Umniki aeg', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_mangija_aeg_turniiril_tulemus*0, eksam_f_mangija_aeg_turniiril_tulemus, eksam_jr)
+		end catch;
+		
+	end;
+
+create	procedure eksam_function_turniiril_kolmas()
+	begin
+		begin try
+			if 		not exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') 
+			then	insert Staatus values('Eksam', 'Protseduur "f_turniiril_kolmas"', 'ei ole olemas', 'VIGA', eksam_f_turniiril_kolmas*0, eksam_f_turniiril_kolmas, eksam_jr);
+			return;
+			else	insert Staatus values('Eksam', 'Protseduur "f_turniiril_kolmas"', 'on olemas', 'OK', eksam_f_turniiril_kolmas_olemasolu, eksam_f_turniiril_kolmas_olemasolu, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert Staatus values ('Eksam', 'Protseduur "f_turniiril_kolmas"', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_turniiril_kolmas*0, eksam_f_turniiril_kolmas, eksam_jr);
+			return;
+		end catch;
+
+		begin try
+			if 		(select f_turniiril_kolmas(44)) = 'Meel, Meelis (Eesti meistrivõistlused 2007)'
+			then  	insert 	Staatus values('Eksam', 'Protseduur "f_turniiril_kolmas" turniiril: Eesti meistrivõistlused 2007, Meel, Meelis', 'on olemas', 'OK', eksam_f_turniiril_kolmas_tulemus, eksam_f_turniiril_kolmas_tulemus, eksam_jr);
+			else	insert 	Staatus values('Eksam', 'Protseduur "f_turniiril_kolmas" turniiril: Eesti meistrivõistlused 2007, Meel, Meelis', 'ei ole olemas', 'VIGA', eksam_f_turniiril_kolmas_tulemus*0, eksam_f_turniiril_kolmas_tulemus, eksam_jr);
+			endif;
+		end try
+		begin catch
+			insert 	Staatus values('Eksam', 'Protseduur "f_turniiril_kolmas" turniiril: Eesti meistrivõistlused 2007, Meel, Meelis', 'Automaatkontrollis on viga!', 'VIGA', eksam_f_turniiril_kolmas_tulemus*0, eksam_f_turniiril_kolmas_tulemus, eksam_jr)
 		end catch;
 		
 	end;
