@@ -1,5 +1,5 @@
 -- Muutuja mis määrab, milline kodutöö käivitatakse, 2=praktikum 3(27õn), 3=kodutöö(28õn) 3, 4=kodutöö 4(31õn), 5=kodutöö 5(?õn), 6=kodutöö 6, 7 = eksam I test, 8 = eksam II test
-create or replace variable versioon int = 7;
+create or replace variable versioon int = 8;
 
 -- Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab 
 if 	exists (select * from sysprocedure where proc_name = 'deleteS') 						then drop function deleteS 						endif;
@@ -558,6 +558,9 @@ create 	procedure arvuta_punktid(versioon int)
 		if versioon = 7 then
 				set kodu_max_punktid = 14;
 		endif;
+		if versioon = 8 then
+				set kodu_max_punktid = 14;
+		endif;
 		if 		versioon = 2 then
 			-- Protsendi arvutamine
 			select count(*) into õiged from Staatus where olek = 'OK' and ylesanne = 'Praktikum';
@@ -596,6 +599,10 @@ create 	procedure arvuta_punktid(versioon int)
 			insert into Staatus values ('Kodutöö','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodu_lõpp_punktid);
 		endif;
 		if 		versioon = 7 then
+			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Eksam';
+			insert into Staatus values ('Eksam','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodu_lõpp_punktid);
+		endif;
+		if 		versioon = 8 then
 			select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Eksam';
 			insert into Staatus values ('Eksam','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodu_lõpp_punktid);
 		endif;
@@ -3319,7 +3326,7 @@ create procedure käivita(versioon int)
 		
 		if versioon = 7 then
 			-- Eksam I vaated - 8/8 tehtud
-			if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
+			/*if 	exists (select * from systable where table_name = 'v_eelnevussuhe') then set eksam_kord = eksam_kord+1; call eksam_view_eelnevussuhe(); endif;
 			if 	exists (select * from systable where table_name = 'v_kaotusi_rohkem_yhest') then set eksam_kord = eksam_kord+1; call eksam_view_kaotusi_rohkem_yhest(); endif;
 			if 	exists (select * from systable where table_name = 'v_kiirviik') then set eksam_kord = eksam_kord+1; call eksam_view_kiirviik(); endif;
 			if 	exists (select * from systable where table_name = 'v_klubisisesed_viigid') then set eksam_kord = eksam_kord+1; call eksam_view_klubisisesed_viigid(); endif;
@@ -3342,12 +3349,12 @@ create procedure käivita(versioon int)
 			if 	exists (select * from sysprocedure where proc_name = 'f_mangija_aeg_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_mangija_aeg_turniiril(); endif;
 			if 	exists (select * from sysprocedure where proc_name = 'f_turniiril_kolmas') then set eksam_kord = eksam_kord+1; call eksam_function_turniiril_kolmas(); endif;
 			if 	exists (select * from sysprocedure where proc_name = 'f_voitja_punktid_turniiril') then set eksam_kord = eksam_kord+1; call eksam_function_voitja_punktid_turniiril(); endif;
-			
+			*/
 		endif;
 		
 		if versioon = 8 then
 			--Eksam II vaated 1/8 tehtud
-			--if 	exists (select * from systable where table_name = 'v_voit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_voit_must_valge(); endif;
+			if 	exists (select * from systable where table_name = 'v_voit_must_valge') then set eksam_kord = eksam_kord+1; call eksam_view_voit_must_valge(); endif;
 			
 			--if 	exists (select * from systable where table_name = 'v_rohkemkahestkaotusest') then set eksam_kord = eksam_kord+1; call eksam_view_rohkemkahestkaotusest(); endif;
 			--if 	exists (select * from systable where table_name = 'v_samaeesnimi') then set eksam_kord = eksam_kord+1; call eksam_view_samaeesnimi(); endif;
