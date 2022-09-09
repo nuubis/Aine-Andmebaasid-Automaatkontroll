@@ -1,7 +1,7 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 7;
+create or replace variable versioon int = 3;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "AA" = Andmebaaside alused */
-create or replace variable aine varchar(5) = 'A';
+create or replace variable aine varchar(5) = 'AA';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
 if exists (select * from sysprocedure where proc_name = 'check_column') 						then drop function check_column 						endif;
 if exists (select * from sysprocedure where proc_name = 'check_column_t2pit2ht')				then drop function check_column_t2pit2ht 				endif;
@@ -107,6 +107,7 @@ create or replace variable inimesed_sünnipäev 							numeric = 0.5 * kolmas_ko
 create or replace variable inimesed_sisestatud 							numeric = 0.5 * kolmas_kodutöö;
 create or replace variable inimesed_isikukood 							numeric = 0.5 * kolmas_kodutöö;
 create or replace variable inimesed_check_sugu 							numeric = 2.0 * kolmas_kodutöö;
+create or replace variable inimesed_kirjete_arv 						numeric = 0.0 * kolmas_kodutöö;
 /* Tabel isikud, kokku on 20p */
 create or replace variable isikud_tabel 								numeric = 20.0 * kolmas_kodutöö;
 create or replace variable isikud_veergude_arv 							numeric = 1.0 * kolmas_kodutöö;
@@ -3939,7 +3940,7 @@ end try
 begin catch
 end catch;
 
-output 	to 'c:\\temp\\info.txt' delimited by ',' format	text;
+--output 	to 'c:\\temp\\info.txt' delimited by ',' format	text;
 
 
 /*
@@ -3951,50 +3952,6 @@ call 	deleteS();
 if 		versioon >= 6 then call procedure_infopump() endif;
 call 	käivita(versioon);
 
-
-
-
-/* Staatus tabel andmete kogumiseks vajalikul kujul */
-if exists (select * from systable where table_name = 'Vead') then drop table Vead endif; 
-create table Vead
-AS (id integer autoincrement,
-select password_creation_time as AB_key, (eesnimi || ', ' || perenimi) as Nimi 
-from sysuser, inimesed 
-where user_name = 'DBA'
-and inimesed.sisestatud = (select max(sisestatud) into aeg from inimesed)
-)
-select * from Vead;
-output to 'C:\TEMP\Vead.sql' append format sql;
-
-
-select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' or Olek = 'Aeg' 
-order by Jr;
-output to 'C:\TEMP\Vead.sql' append format sql;
-
-/* Nende andmete kogumine on vajalik Martti Kakk magistritöö andmete kogumiseks ja analüüsimiseks
-Andmebaasi loomise kuupäev ja tudengi nimi */
-if exists (select * from systable where table_name = 'AB') then drop table AB endif; 
-create table AB 
-AS (id integer autoincrement,
-select password_creation_time as AB_key, (eesnimi || ', ' || perenimi) as Nimi 
-from sysuser, inimesed 
-where user_name = 'DBA'
-and inimesed.sisestatud = (select max(sisestatud) into aeg from inimesed)
-)
-select * from AB;
-output to 'C:\TEMP\AB.sql' append format sql;
-
-/* See tabel seob tabeli Vead ja AB*/
-if exists (select * from systable where table_name = 'Vead_AB') then drop table Vead_AB endif; 
-create table Vead_AB 
-AS (id integer autoincrement,
-select password_creation_time_utc as Viga_ID, (eesnimi || ', ' || perenimi) as Nimi 
-from sysuser, inimesed 
-where user_name = 'DBA'
-and inimesed.sisestatud = (select max(sisestatud) into aeg from inimesed)
-)
-select * from Vead_AB;
-output to 'C:\TEMP\Vead_AB.sql' append format sql;
 
 /* Tulemuste väljastamine ekraanile ning kirjutamine txt ja csv failidesse */
 select  Nimi, Veerg, Tagasiside, Olek, Punktid, Max_punktid, Soovitus from staatus where Olek = 'VIGA' or Olek = 'Kokku' or Olek = 'Hindepunktid' or Olek = 'Aeg' 
