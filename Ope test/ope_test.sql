@@ -120,7 +120,7 @@ create or replace variable isikud_unique_ees_pere 						numeric = 1.0 * kolmas_k
 create or replace variable isikud_kirjete_arv 							numeric = 12.0 * kolmas_kodutöö_kirjed;
 /* Tabel klubid, kokku on 10p */
 create or replace variable klubid_tabel 								numeric = 10.0 * kolmas_kodutöö;
-create or replace variable klubid_veergude_arv 							numeric = 1.0 * kolmas_kodutöö;
+create or replace variable klubid_veergude_arv 							numeric = 2.0 * kolmas_kodutöö;
 create or replace variable klubid_id 									numeric = 1.0 * kolmas_kodutöö; 		
 create or replace variable klubid_nimi 									numeric = 1.0 * kolmas_kodutöö;
 create or replace variable klubid_asukoht 								numeric = 1.0 * kolmas_kodutöö;
@@ -138,7 +138,7 @@ create or replace variable turniirid_unique_nimi 						numeric = 1.0 * kolmas_ko
 create or replace variable turniirid_kirjete_arv 						numeric = 2.0 * kolmas_kodutöö_kirjed;
 /* Tabel partiid, kokku on 30p */
 create or replace variable partiid_tabel 								numeric = 30.0 * kolmas_kodutöö;
-create or replace variable partiid_veergude_arv 						numeric = 1.0 * kolmas_kodutöö;
+create or replace variable partiid_veergude_arv 						numeric = 2.0 * kolmas_kodutöö;
 create or replace variable partiid_id 									numeric = 1.0 * kolmas_kodutöö; 	
 create or replace variable partiid_turniir 								numeric = 1.0 * kolmas_kodutöö; 
 create or replace variable partiid_algushetk 							numeric = 1.0 * kolmas_kodutöö; 
@@ -990,7 +990,9 @@ endif;
 
 call 	check_column(v_table_id, 'Id',       'autoincrement',    'y', 'n', 4, klubid_id, tabelid_jr); 
 call 	check_column(v_table_id, 'Nimi',     null,               'n', 'n', 100, klubid_nimi, tabelid_jr); 
+if		version = 5 then
 call 	check_column(v_table_id, 'Asukoht',  'Tartu',            'n', 'n', 70, klubid_asukoht, tabelid_jr);
+endif;
 if		version = 7 then
 call	check_column(v_table_id, 'Asula',  null,            'n', 'y', 4, klubid_asula, tabelid_jr)
 endif;
@@ -1099,7 +1101,13 @@ else	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', '-', 'OK', turn
 endif;
 
 call 	check_column(v_table_id, 'Id',              'autoincrement',    'y', 'n', 4, turniirid_id, tabelid_jr);
+--if 		exists (select * from systable where table_name = 'Turniirid')
+if 		versioon = 3 then 
+call 	check_column(v_table_id, 'Nimetus',            null,               'n', 'n', 100, turniirid_nimi, tabelid_jr);
+endif;
+if 		versioon = 5 then 
 call 	check_column(v_table_id, 'Nimi',            null,               'n', 'n', 100, turniirid_nimi, tabelid_jr);
+endif;
 call 	check_column(v_table_id, 'Toimumiskoht',    null,               'n', 'y', 100, turniirid_toimumiskoht, tabelid_jr);
 if 		version = 7 then
 call	check_column(v_table_id, 'Asula', 			null,				'n', 'y', 4, turniirid_asula, tabelid_jr) 
@@ -1182,7 +1190,9 @@ call 	check_column_t2pit2ht('Kokkuvote', 'Kokkuvõte', v_table_id, null, 'n', 'y
 // Check kitsenduste kontroll
 call 	check_check('check("valge_tulemus" in( 0,1,2 ) )', 'Partiid', 'Valge_tulemus', partiid_check_valge_tulemus, tabelid_jr);
 call 	check_check('check("musta_tulemus" in( 0,1,2 ) )', 'Partiid', 'Musta_tulemus', partiid_check_musta_tulemus, tabelid_jr);
+if 		versioon = 5 then
 call 	check_check('check("valge_tulemus"+"musta_tulemus" = 2)', 'Partiid', 'Valge_tulemus + Musta_tulemus', partiid_check_valge_musta_tulemus, tabelid_jr);
+endif;
 
 // Kirjete arvu kontroll
 select 	count(*) into kirje_count from partiid;
