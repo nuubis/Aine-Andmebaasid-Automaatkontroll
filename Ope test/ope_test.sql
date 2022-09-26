@@ -981,11 +981,11 @@ set 	v_table_id = find_table_id('klubid');
 
 select 	count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      version = 3  and   v_size != 2             
+if      version = 3  and v_size != 2             
 then 	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
 elseif	version = 7 and v_size != 4
 then	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
-elseif	version != 7 and v_size != 3
+elseif	(version = 5 or versioon = 6) and v_size != 3
 then	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', '-', 'OK', klubid_veergude_arv, klubid_veergude_arv, '', tabelid_jr)
 endif;
