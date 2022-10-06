@@ -27,7 +27,7 @@ WHERE 5 = var1
 set session my.versioon = '1'; 
 
 
-create  function find_table_id(a_table_name varchar(100))
+/*create  function find_table_id(a_table_name varchar(100))
 	returns int
 	begin 
 		declare a_id int;
@@ -37,13 +37,16 @@ create  function find_table_id(a_table_name varchar(100))
 	end;
 	
 
+
+--create or replace view
+
 select * from pg_proc where proname like '%isikud%';
 --pg_tables - tabelid;
 -- pg_stats - veerud;
 -- pg_views, pg_index?
 -- pg_proc - funk/protseduur
 
-
+*/
 insert into muutujad(nimi, väärtus) values ('versioon', 1);
 select * from muutujad; 
 delete from muutujad;
@@ -60,7 +63,7 @@ Max_punktid numeric,
 Jr int,
 Id serial);
 
-
+-- CREATE or replace FUNCTION getIsikud()
 CREATE FUNCTION getIsikud()
 RETURNS TABLE (e_nimi varchar(25), p_nimi varchar(25))
 AS 'SELECT eesnimi, perenimi FROM isikud;'
