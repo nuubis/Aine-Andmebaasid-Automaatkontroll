@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 3;
+create or replace variable versioon int = 5;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "AA" = Andmebaaside alused */
 create or replace variable aine varchar(5) = 'AA';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -71,9 +71,9 @@ if exists (select * from sysprocedure where proc_name = 'check_error_tapitaht') 
 
 /* Kodutööde max punktid */
 create 	or replace variable kodutöö_3							numeric = 100;
-create 	or replace variable kodutöö_5							numeric = 132; // (100 + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32)
-create 	or replace variable kodutöö_6							numeric = 157; // (100 + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
-create 	or replace variable kodutöö_7							numeric = 182; // (100 + (kodutöö_6 punktid * 0.25 = 50) + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
+create 	or replace variable kodutöö_5							numeric = 132; -- (100 + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32)
+create 	or replace variable kodutöö_6							numeric = 157; -- (100 + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
+create 	or replace variable kodutöö_7							numeric = 182; -- (100 + (kodutöö_6 punktid * 0.25 = 50) + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
 /* Kodutööde punktide osakaalu muutujate loomine ja määramine */
 create 	or replace variable kolmas_kodutöö 						numeric = 1.0;
 create 	or replace variable viies_kodutöö 						numeric = 1.0;
@@ -126,6 +126,8 @@ create or replace variable klubid_nimi 									numeric = 1.0 * kolmas_kodutöö
 create or replace variable klubid_asukoht 								numeric = 1.0 * kolmas_kodutöö;
 create or replace variable klubid_unique_nimi 							numeric = 1.0 * kolmas_kodutöö;
 create or replace variable klubid_kirjete_arv 							numeric = 5.0 * kolmas_kodutöö_kirjed;
+/* Tabeli klubid veerg Asula, kokku 0.5p, alates 5. kodutööst */
+create or replace variable klubid_asula 								numeric = 1.0 * kolmas_kodutöö;
 /* Tabel turniirid, kokku on 10p */
 create or replace variable turniirid_tabel 								numeric = 10.0 * kolmas_kodutöö;
 create or replace variable turniirid_veergude_arv 						numeric = 1.0 * kolmas_kodutöö;
@@ -173,35 +175,35 @@ create or replace variable v_edetabelid_punkte 							numeric = 1.0 * viies_kodu
 create or replace variable v_edetabelid_punkte_täiskohaga 				numeric = 4.0 * viies_kodutöö;
 create or replace variable v_edetabelid_punkte_komakohaga 				numeric = 8.0 * viies_kodutöö;
 create or replace variable v_edetabelid_kirjete_arv 					numeric = 14.0 * viies_kodutöö;
-/* Vaade klubipartiikogused_1, kokku on 10p */
-create or replace variable v_klubipartiikogused_1 						numeric = 10.0 * viies_kodutöö;
+/* Vaade klubipartiikogused_1, kokku on 9p */
+create or replace variable v_klubipartiikogused_1 						numeric = 9.0 * viies_kodutöö;
 create or replace variable v_klubipartiikogused_1_veergude_arv 			numeric = 1.0 * viies_kodutöö;
 create or replace variable v_klubipartiikogused_1_klubi_nimi 			numeric = 1.0 * viies_kodutöö;
 create or replace variable v_klubipartiikogused_1_partiisid 			numeric = 1.0 * viies_kodutöö;
-create or replace variable v_klubipartiikogused_1_partiide_arvu_summa 	numeric = 7.0 * viies_kodutöö;
-/* Vaade klubipartiikogused_2, kokku on 5p */
-create or replace variable v_klubipartiikogused_2 						numeric = 5.0 * viies_kodutöö;
-create or replace variable v_klubipartiikogused_2_veergude_arv 			numeric = 1.0 * viies_kodutöö;
-create or replace variable v_klubipartiikogused_2_klubi_nimi 			numeric = 1.0 * viies_kodutöö;
+create or replace variable v_klubipartiikogused_1_partiide_arvu_summa 	numeric = 6.0 * viies_kodutöö;
+/* Vaade klubipartiikogused_2, kokku on 4p */
+create or replace variable v_klubipartiikogused_2 						numeric = 4.0 * viies_kodutöö;
+create or replace variable v_klubipartiikogused_2_veergude_arv 			numeric = 0.5 * viies_kodutöö;
+create or replace variable v_klubipartiikogused_2_klubi_nimi 			numeric = 0.5 * viies_kodutöö;
 create or replace variable v_klubipartiikogused_2_partiisid 			numeric = 1.0 * viies_kodutöö;
 create or replace variable v_klubipartiikogused_2_partiide_arvu_summa 	numeric = 2.0 * viies_kodutöö;
-/* Vaade mängijad, kokku on 5p */
-create or replace variable v_mangijad 									numeric = 5.0 * viies_kodutöö;
+/* Vaade mängijad, kokku on 3p */
+create or replace variable v_mangijad 									numeric = 3.0 * viies_kodutöö;
 create or replace variable v_mangijad_veergude_arv 						numeric = 0.5 * viies_kodutöö;
 create or replace variable v_mangijad_klubi_nimi 						numeric = 0.5 * viies_kodutöö;
 create or replace variable v_mangijad_klubi_id 							numeric = 0.5 * viies_kodutöö;
 create or replace variable v_mangijad_isik_nimi 						numeric = 0.5 * viies_kodutöö;
 create or replace variable v_mangijad_isik_nimi_kuju 					numeric = 0.5 * viies_kodutöö;
 create or replace variable v_mangijad_isik_id 							numeric = 0.5 * viies_kodutöö;
-create or replace variable v_mangijad_kirjete_arv 						numeric = 2.0 * viies_kodutöö;
-/* Vaade turniiripartiid, kokku on 10p */
-create or replace variable v_turniiripartiid 							numeric = 10.0 * viies_kodutöö;
+create or replace variable v_mangijad_kirjete_arv 						numeric = 0.0 * viies_kodutöö;
+/* Vaade turniiripartiid, kokku on 8p */
+create or replace variable v_turniiripartiid 							numeric = 8.0 * viies_kodutöö;
 create or replace variable v_turniiripartiid_veergude_arv 				numeric = 1.0 * viies_kodutöö;
 create or replace variable v_turniiripartiid_turniir_nimi 				numeric = 1.0 * viies_kodutöö;
 create or replace variable v_turniiripartiid_partii_id 					numeric = 1.0 * viies_kodutöö;
 create or replace variable v_turniiripartiid_partii_algus 				numeric = 1.0 * viies_kodutöö;
 create or replace variable v_turniiripartiid_partii_lõpp 				numeric = 1.0 * viies_kodutöö;
-create or replace variable v_turniiripartiid_kirjete_arv 				numeric = 5.0 * viies_kodutöö;
+create or replace variable v_turniiripartiid_kirjete_arv 				numeric = 3.0 * viies_kodutöö;
 /* Vaade punktid, kokku on 20p */
 create or replace variable v_punktid 									numeric = 20.0 * viies_kodutöö;
 create or replace variable v_punktid_veergude_arv 						numeric = 1.0 * viies_kodutöö;
@@ -214,28 +216,38 @@ create or replace variable v_punktid_punkt_koma 						numeric = 1.0 * viies_kodu
 create or replace variable v_punktid_punkt_täis 						numeric = 1.0 * viies_kodutöö;
 create or replace variable v_punktid_kirjete_arv 						numeric = 4.0 * viies_kodutöö;
 create or replace variable v_punktid_punkti_summa 						numeric = 8.0 * viies_kodutöö;
-/* Vaade partiid, kokku on 12p */
-create or replace variable v_partiid 									numeric = 12.0 * viies_kodutöö;
+/* Vaade partiid, kokku on 7p */
+create or replace variable v_partiid 									numeric = 10.0 * viies_kodutöö;
 create or replace variable v_partiid_veergude_arv 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_id 								numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_turniir 							numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_algus								numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_valge_nimi 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_valge_klubi 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_valge_punkt 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_must_nimi 							numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_must_klubi 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_must_punkt 						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_partiid_kirjete_arv 						numeric = 1.0 * viies_kodutöö;
+create or replace variable v_partiid_id 								numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_turniir 							numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_algus								numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_valge_nimi 						numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_valge_klubi 						numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_valge_punkt 						numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_must_nimi 							numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_must_klubi 						numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_must_punkt 						numeric = 0.5 * viies_kodutöö;
+create or replace variable v_partiid_kirjete_arv 						numeric = 0.5 * viies_kodutöö;
 create or replace variable v_partiid_punkti_summa 						numeric = 1.0 * viies_kodutöö;
-/* Vaade kolmik, kokku on 8p */
-create or replace variable v_kolmik										numeric = 8.0 * viies_kodutöö;
+/* Vaade kolmik, kokku on 6p */
+create or replace variable v_kolmik										numeric = 6.0 * viies_kodutöö;
 create or replace variable v_kolmik_veergude_arv						numeric = 1.0 * viies_kodutöö;
 create or replace variable v_kolmik_nimi								numeric = 0.5 * viies_kodutöö;
 create or replace variable v_kolmik_punktid								numeric = 0.5 * viies_kodutöö;
 create or replace variable v_kolmik_esimene_punktid						numeric = 1.0 * viies_kodutöö;
-create or replace variable v_kolmik_kirjete_arv							numeric = 2.0 * viies_kodutöö;
-create or replace variable v_kolmik_punkti_summa						numeric = 3.0 * viies_kodutöö;
+create or replace variable v_kolmik_kirjete_arv							numeric = 1.0 * viies_kodutöö;
+create or replace variable v_kolmik_punkti_summa						numeric = 2.0 * viies_kodutöö;
+/* Järgnev tuli kodutöö 7st ja kokku on 21p*/
+/* Tabel Asulad kokku on 8p*/
+create or replace variable asulad_tabel 								numeric = 8.0 * viies_kodutöö;
+create or replace variable asulad_veergude_arv 							numeric = 2.0 * viies_kodutöö;
+create or replace variable asulad_id 									numeric = 2.0 * viies_kodutöö;
+create or replace variable asulad_nimi 									numeric = 2.0 * viies_kodutöö;
+create or replace variable asulad_unique_nimi 							numeric = 2.0 * viies_kodutöö;
+/* Välisvõtmed kokkku on 4p*/
+create or replace variable välisvõti_klubi_2_asula 						numeric = 4.0 * viies_kodutöö;
+
 /*Kodutöö 6 punktid kokku = 100p */
 create or replace variable f_klubisuurus 								numeric = 10 * kuues_kodutöö;
 create or replace variable f_nimi 										numeric = 10 * kuues_kodutöö;
@@ -263,22 +275,15 @@ create or replace variable muud_indexid_partiid 						numeric = 5 * kuues_kodut�
 create or replace variable muud_indexid_turniirid 						numeric = 5 * kuues_kodutöö;
 
 /* Kodutöö 7 punktid kokku = 100p */
-/* Tabel Asulad kokku on 16p*/
-create or replace variable asulad_tabel 								numeric = 16.0;
-create or replace variable asulad_veergude_arv 							numeric = 4.0;
-create or replace variable asulad_id 									numeric = 4.0;
-create or replace variable asulad_nimi 									numeric = 4.0;
-create or replace variable asulad_unique_nimi 							numeric = 4.0;
-/* Tabelite klubid ja turniirid veerg Asula, kokku 2p */
-create or replace variable klubid_asula 								numeric = 1.0;
-create or replace variable turniirid_asula 								numeric = 1.0;
+
+/* asulad ja klubid seaotud asjad läksid 5ndasse, hetkel kokku 79p */
 /* Tabel inimesed kirjete arv */
 if versioon = 7 then
 create or replace variable inimesed_check_sugu 							numeric = 1.0 * kolmas_kodutöö; // algselt on 2p, aga siin läheb 1 maha kirjete jaoks PS! Ma ei arvesta siin multiplieri teksti sest idee jääb samaks
 create or replace variable inimesed_kirjete_arv 						numeric = 1.0 * kolmas_kodutöö;
 endif;
-/* Välisvõtmed kokkku on 8p*/
-create or replace variable välisvõti_klubi_2_asula 						numeric = 4.0;
+/* Kokku 5p turniirid ja asulad vahel */
+create or replace variable turniirid_asula 								numeric = 1.0;
 create or replace variable välisvõti_turniir_2_asula 					numeric = 4.0;
 /* Vaade asulaklubisid kokku on 6p */
 create or replace variable v_asulaklubisid 								numeric = 6.0;
@@ -992,10 +997,10 @@ endif;
 
 call 	check_column(v_table_id, 'Id',       'autoincrement',    'y', 'n', 4, klubid_id, tabelid_jr); 
 call 	check_column(v_table_id, 'Nimi',     null,               'n', 'n', 100, klubid_nimi, tabelid_jr); 
-if		version = 5 then
+/*if		version = 5 then
 call 	check_column(v_table_id, 'Asukoht',  'Tartu',            'n', 'n', 70, klubid_asukoht, tabelid_jr);
-endif;
-if		version = 7 then
+endif;*/
+if		version > 3 then
 call	check_column(v_table_id, 'Asula',  null,            'n', 'y', 4, klubid_asula, tabelid_jr)
 endif;
 
@@ -1270,21 +1275,30 @@ call	check_foreign_key('Klubid',       'Isikud',        'id', 'klubi', välisvõ
 call  	check_foreign_key('Isikud',       'Partiid',       'id', 'valge', välisvõti_partii_2_isik_valge, välisvõtmed_jr);
 call	check_foreign_key('Isikud',       'Partiid',       'id', 'must',  välisvõti_partii_2_isik_must, välisvõtmed_jr);
 call	check_foreign_key('Turniirid',    'Partiid',       'id', 'turniir', välisvõti_partii_2_turniir, välisvõtmed_jr);
-if		version = 7 then
+if 		version > 3 then 
 call	check_foreign_key('Asulad', 'Klubid', 'id', 'asula', välisvõti_klubi_2_asula, välisvõtmed_jr);
+endif;
+if	version = 7 then
 call	check_foreign_key('Asulad', 'Turniirid', 'id', 'asula', välisvõti_turniir_2_asula, välisvõtmed_jr);
 endif;
 
 
 // Süsteemsete triggerite kontroll välisvõtmete juures
-if 		version < 7
+if 		version < 5
 then	select 	count(*) into trigger_count_C		from systrigger
 		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 		if 		trigger_count_C = 4				
 		then 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
 		else 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on puudu.',  	'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
+		endif;
+elseif 		version < 7
+then	select 	count(*) into trigger_count_C		from systrigger
+		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
+		if 		trigger_count_C = 5				
+		then 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', '-',	'OK', trigger_cascade, trigger_cascade, '', välisvõtmed_tg_jr)
+		else 	insert Staatus values ('Välisvõtme tingimus "ON UPDATE CASCADE"', '-', 'Vähemalt ühe välisvõtme "ON UPDATE CASCADE" tingimus on puudu.',  	'VIGA', trigger_cascade*0, trigger_cascade, '', välisvõtmed_tg_jr)
 		endif
-				
+					
 else	select 	count(*) into trigger_count_C		from systrigger
 		where	event = 'C' and trigger_time = 'A' 	and referential_action = 'C' and trigger_name is null;
 		if 		trigger_count_C = 6				
@@ -3676,6 +3690,7 @@ if 		kodutöö >= 5 then
 		call view_punktid();
 		call view_turniiripartiid();
 		call view_kolmik();
+		call table_asulad();
 endif;
 if		kodutöö >= 6 then
 		call function_klubisuurus();
@@ -3689,7 +3704,6 @@ if		kodutöö >= 6 then
 		call muud_indexid();
 endif;
 if		kodutöö = 7 then
-		call table_asulad();
 		call trigger_lisa_klubi();
 		call trigger_kustuta_klubi();
 		call trigger_kustuta_klubi_isikutega();
@@ -3917,18 +3931,24 @@ if 	versioon > 3 then
 	
 	/* Asulad tabeli andmete lisamine */
 	begin try
-		if versioon = 7 then
-		begin try
-			delete asulad;
-		end try
-		begin catch
-			raiserror 17000 ('Ei saanud kustutada kirjeid tabelis "Asulad". Kontrollida trigerite definitsioone! Teha vajadusel parandused ja skript uuesti käivitada.');
-		end catch;
-		
-		load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
-		update klubid set asukoht = 'Tartu';
-		update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
-		update turniirid set asula = (select id from asulad where asulad.nimi = turniirid.Toimumiskoht);
+		if versioon > 3 then
+			begin try
+				delete asulad;
+			end try
+			begin catch
+				raiserror 17000 ('Ei saanud kustutada kirjeid tabelis "Asulad". Kontrollida trigerite definitsioone! Teha vajadusel parandused ja skript uuesti käivitada.');
+			end catch;
+			
+			load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
+			--update klubid set asukoht = 'Tartu';
+			--update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
+			begin try
+				if versioon = 7 then
+					update turniirid set asula = (select id from asulad where asulad.nimi = turniirid.Toimumiskoht);
+				endif;
+			end try
+			begin catch
+			end catch;
 		endif;
 	end try
 	begin catch
