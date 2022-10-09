@@ -3940,8 +3940,10 @@ if 	versioon > 3 then
 			end catch;
 			
 			load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
-			--update klubid set asukoht = 'Tartu';
-			--update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
+			alter table klubid add asukoht varchar(100);
+			update klubid set asukoht = 'Tartu';
+			update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
+			alter table klubid drop asukoht;
 			begin try
 				if versioon = 7 then
 					update turniirid set asula = (select id from asulad where asulad.nimi = turniirid.Toimumiskoht);
