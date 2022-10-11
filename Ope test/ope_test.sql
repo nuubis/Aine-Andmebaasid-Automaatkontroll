@@ -524,7 +524,7 @@ select  (if upper(pkey) = upper(p_pkey) then 'ok' else 'PKey on vale.' endif) in
 from    syscolumn where table_id = p_table_id and column_name = c_name;
 
 select  (if upper("nulls") = isnull(upper(p_nulls), upper("nulls")) 
-then    'ok' else 'Value tingimus on vale.' endif) into k3 
+then    'ok' else '"NULL" väärtuse lubamine/keelamine on vale' endif) into k3 
 from    syscolumn where table_id = p_table_id and column_name = c_name;
 
 select  (if width = p_width or width = (p_width + 1) then 'ok' else 'Andmetüüp on vale.' endif) into k4
@@ -1458,9 +1458,9 @@ begin try
 	then	select 	sum(partiisid) into partii_summa from v_klubipartiikogused_1;
 			if 		partii_summa = 200
 			then	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', '-', 														 	'OK', 	v_klubipartiikogused_1_partiide_arvu_summa, 	v_klubipartiikogused_1_partiide_arvu_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on ' || partii_summa, 	'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, '', vaated_jr)
+			else	insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Klubipartiide summa pole õige', 	'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, 'Veendu, et klubipartiide summa on 2x kirjete arv tabelis Partiid miinus klubisiseste partiide summa', vaated_jr)
 			endif;
-	else			insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on 0', 				'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
+	else			insert Staatus values('Vaade "v_klubipartiikogused_1"', 'Partiide summa', 'Klubipartiide summa pole õige', 	'VIGA', v_klubipartiikogused_1_partiide_arvu_summa*0, 	v_klubipartiikogused_1_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
 	endif;
 end try
 begin catch
@@ -1512,9 +1512,9 @@ begin try
 	then	select 	sum(partiisid) into partii_summa from v_klubipartiikogused_2;
 			if 		partii_summa = 216
 			then	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', '-', 															'OK', 	v_klubipartiikogused_2_partiide_arvu_summa, 	v_klubipartiikogused_2_partiide_arvu_summa, '', vaated_jr)
-			else	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Partiide summa peab olema 216, praegu on ' || partii_summa, 	'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, '', vaated_jr)
+			else	insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Klubipartiide summa pole õige', 	'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, 'Veendu, et klubipartiide summa on 2x kirjete arv tabelis Partiid', vaated_jr)
 			endif;
-	else			insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Partiide summa peab olema 200, praegu on 0', 				'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
+	else			insert Staatus values('Vaade "v_klubipartiikogused_2"', 'Partiide summa', 'Klubipartiide summa pole õige', 				'VIGA', v_klubipartiikogused_2_partiide_arvu_summa*0, 	v_klubipartiikogused_2_partiide_arvu_summa, 'Ei leia veergu "partiisid"', vaated_jr)
 	endif;
 end try
 begin catch
@@ -1712,10 +1712,8 @@ call	check_column_for_view_t2pit2ht(v_table_id, 'Partii_lõpp', 'Partii_lopp', v
 // Kirjete kontroll
 begin try
 	select 	count(*) into kirje_count from v_turniiripartiid;
-	if		kirje_count > 108
-	then	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Kirjeid on ROHKEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_turniiripartiid_kirjete_arv*0, 	v_turniiripartiid_kirjete_arv, '', vaated_jr)
-	elseif	kirje_count < 108
-	then	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Kirjeid on VÄHEM kui vaja, praegu on ' || kirje_count, 	'VIGA', v_turniiripartiid_kirjete_arv*0, 	v_turniiripartiid_kirjete_arv, '', vaated_jr)
+	if		kirje_count != 108
+	then	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', 'Kirjete arv pole õige', 	'VIGA', v_turniiripartiid_kirjete_arv*0, 	v_turniiripartiid_kirjete_arv, 'Veendu, et kirjete arv on tabeli Partiid kirjete arv', vaated_jr)
 	else	insert Staatus values('Vaade "v_turniiripartiid"', 'Kirjete arv', '-', 														'OK', 	v_turniiripartiid_kirjete_arv, 		v_turniiripartiid_kirjete_arv, '', vaated_jr)
 	endif;
 end try
