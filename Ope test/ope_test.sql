@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 5;
+create or replace variable versioon int = 6;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "AA" = Andmebaaside alused */
 create or replace variable aine varchar(5) = 'AA';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -879,7 +879,7 @@ else					  set max_summa = 1
 endif;
 
 /* Hindepunktide välja arvutamine */
-select sum(punktid) into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
+select sum(punktid)+0.75 into summa from Staatus where Olek = 'OK' or Olek = 'VIGA';
 if 		versioon = 7 and aine = 'A'
 then	
 set 	hindepunkt = (summa / max_summa) * 2;
@@ -3375,22 +3375,22 @@ begin try
 	load 	table #Temp from 'C:\\TEMP\\kodutoo_check.txt' defaults on;
     
 	if		(select võite from #Temp where id = 75) = 4
-    then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude arv, id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_võidud, sp_voit_viik_kaotus_võidud, '', protseduurid_jr)
-	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude arv, id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_võidud*0, sp_voit_viik_kaotus_võidud, '', protseduurid_jr)
+    then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude arv, isik id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_võidud, sp_voit_viik_kaotus_võidud, '', protseduurid_jr)
+	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude arv, isik id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_võidud*0, sp_voit_viik_kaotus_võidud, '', protseduurid_jr)
     endif;
     
 	if		(select viike from #Temp where id = 75) = 1
-    then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Viikide arv, id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_viigid, sp_voit_viik_kaotus_viigid, '', protseduurid_jr)
-	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Viikide arv, id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_viigid*0, sp_voit_viik_kaotus_viigid, '', protseduurid_jr)
+    then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Viikide arv, isik id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_viigid, sp_voit_viik_kaotus_viigid, '', protseduurid_jr)
+	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Viikide arv, isik id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_viigid*0, sp_voit_viik_kaotus_viigid, '', protseduurid_jr)
     endif;
     
 	if		(select kaotusi from #Temp where id = 75) = 0
-	then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Kaotuste arv, id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_kaotused, sp_voit_viik_kaotus_kaotused, '', protseduurid_jr)
-	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Kaotuste arv, id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_kaotused*0, sp_voit_viik_kaotus_kaotused, '', protseduurid_jr)
+	then	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Kaotuste arv, isik id 75, turniir 41', '-', 'OK', sp_voit_viik_kaotus_kaotused, sp_voit_viik_kaotus_kaotused, '', protseduurid_jr)
+	else	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Kaotuste arv, isik id 75, turniir 41', 'Tulemus on vale', 'VIGA', sp_voit_viik_kaotus_kaotused*0, sp_voit_viik_kaotus_kaotused, '', protseduurid_jr)
 	endif;
 end try
 begin catch
-	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude/Viikide/Kaotuste arv, id 75', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_voit_viik_kaotus_kontrollid*0, sp_voit_viik_kaotus_kontrollid, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
+	insert 	Staatus values('Protseduur "sp_voit_viik_kaotus"', 'Võitude/Viikide/Kaotuste arv, id 75, turniir 41', 'Ei saanud kontrolli teostada! Palun kontrolli protseduuri.', 'VIGA', sp_voit_viik_kaotus_kontrollid*0, sp_voit_viik_kaotus_kontrollid, 'Kas käivitasid protseduuri ühe parameetriga?', protseduurid_jr);
 end catch;
 
 end;
@@ -3830,10 +3830,50 @@ if 	versioon > 3 then
 		begin catch
 			if versioon = 7 then
 				raiserror 17000 ('Ei saa kustutada tabeli "Klubid" kirjeid. Kontrollida trigerite definitsioone! Teha parandused vajadusel ja skript uuesti käivitada.')
+			else
+				raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Isikud"!')
 			endif;
 		end catch;
 	end catch;
 	
+	begin try
+		delete asulad;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud kustutada kirjeid tabelis "Asulad". Kontrollida trigerite definitsioone! Teha vajadusel parandused ja skript uuesti käivitada.');
+	end catch;
+			
+	/* Asulad tabeli andmete lisamine */
+	begin try
+		if versioon > 3 then
+			begin try
+				delete asulad;
+			end try
+			begin catch
+				raiserror 17000 ('Ei saanud kustutada kirjeid tabelis "Asulad". Kontrollida trigerite definitsioone! Teha vajadusel parandused ja skript uuesti käivitada.');
+			end catch;
+			
+			load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
+			begin try
+				alter table klubid add asukoht varchar(100);
+				update klubid set asukoht = 'Tartu';
+				update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
+			end try
+			begin catch
+			end catch;
+			alter table klubid drop asukoht;
+			begin try
+				if versioon = 7 then
+					update turniirid set asula = (select id from asulad where asulad.nimi = turniirid.Toimumiskoht);
+				endif;
+			end try
+			begin catch
+			end catch;
+		endif;
+	end try
+	begin catch
+		raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Asulad"!');
+	end catch;
 	
 	/* Klubid tabeli andmete lisamine */
 	begin try
@@ -3842,8 +3882,12 @@ if 	versioon > 3 then
 	begin catch
 		//raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Klubid"!');
 		if	(select count(*) from Klubid) = 0 then
-			call 	check_error('Klubid','Id');
-			call 	check_error('Klubid','Nimi');
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(51,'Laudnikud',(select id from asulad where nimi = 'tartu'));
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(54,'Ajurebend',(select id from asulad where nimi = 'tartu'));
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(55,'Ruudu Liine',(select id from asulad where nimi = 'tartu'));
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(57,'V�itmatu Valge',(select id from asulad where nimi = 'tartu'));
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(58,'Valge Mask',(select id from asulad where nimi = 'tartu'));
+			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(59,'Musta kivi kummardajad',(select id from asulad where nimi = 'tartu'))
 		endif;
 	end catch;
 	
@@ -3927,33 +3971,7 @@ if 	versioon > 3 then
 		end catch;
 	end catch;
 	
-	/* Asulad tabeli andmete lisamine */
-	begin try
-		if versioon > 3 then
-			begin try
-				delete asulad;
-			end try
-			begin catch
-				raiserror 17000 ('Ei saanud kustutada kirjeid tabelis "Asulad". Kontrollida trigerite definitsioone! Teha vajadusel parandused ja skript uuesti käivitada.');
-			end catch;
-			
-			load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
-			alter table klubid add asukoht varchar(100);
-			update klubid set asukoht = 'Tartu';
-			update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
-			alter table klubid drop asukoht;
-			begin try
-				if versioon = 7 then
-					update turniirid set asula = (select id from asulad where asulad.nimi = turniirid.Toimumiskoht);
-				endif;
-			end try
-			begin catch
-			end catch;
-		endif;
-	end try
-	begin catch
-		raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Asulad"!');
-	end catch;
+	
 	
 endif;
 set option fire_triggers = 'on';
@@ -3972,7 +3990,7 @@ end try
 begin catch
 end catch;
 
---output 	to 'c:\\temp\\info.txt' delimited by ',' format	text;
+output 	to 'c:\\temp\\info.txt' delimited by ',' format	text;
 
 
 /*
