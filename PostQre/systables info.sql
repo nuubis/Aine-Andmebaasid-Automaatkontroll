@@ -21,3 +21,30 @@ Lahendused:
 
 
 */
+
+Andmete sisestus:
+COPY <tabel> ({veerud})
+FROM '<täielik tee failini>'
+DELIMITER E'\t'
+ENCODING 'UTF-8';
+
+Connection:
+C:\Users\marttika\AppData\Local\DBeaverEE\dbeaver-cli.exe -con "driver=postgres-jdbc|url=jdbc:postgresql://localhost:5432/postgres|user=postgres|password=sql"
+
+Runtasks:
+-runTask "@projectName:taskName"
+C:\Users\marttika\AppData\Local\DBeaverEE\dbeaver-cli.exe -runTask "@General:Testing"
+
+
+
+postqreSQl driver=postgres-jdbc
+
+url: jdbc:postgresql://{host}[:{port}]/[{database}]
+jdbc:postgresql://localhost:5432/postgres
+
+Port: 5432
+Deafult database: postgres
+Default user: postgres
+
+Username:postgres
+Password: sql

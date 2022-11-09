@@ -1,10 +1,11 @@
 create table if not exists muutujad (
 nimi varchar(1000) unique,
 vaartus int);
+delete from muutujad;
 copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ';');
 
 
-create table Staatus (
+create table if not exists Staatus (
 Ylesanne varchar(100),
 Kontroll varchar(1000),
 Tagasiside varchar(1000),
@@ -47,11 +48,12 @@ select * from pg_proc where proname like '%isikud%';
 -- pg_proc - funk/protseduur
 
 */
-insert into muutujad(nimi, väärtus) values ('versioon', 1);
-select * from muutujad; 
-delete from muutujad;
+--delete from muutujad;
+--insert into muutujad(nimi, vaartus) values ('versioon', 1);
+--select * from muutujad; 
+--delete from muutujad;
 
-copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ';');
+--copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ';');
 drop table staatus;
 create table if not exists Staatus (
 Ylesanne varchar(100),
@@ -64,6 +66,7 @@ Jr int,
 Id serial);
 
 -- CREATE or replace FUNCTION getIsikud()
+drop function getIsikud();
 CREATE FUNCTION getIsikud()
 RETURNS TABLE (e_nimi varchar(25), p_nimi varchar(25))
 AS 'SELECT eesnimi, perenimi FROM isikud;'
