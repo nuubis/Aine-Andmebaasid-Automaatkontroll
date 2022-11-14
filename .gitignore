@@ -32,3 +32,6 @@ tulemus.csv
 *.db
 *.db
 *.lnk
+Edu test/edu.db
+Edu test/edu.log
+Ope test/ope.db
