@@ -1,0 +1,14 @@
+59	Musta kivi kummardajad	Tartu
+57	Vőitmatu Valge	Tartu
+55	Ruudu Liine	Tartu
+51	Laudnikud	Tartu
+54	Ajurebend	Tartu
+58	Valge Mask	Tartu
+50	Raudne Ratsu	Tallinn
+52	Pärnu Parimad	Pärnu
+53	Vabaettur	Narva
+56	Maletäht	Tallinn
+60	Chess	Viljandi
+61	Areng	Tallinn
+1	Tallinna ratsud	Tallinn
+3	Odamehed	Tartu

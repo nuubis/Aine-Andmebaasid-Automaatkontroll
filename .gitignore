@@ -30,3 +30,5 @@ tulemus.csv
 *.log
 *.db
 *.db
+*.db
+*.lnk

@@ -22,6 +22,58 @@ Lahendused:
 
 */
 
+Hetkel olev tööprotsess.
+Õppejõud paneb tudengi backupi kausta.
+õppejõud käivitab bat faili või taskid dbeaveris.
+1. task load backup
+2- task run script
+	2.1 script delete andmed
+	2.2 script insert default andmed
+	2.3 Run tests
+
+select * from pg_proc where proname like '%isikud%';
+--pg_tables - tabelid;
+-- pg_stats - veerud;
+-- pg_views, pg_index?
+-- pg_proc - funk/protseduur
+
+https://courses.cs.ut.ee/2022/Andmebaasid/fall/Main/CreatingFunctionsAndProcedures
+
+CREATE [ OR REPLACE ] FUNCTION name ( [ [ argname ] argtype ] )
+[ RETURNS rettype
+| RETURNS TABLE ( column_name column_type [, ...] ) ]
+LANGUAGE lang_name
+AS 'definition';
+
+-- CREATE or replace FUNCTION getIsikud()
+drop function getIsikud();
+CREATE FUNCTION getIsikud()
+RETURNS TABLE (e_nimi varchar(25), p_nimi varchar(25))
+AS 'SELECT eesnimi, perenimi FROM isikud;'
+LANGUAGE SQL;
+
+
+SELECT getIsikud();
+
+
+--Muutuja loomine - asendusena teha tabel, kõigi muutujatega.
+WITH myconstants (var1, var2) as (
+   values (5, 'foo')
+)
+SELECT *
+FROM myconstants
+WHERE 5 = var1
+   OR 'foo' = var2;
+   
+set session my.versioon = '1'; 
+
+
+
+
+CREATE [ OR REPLACE ] PROCEDURE name ( [ [ argname ] argtype ] )
+AS 'definition'
+LANGUAGE lang_name;
+
 Andmete sisestus:
 COPY <tabel> ({veerud})
 FROM '<täielik tee failini>'
