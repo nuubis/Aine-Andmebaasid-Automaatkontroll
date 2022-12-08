@@ -36,3 +36,4 @@ Edu test/edu.db
 Edu test/edu.log
 Ope test/ope.db
 PostQre/DB-8X1MRZS3-ZO6N.txt
+*.backup
