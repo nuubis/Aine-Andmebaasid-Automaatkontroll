@@ -1,5 +1,5 @@
 /* Muutuja mis määrab, milline kodutöö käivitatakse, 3=kodutöö 3, 5=kodutöö 5, 6=kodutöö 6 ja 7=kodutöö 7*/
-create or replace variable versioon int = 6;
+create or replace variable versioon int = 7;
 /* Muutuja, mis määrab, millist õppeainet kontrollitakse. "A" = Andmebaasid, "AA" = Andmebaaside alused */
 create or replace variable aine varchar(5) = 'AA';
 /* Protseduuride kustutamine - kõigepealt otsib kas see funktsioon/protseduur on olemas ja kui on siis kustutab */
@@ -73,7 +73,7 @@ if exists (select * from sysprocedure where proc_name = 'check_error_tapitaht') 
 create 	or replace variable kodutöö_3							numeric = 100;
 create 	or replace variable kodutöö_5							numeric = 132; -- (100 + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32)
 create 	or replace variable kodutöö_6							numeric = 157; -- (100 + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
-create 	or replace variable kodutöö_7							numeric = 182; -- (100 + (kodutöö_6 punktid * 0.25 = 50) + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
+create 	or replace variable kodutöö_7							numeric = 165; -- (100 + (kodutöö_6 punktid * 0.25 = 50) + (kodutöö_5 punktid * 0.25 = 50) + (kodutöö_3 punktid - kirjete_arvu punktid) * 0.5 = 32) 
 /* Kodutööde punktide osakaalu muutujate loomine ja määramine */
 create 	or replace variable kolmas_kodutöö 						numeric = 1.0;
 create 	or replace variable viies_kodutöö 						numeric = 1.0;
@@ -279,31 +279,32 @@ create or replace variable muud_indexid_turniirid 						numeric = 5 * kuues_kodu
 /* asulad ja klubid seaotud asjad läksid 5ndasse, hetkel kokku 79p */
 /* Tabel inimesed kirjete arv */
 if versioon = 7 then
-create or replace variable inimesed_check_sugu 							numeric = 1.0 * kolmas_kodutöö; // algselt on 2p, aga siin läheb 1 maha kirjete jaoks PS! Ma ei arvesta siin multiplieri teksti sest idee jääb samaks
+create or replace variable inimesed_check_sugu 							numeric = 1.0 * kolmas_kodutöö; -- algselt on 2p, aga siin läheb 1 maha kirjete jaoks PS! Ma ei arvesta siin multiplieri teksti sest idee jääb samaks
 create or replace variable inimesed_kirjete_arv 						numeric = 1.0 * kolmas_kodutöö;
 endif;
-/* Kokku 5p turniirid ja asulad vahel */
+/* Kokku 10p turniirid ja asulad vahel */
 create or replace variable turniirid_asula 								numeric = 1.0;
+create or replace variable turniirid_asula_andmed 						numeric = 5.0;
 create or replace variable välisvõti_turniir_2_asula 					numeric = 4.0;
-/* Vaade asulaklubisid kokku on 6p */
-create or replace variable v_asulaklubisid 								numeric = 6.0;
+/* Vaade asulaklubisid kokku on 10p */
+create or replace variable v_asulaklubisid 								numeric = 10.0;
 create or replace variable v_asulaklubisid_veergude_arv 				numeric = 1.0;
 create or replace variable v_asulaklubisid_asula_id 					numeric = 1.0;
 create or replace variable v_asulaklubisid_asula_nimi 					numeric = 1.0;
 create or replace variable v_asulaklubisid_klubisid 					numeric = 1.0;
-create or replace variable v_asulaklubisid_kirjete_arv 					numeric = 1.0;
+create or replace variable v_asulaklubisid_kirjete_arv 					numeric = 5.0;
 create or replace variable v_asulaklubisid_kirje 						numeric = 1.0;
-/* Vaade asulasuurus kokku on 6p */
-create or replace variable v_asulasuurus 								numeric = 6.0;
+/* Vaade asulasuurus kokku on 10p */
+create or replace variable v_asulasuurus 								numeric = 10.0;
 create or replace variable v_asulasuurus_veergude_arv 					numeric = 1.0;
 create or replace variable v_asulasuurus_asula_id 						numeric = 1.0;
 create or replace variable v_asulasuurus_asula_nimi 					numeric = 1.0;
 create or replace variable v_asulasuurus_mangijaid 						numeric = 1.0;
-create or replace variable v_asulasuurus_kirjete_arv 					numeric = 1.0;
+create or replace variable v_asulasuurus_kirjete_arv 					numeric = 5.0;
 create or replace variable v_asulasuurus_kirje 							numeric = 1.0;
-/* Protseduur sp_kustuta_klubi kokku on 9p*/
-create or replace variable sp_kustuta_klubi 							numeric = 7.0;
-/* Triggerite punktid kokku on 30p*/
+/* Protseduur sp_kustuta_klubi kokku on 8.5p*/
+create or replace variable sp_kustuta_klubi 							numeric = 8.5;
+/* Triggerite punktid kokku on 20p, 10p on lisa klubi, hetkel kasutamata*/
 create or replace variable tg_lisa_klubi 								numeric = 10.0;
 create or replace variable tg_lisa_klubi_nimi 							numeric = 5.0;
 create or replace variable tg_lisa_klubi_id 							numeric = 5.0;
@@ -988,9 +989,7 @@ select 	count(column_name) into v_size from syscolumn where table_id = v_table_i
 
 if      version = 3  and v_size != 2             
 then 	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
-elseif	version = 7 and v_size != 4
-then	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 4, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
-elseif	(version = 5 or versioon = 6) and v_size != 3
+elseif	version != 3 and v_size != 3
 then	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', klubid_veergude_arv*0, klubid_veergude_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Klubid"', 'Veergude arv', '-', 'OK', klubid_veergude_arv, klubid_veergude_arv, '', tabelid_jr)
 endif;
@@ -1100,10 +1099,8 @@ set 	v_table_id = find_table_id('turniirid');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if      v_size != 6 and version = 7                
-then 	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', 'On vale, peab olema 6, hetkel on ' || v_size, 'VIGA', turniirid_veergude_arv*0, turniirid_veergude_arv, '', tabelid_jr)
-elseif 	v_size != 5 and version != 7
-then	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', turniirid_veergude_arv*0, turniirid_veergude_arv, '', tabelid_jr)
+if      v_size != 5               
+then 	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', turniirid_veergude_arv*0, turniirid_veergude_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Turniirid"', 'Veergude arv', '-', 'OK', turniirid_veergude_arv, turniirid_veergude_arv, '', tabelid_jr)
 endif;
 
@@ -1115,7 +1112,9 @@ endif;
 if 		versioon = 5 then 
 call 	check_column(v_table_id, 'Nimi',            null,               'n', 'n', 100, turniirid_nimi, tabelid_jr);
 endif;
+if 		versioon != 7 then
 call 	check_column(v_table_id, 'Toimumiskoht',    null,               'n', 'y', 100, turniirid_toimumiskoht, tabelid_jr);
+endif;
 if 		version = 7 then
 call	check_column(v_table_id, 'Asula', 			null,				'n', 'y', 4, turniirid_asula, tabelid_jr) 
 endif;
@@ -1140,6 +1139,24 @@ if 		kirje_count = 2
 then 	insert Staatus values ('Tabel "Turniirid"', 'Kirjete arv', '-', 													'OK', 	turniirid_kirjete_arv, 		turniirid_kirjete_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Turniirid"', 'Kirjete arv', 'Kirjete arv peab olema 2, hetkel on ' || kirje_count, 	'VIGA', turniirid_kirjete_arv*0, 	turniirid_kirjete_arv, '', tabelid_jr)
 endif;
+
+// Asula veeru andmete kontroll
+begin try
+	if 		(select count(*) from Turniirid where asula is null) = 0
+	then 	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on olemas', 'OK', turniirid_asula_andmed, turniirid_asula_andmed, '', tabelid_jr);
+	else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on puudu', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+	endif;
+end try
+begin catch
+	case
+		when	not exists (select * from systable where table_name = 'Turniirid')
+		then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+		when	not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('Turniirid'))
+		then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Veergu "Asula" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+		else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+	end;
+	
+end catch;
 end;
 
 
@@ -3418,7 +3435,15 @@ endif;
 
 
 begin try
-	insert 	into klubid (nimi, asukoht) values ('Kiire Aju', 'Viljandi');
+	begin try 
+		if 		not exists (select * from asulad where nimi = 'Viljandi')
+		then	insert into asulad (nimi) values ('Viljandi');
+		endif;
+		insert 	into klubid (nimi, asula) values ('Kiire Aju', (select id from asulad where nimi = 'Viljandi'));
+	end try
+	begin catch
+		insert Staatus values('Protseduur "sp_kustuta_klubi"', 'Klubi kustutamine', 'Ei kompileeru kontroll andmete lisamisel', 'VIGA', sp_kustuta_klubi*0, sp_kustuta_klubi, '', protseduurid_jr)
+	end catch;
 	call	sp_kustuta_klubi('Kiire Aju');
 	if		not exists (select * from klubid where nimi = 'Kiire Aju')
 	then	insert Staatus values('Protseduur "sp_kustuta_klubi"', 'Klubi kustutamine', '-', 'OK', sp_kustuta_klubi, sp_kustuta_klubi, '', protseduurid_jr)
@@ -3556,9 +3581,19 @@ return;
 endif;
 
 begin try
-	insert 	into klubid (nimi, asukoht) values ('Kiire Aju', 'Viljandi');
+
+	begin try 
+		if 		not exists (select * from asulad where nimi = 'Viljandi')
+		then	insert into asulad (nimi) values ('Viljandi');
+		endif;
+		insert 	into klubid (nimi, asula) values ('Kiire Aju', (select id from asulad where nimi = 'Viljandi'));
+	end try
+	begin catch
+		insert Staatus values('Protseduur "sp_kustuta_klubi"', 'Klubi kustutamine', 'Ei kompileeru kontroll andmete lisamisel', 'VIGA', sp_kustuta_klubi*0, sp_kustuta_klubi, '', protseduurid_jr)
+	end catch;
+	
     if 		not exists (select * from asulad where nimi = 'Viljandi') then insert asulad values('Viljandi') endif;
-    insert 	into klubid (nimi, asukoht) values ('Kambja Kibe', 'Viljandi');
+    insert 	into klubid (nimi, asula) values ('Kambja Kibe', (select id from asulad where nimi = 'Viljandi'));
     
 	delete	from klubid where nimi = 'Kiire Aju';
 	if		exists (select * from asulad where nimi = 'Viljandi')
@@ -3611,7 +3646,8 @@ endif;
 
 // Klubi kustutamine koos isikuga, kellel pole partiisid
 begin try
-	insert 	into klubid (nimi, asukoht) values ('SQL klubi', 'Tartu');
+	
+	insert 	into klubid (nimi, asula) values ('SQL klubi', (select id from asulad where nimi = 'Tartu'));
 	insert 	into isikud (eesnimi, perenimi, klubi) values ('Martti', 'Kakk', (select id from klubid where nimi = 'SQL klubi'));
 	delete 	from klubid where nimi = 'SQL klubi';
 	if 		not exists (select * from klubid where nimi = 'SQL klubi')
@@ -3702,7 +3738,7 @@ if		kodutöö >= 6 then
 		call muud_indexid();
 endif;
 if		kodutöö = 7 then
-		call trigger_lisa_klubi();
+		--call trigger_lisa_klubi();
 		call trigger_kustuta_klubi();
 		call trigger_kustuta_klubi_isikutega();
 endif;
@@ -3836,6 +3872,8 @@ if 	versioon > 3 then
 		end catch;
 	end catch;
 	
+	
+	
 	begin try
 		delete asulad;
 	end try
@@ -3854,7 +3892,7 @@ if 	versioon > 3 then
 			end catch;
 			
 			load table Asulad (nimi) from 'C:\TEMP\asulad.txt' defaults on;
-			begin try
+			/*begin try
 				alter table klubid add asukoht varchar(100);
 				update klubid set asukoht = 'Tartu';
 				update klubid set asula = (select id from asulad where asulad.nimi = klubid.asukoht);
@@ -3868,7 +3906,7 @@ if 	versioon > 3 then
 				endif;
 			end try
 			begin catch
-			end catch;
+			end catch;*/
 		endif;
 	end try
 	begin catch
@@ -3878,6 +3916,9 @@ if 	versioon > 3 then
 	/* Klubid tabeli andmete lisamine */
 	begin try
 		load 	table Klubid (id, nimi) from 'C:\\TEMP\\klubid.txt' FORMAT ASCII DELIMITED BY '\x09';
+		if 	versioon = 7 then 
+			update klubid set asula = (select id from asulad where nimi = 'Tartu'); 
+		endif;
 	end try
 	begin catch
 		//raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Klubid"!');
@@ -3888,20 +3929,6 @@ if 	versioon > 3 then
 			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(57,'V�itmatu Valge',(select id from asulad where nimi = 'tartu'));
 			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(58,'Valge Mask',(select id from asulad where nimi = 'tartu'));
 			INSERT INTO "DBA"."klubid" ("id","Nimi","Asula") VALUES(59,'Musta kivi kummardajad',(select id from asulad where nimi = 'tartu'))
-		endif;
-	end catch;
-	
-	/* Isikud tabeli andmete lisamine */
-	begin try
-		load 	table Isikud (id, eesnimi, perenimi, klubi) from 'C:\TEMP\isikud.txt' FORMAT ASCII DELIMITED BY '\x09' ;
-	end try
-	begin catch
-		if	(select count(*) from Isikud) = 0 then
-			call 	check_error('Isikud','Id');
-			call 	check_error('Isikud','Eesnimi');
-			call 	check_error('Isikud','Perenimi');
-			call 	check_error('Isikud','Klubi');
-			raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Isikud"!');
 		endif;
 	end catch;
 	
@@ -3922,7 +3949,16 @@ if 	versioon > 3 then
 					load 	table Turniirid (id, nimetus, Toimumiskoht, Alguskuupäev, Lõppkuupäev) from 'C:\TEMP\turniirid.txt' FORMAT ASCII DELIMITED BY '\x09' ;
 				end try
 				begin catch
-					if	(select count(*) from Turniirid) = 0 then
+					begin try
+						if 	(select count(*) from Turniirid) = 0 then
+							insert into turniirid values(41, 'Kolme klubi kohtumine', '2005-01-12', '2005-01-12', (select id from asulad where nimi = 'Kambja'));
+							insert into turniirid values(42, 'Tartu lahtised meistrivõistlused 2005', '2005-03-04', '2005-03-17', (select id from asulad where nimi = 'Tartu'));
+						endif;
+					end try
+					begin catch
+						raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Turniirid"! Kontrollida Välisvõtmeid.');
+					end catch;
+					/*if	(select count(*) from Turniirid) = 0 then
 						call 	check_error('Turniirid','Id');
 						if 		not exists (select * from syscolumn where table_id = find_table_id('Turniirid') and column_name = 'nimetus') then
 								call 	check_error('Turniirid','Nimi');
@@ -3931,7 +3967,7 @@ if 	versioon > 3 then
 						endif;
 						call 	check_error('Turniirid','Toimumiskoht');
 						
-						/* Ei oska seda hetkel lahendada
+						 Ei oska seda hetkel lahendada
 						if		not exists (select * from syscolumn where table_id = find_table_id('Turniirid') and column_name = 'Alguskuupäev') and  
 								not exists (select * from syscolumn where table_id = find_table_id('Turniirid') and column_name = 'Lõppkuupäev')
 						then		call 	check_error_paar('Turniirid','Alguskuupaev','Loppkuupaev');
@@ -3942,11 +3978,24 @@ if 	versioon > 3 then
 						then		call 	check_error_paar('Turniirid','Alguskuupäev','Lõppkuupäev');
 						endif;*/
 						
-						raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Turniirid"! Kontrollida Välisvõtmeid.');
-					endif;
+						
 				end catch;
 			end catch;
 		end catch;
+	end catch;
+	
+	/* Isikud tabeli andmete lisamine */
+	begin try
+		load 	table Isikud (id, eesnimi, perenimi, klubi) from 'C:\TEMP\isikud.txt' FORMAT ASCII DELIMITED BY '\x09' ;
+	end try
+	begin catch
+		if	(select count(*) from Isikud) = 0 then
+			call 	check_error('Isikud','Id');
+			call 	check_error('Isikud','Eesnimi');
+			call 	check_error('Isikud','Perenimi');
+			call 	check_error('Isikud','Klubi');
+			raiserror 17000 ('Ei saanud lisada andmeid tabelisse "Isikud"!');
+		endif;
 	end catch;
 	
 	/* Partiid tabeli andmete lisamine */
