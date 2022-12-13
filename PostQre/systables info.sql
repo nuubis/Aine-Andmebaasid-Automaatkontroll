@@ -5,7 +5,10 @@ select * from information_schema.tables where table_schema ='public';
 select * from information_schema.columns where table_schema = 'public';
 -- klubid asukoht varchar pikkus 
 select * from information_schema.columns where table_name = 'klubid' and character_maximum_length =70;
-
+-- indeksite kontroll 
+select * from pg_indexes;
+-- välisvõtmed ja muud constraints
+select * from information_schema.table_constraints
 
 -- Moodle test: 
 -- https://demovpl.dis.ulpgc.es/mod/vpl/forms/executionfiles.php?id=582

@@ -1141,22 +1141,23 @@ else	insert Staatus values ('Tabel "Turniirid"', 'Kirjete arv', 'Kirjete arv pea
 endif;
 
 // Asula veeru andmete kontroll
-begin try
-	if 		(select count(*) from Turniirid where asula is null) = 0
-	then 	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on olemas', 'OK', turniirid_asula_andmed, turniirid_asula_andmed, '', tabelid_jr);
-	else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on puudu', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
-	endif;
-end try
-begin catch
-	case
-		when	not exists (select * from systable where table_name = 'Turniirid')
-		then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
-		when	not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('Turniirid'))
-		then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Veergu "Asula" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
-		else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
-	end;
-	
-end catch;
+if 	versioon = 7 then
+	begin try
+		if 		(select count(*) from Turniirid where asula is null) = 0
+		then 	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on olemas', 'OK', turniirid_asula_andmed, turniirid_asula_andmed, '', tabelid_jr);
+		else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'on puudu', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+		endif;
+	end try
+	begin catch
+		case
+			when	not exists (select * from systable where table_name = 'Turniirid')
+			then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+			when	not exists (select * from syscolumn where column_name = 'asula' and table_id = find_table_id('Turniirid'))
+			then	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Veergu "Asula" ei ole olemas', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+			else	insert Staatus values ('Tabel "Turniirid"', 'veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', turniirid_asula_andmed*0, turniirid_asula_andmed, '', tabelid_jr);
+		end;
+	end catch;
+endif;
 end;
 
 

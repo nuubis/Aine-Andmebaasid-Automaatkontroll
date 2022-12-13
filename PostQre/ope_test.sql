@@ -28,7 +28,7 @@ begin
 	select taisarv into kodutoo_jr from muutujad where nimi = 'kodutoo_jr';
 	if versioon = 3 then 
 		kodu_max_punktid := 1.0;
-		select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutöö 3';
+		select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutoo 3';
 		insert into Staatus values ('Kodutöö 3','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 
@@ -56,13 +56,18 @@ $$ language plpgsql;
 
 create or replace procedure kodutoo_3() as $$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
 declare 
-kodutoo_3_inimesed_andmed numeric;
 kodutoo_3_jr int;
+kodutoo_3_inimesed_andmed numeric;
 kodutoo_3_turniirid_asula numeric;
+kodutoo_3_turniirid_asukoht_kustutamine numeric;
+kodutoo_3_valisvoti_turniirid_asulad numeric;
 begin 
+	select taisarv into kodutoo_3_jr from muutujad where nimi = 'kodutoo_3_jr';
 	select komaarv into kodutoo_3_turniirid_asula from muutujad where nimi = 'kodutoo_3_turniirid_asula';
 	select komaarv into kodutoo_3_inimesed_andmed from muutujad where nimi = 'kodutoo_3_inimesed_andmed';
-	select taisarv into kodutoo_3_jr from muutujad where nimi = 'kodutoo_3_jr';
+	select komaarv into kodutoo_3_turniirid_asukoht_kustutamine from muutujad where nimi = 'kodutoo_3_turniirid_asukoht_kustutamine';
+	select komaarv into kodutoo_3_valisvoti_turniirid_asulad from muutujad where nimi = 'kodutoo_3_valisvoti_turniirid_asulad';
+	
 	-- 1. tabeli inimesed andmed
 	if 		(select count(*) from inimesed) > 0
 	then 	insert into Staatus values ('Kodutoo 3', 'Tabel "Inimesed" andmed', 'on olemas', 'OK', kodutoo_3_inimesed_andmed, kodutoo_3_inimesed_andmed, kodutoo_3_jr);
@@ -70,43 +75,55 @@ begin
 	end if;
 	
 	-- 2. Turniirid veerg asula
-	call check_column('turniirid', 'asula', kodutoo_3_turniirid_asula, kodutoo_3_jr, 'Kodutöö 3', 'Tabel');
+	call check_column('turniirid', 'asula', kodutoo_3_turniirid_asula, kodutoo_3_jr, 'Kodutoo 3', 'Tabel');
 	
 	-- 3. Kontrollida tabeli turniirid veergu asula kirjeid
+	call turniirid_asula_andmed(kodutoo_3_jr);
 	
 	-- 4. välisvõtme fk_turniir_2_asula kontroll
+	if 		exists (select * from information_schema.table_constraints where table_name = 'turniirid' and constraint_type = 'FOREIGN KEY')
+	then 	insert into Staatus values ('Kodutoo 3', 'Välisvõti "fk_turniir_2_asula"', 'on olemas', 'OK', kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
+	else	insert into Staatus values ('Kodutoo 3', 'Välisvõti "fk_turniir_2_asula"', 'ei ole olemas', 'VIGA', kodutoo_3_valisvoti_turniirid_asulad*0, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
+	end if;
 	
 	-- 5. tabeli turniirid veerg asukoht/toimumiskoht olemasolu puudumine
+	if 		not exists (select * from information_schema.columns where table_name = 'turniirid' and column_name in ('asukoht', 'toimumiskoht'))
+	then 	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asukoht" voi "Toimumiskoht"', 'on kustutatud', 'OK', kodutoo_3_turniirid_asukoht_kustutamine, kodutoo_3_turniirid_asukoht_kustutamine, kodutoo_3_jr);
+	else	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asukoht" voi "Toimumiskoht"', 'ei ole kustutatud', 'VIGA', kodutoo_3_turniirid_asukoht_kustutamine*0, kodutoo_3_turniirid_asukoht_kustutamine, kodutoo_3_jr);
+	end if;
 	
 	-- 6. päringu kontroll
 	
 	-- 7. päringu kontroll
+	
+	exception
+		when others then
+		insert into Staatus values ('Kodutoo 3', '', 'Automaatkontrollis on viga!', 'VIGA', 0*0, 0, kodutoo_3_jr);
+
 end;	
 $$ language plpgsql;
 
-create or replace procedure turniirid_asula_andmed() as $$ 
+create or replace procedure turniirid_asula_andmed(kodutoo_3_jr int) as $$ 
 declare 
 kodutoo_3_turniirid_asula_andmed numeric;
-kodutoo_3_jr int;
 begin 
 
 	select komaarv into kodutoo_3_turniirid_asula_andmed from muutujad where nimi = 'kodutoo_3_turniirid_asula_andmed';
-	select taisarv into kodutoo_3_jr from muutujad where nimi = 'kodutoo_3_jr';
 
 	if (select count(*) from Turniirid where asula isnull) = 0 then 
-	insert into Staatus values ('Kodutöö 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'on olemas', 'OK', kodutoo_3_turniirid_asula_andmed, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
+	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'on olemas', 'OK', kodutoo_3_turniirid_asula_andmed, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
 	else 
-	insert into Staatus values ('Kodutöö 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'on puudu', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
+	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'on puudu', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
 	end if;
 	
 	exception 
 		when others then 
 			case
 				when	not exists (select * from information_schema.tables where table_name = 'turniirid')
-				then	insert into Staatus values ('Kodutöö 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
+				then	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'Tabelit "Turniirid" ei ole olemas', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
 				when	not exists (select * from information_schema.columns where table_name = 'turniirid' and column_name = 'asula')
-				then	insert into  Staatus values ('Kodutöö 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'Veergu "Asula" ei ole olemas', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
-				else	insert into Staatus values ('Kodutöö', 'Tabel "Turniirid" veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
+				then	insert into  Staatus values ('Kodutoo 3', 'Tabel "Turniirid" veerg "Asula" andmed', 'Veergu "Asula" ei ole olemas', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
+				else	insert into Staatus values ('Kodutoo', 'Tabel "Turniirid" veerg "Asula" andmed', 'Automaatkontrollis on viga!', 'VIGA', kodutoo_3_turniirid_asula_andmed*0, kodutoo_3_turniirid_asula_andmed, kodutoo_3_jr);
 			end case;
 end;	
 $$ language plpgsql;
@@ -116,7 +133,8 @@ declare aeg timestamp;
 tudeng int;
 begin 
 	select taisarv into tudeng from muutujad where nimi = 'tudeng';
-	if versioon = 3 then call kodutoo_3(); 
+	if versioon = 3 then 
+		call kodutoo_3(); 
 	end if;
 	
 	call arvuta_punktid(versioon);
