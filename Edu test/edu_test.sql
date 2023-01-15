@@ -701,7 +701,7 @@ set 	v_table_id = find_table_id('lecturers');
 
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
-if 	v_size != 4
+if 	v_size != 5
 then	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', 'On vale, peab olema 5, hetkel on ' || v_size, 'VIGA', lecturers_veergude_arv*0, lecturers_veergude_arv, '', tabelid_jr)
 else	insert Staatus values ('Tabel "Lecturers"', 'Veergude arv', '-', 'OK', lecturers_veergude_arv, lecturers_veergude_arv, '', tabelid_jr)
 endif;

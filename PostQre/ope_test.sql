@@ -29,7 +29,7 @@ begin
 	if versioon = 3 then 
 		kodu_max_punktid := 1.0;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne = 'Kodutoo 3';
-		insert into Staatus values ('Kodutöö 3','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
+		insert into Staatus values ('Kodutoo 3','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 
 end;
