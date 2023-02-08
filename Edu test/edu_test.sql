@@ -1010,7 +1010,7 @@ set 	v_table_id = find_table_id('v_andmebaasideTeooria');
 select count(column_name) into v_size from syscolumn where table_id = v_table_id; 
 
 if      v_size != 3                 
-then 	insert Staatus values ('Vaade "v_andmebaasideTeooria"', 'Veergude arv', 'On vale, peab olema 2, hetkel on ' || v_size, 'VIGA', v_andmebaasideTeooria_veergude_arv*0, v_andmebaasideTeooria_veergude_arv, '', vaated_jr)
+then 	insert Staatus values ('Vaade "v_andmebaasideTeooria"', 'Veergude arv', 'On vale, peab olema 3, hetkel on ' || v_size, 'VIGA', v_andmebaasideTeooria_veergude_arv*0, v_andmebaasideTeooria_veergude_arv, '', vaated_jr)
 else	insert Staatus values ('Tabel "v_andmebaasideTeooria"', 'Veergude arv', '-', 'OK', v_andmebaasideTeooria_veergude_arv, v_andmebaasideTeooria_veergude_arv, '', vaated_jr)
 endif;
 
