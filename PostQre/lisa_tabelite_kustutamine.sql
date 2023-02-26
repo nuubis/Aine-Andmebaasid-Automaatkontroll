@@ -1,10 +1,4 @@
 create or replace procedure kustuta () as $$
-
-	begin 
-	if 	exists (select * from information_schema.tables where table_name = 'inimesed') then
-		drop table inimesed;
-	end if;
-
 	
 	if 	exists (select * from information_schema.tables where table_name = 'partiid') then
 		drop table partiid;
