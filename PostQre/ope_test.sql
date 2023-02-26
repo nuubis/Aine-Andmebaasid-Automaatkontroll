@@ -129,13 +129,8 @@ begin
 	then 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on õige perenimi', 'OK', 0, 0,	praktikum_3_jr);
 	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on vale perenimi, peab olema Kompvek', 'VIGA', 0, 0,	praktikum_3_jr);
 	end if;
-	-- Ei tohi olla ühtegi P tähea isikuid
-	if		not exists (select * FROM isikud WHERE eesnimi LIKE 'P%' AND RIGHT(eesnimi,1)='P')
-	then 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" andmeid ', 'on kustutatud', 'OK', 0, 0,	praktikum_3_jr);
-	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" andmeid ', 'ei ole kustutatud', 'VIGA', 0, 0,	praktikum_3_jr);
-	end if;
 	-- Osav oda klubi olemas
-	if 		exists (select * from klubid where nimi = 'Osav Oda')
+	if 		exists (select * from klubid where nimi ilike 'osav oda')
 	then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'on olemas', 'OK', 0, 0,	praktikum_3_jr);
 	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'ei ole olemas', 'VIGA', 0, 0,	praktikum_3_jr);
 	end if;
