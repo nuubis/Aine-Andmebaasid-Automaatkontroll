@@ -1,0 +1,10 @@
+1	Pärnu
+2	Valga
+3	Elva
+4	Narva
+5	Tartu
+6	Viljandi
+7	Otepää
+8	Viiratsi
+9	Kambja
+10	Tallinn

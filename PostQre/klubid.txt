@@ -1,0 +1,15 @@
+59	Musta kivi kummardajad	5
+57	Vőitmatu Valge	5
+55	Ruudu Liine	5
+51	Laudnikud	5
+54	Ajurebend	5
+50	Raudne Ratsu	10
+52	Pärnu Parimad	1
+53	Vabaettur	4
+56	Maletäht	10
+60	Chess	6
+61	Areng	10
+1	Tallinna ratsud	10
+3	Odamehed	5
+4	Osav Oda	7
+58	Valge Mask	2

@@ -1,5 +1,0 @@
-41	'Kolme klubi kohtumine'	'Kambja'	2005-01-12	2005-01-12
-42	'Tartu lahtised meistrivőistlused 2005'	'Tartu'	2005-03-04	2005-03-17
-47	'Plekkkarikas 2010'	'Elva'	2010-10-14	2010-10-14
-43	'Viljandi lahtised meistrivőistlused 2006'	'Viiratsi'	2006-06-04	2006-06-04
-44	'Eesti meistrivőistlused 2007'	'Tallinn'	2007-09-01	2007-09-01

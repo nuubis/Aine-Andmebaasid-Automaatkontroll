@@ -1,0 +1,5 @@
+41	Kolme klubi kohtumine	2005-01-12	2005-01-12	9
+42	Tartu lahtised meistrivőistlused 2005	2005-03-04	2005-03-17	5
+47	Plekkkarikas 2010	2010-10-14	2010-10-14	3
+43	Viljandi lahtised meistrivőistlused 2006	2006-06-04	2006-06-04	8
+44	Eesti meistrivőistlused 2007	2007-09-01	2007-09-01	10
