@@ -380,7 +380,7 @@ begin
 					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on õige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
 					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on vale, peaks olema viik', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
 					end if;
-			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" veeru kes voitis andme kontrolli', 'ei saa teha, sest puudub veerg kes_voitis või partii_id', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10*3, kodutoo_4_jr);
+			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" veeru kes voitis', 'ei saa kontrollida, sest puudub veerg "kes_voitis" või "partii_id"', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10*3, kodutoo_4_jr);
 			end if;
 	else 	insert into Staatus values ('Kodutoo 4', 'Vaadet "v_turniiripartiid"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid, kodutoo_4_jr);
 	end if;
@@ -396,7 +396,7 @@ begin
 			then	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr);
 			else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" kirjete arv', 'on vale, peaks olema 12', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr);
 			end if;
-			-- pisteliselt 3 veeru kontroll
+			-- partiide kogusumma kontroll
 			if 		exists (select * from information_schema.columns where table_name = 'v_klubipartiikogused' and column_name = 'partiisid') then
 					select sum(partiisid) into klubidepartiikogustesumma from v_klubipartiikogused;
 					-- partiide kogu summa on 571
@@ -408,9 +408,39 @@ begin
 					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'on vale, sul on:'||klubidepartiikogustesumma||', peaks olema rohkem', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
 					end if;
 					
-			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'ei saa leida, sest puudub veerg partiisid', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
+			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'ei saa kontrollida, sest puudub veerg "partiisid"', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr);
 			end if;
 	else 	insert into Staatus values ('Kodutoo 4', 'Vaadet "v_klubipartiikogused"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused, kodutoo_4_jr);
+	end if;
+	
+	-- v_keskminepartii
+	if 		exists (select * from information_schema.views where table_name = 'v_keskminepartii') then
+			
+			-- veergude olemasolu
+			call check_column('v_keskminepartii', 'turniiri_nimi', kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
+			call check_column('v_keskminepartii', 'keskmine_partii', kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
+			-- kirjete arv = 5
+			if 		(select count(*) from v_keskminepartii) = 5 
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_keskminepartii/5, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" kirjete arv', 'on vale, peaks olema 5', 'VIGA', kodutoo_4_vaade_keskminepartii*0, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+			end if;
+			-- pisteliselt 2 veeru kontroll
+			if 		exists (select * from information_schema.columns where table_name = 'v_keskminepartii' and column_name = 'keskmine_partii')
+			and 	exists (select * from information_schema.columns where table_name = 'v_keskminepartii' and column_name = 'turniiri_nimi') then
+					-- Plekkkarikas 2010 keskmine
+					if 		(select round(keskmine_partii,3) from v_keskminepartii where turniiri_nimi = 'Plekkkarikas 2010') = 23.765
+					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" turniiri "Plekkkarikas 2010" keskmine', 'on õige', 'OK', kodutoo_4_vaade_keskminepartii/5, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" turniiri "Plekkkarikas 2010" keskmine', 'on vale, peaks olema 23.765', 'VIGA', kodutoo_4_vaade_keskminepartii*0, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+					end if;
+					-- Kolmeklubi kohtumine keskmine
+					if 		(select round(keskmine_partii,3) from v_keskminepartii where turniiri_nimi = 'Kolme klubi kohtumine') = 23.04
+					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine', 'on õige', 'OK', kodutoo_4_vaade_keskminepartii/5, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" turniiri "Kolme klubi kohtumine" keskmine', 'on vale, peaks olema 23.04', 'VIGA', kodutoo_4_vaade_keskminepartii*0, kodutoo_4_vaade_keskminepartii/5, kodutoo_4_jr);
+					end if;
+					
+			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_keskminepartii" turniiride keskmisi', 'ei saa kontrollida, sest puudub veerg "turniiri_nimi" või "keskmine_partii"', 'VIGA', kodutoo_4_vaade_keskminepartii*0, kodutoo_4_vaade_keskminepartii/5*2, kodutoo_4_jr);
+			end if;
+	else 	insert into Staatus values ('Kodutoo 4', 'Vaadet "v_keskminepartii"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_keskminepartii*0, kodutoo_4_vaade_keskminepartii, kodutoo_4_jr);
 	end if;
 end;	
 $$ language plpgsql;	
