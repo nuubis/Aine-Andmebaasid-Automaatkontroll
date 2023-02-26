@@ -333,6 +333,7 @@ declare
 kodutoo_4_jr int;
 kodutoo_4_vaade_turniiripartiid numeric;
 kodutoo_4_vaade_klubipartiikogused numeric;
+klubidepartiikogustesumma int;
 kodutoo_4_vaade_keskminepartii numeric;
 kodutoo_4_vaade_partiide_arv_valgetega numeric;
 hilisem_kodutoo int;
@@ -388,38 +389,28 @@ begin
 	if 		exists (select * from information_schema.views where table_name = 'v_klubipartiikogused') then
 			
 			-- veergude olemasolu
-			call check_column('v_klubipartiikogused', 'turniir_nimi', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			call check_column('v_klubipartiikogused', 'toimumiskoht', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			call check_column('v_turniiripartiid', 'partii_id', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			call check_column('v_turniiripartiid', 'partii_algus', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			call check_column('v_turniiripartiid', 'partii_lopp', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			call check_column('v_turniiripartiid', 'kes_voitis', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
-			-- kirjete arv = 299
-			if 		(select count(*) from v_turniiripartiid) = 299 
-			then	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-			else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" kirjete arv', 'on vale, peaks olema partiide koguarv', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+			call check_column('v_klubipartiikogused', 'klubi_nimi', kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
+			call check_column('v_klubipartiikogused', 'partiisid', kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr, 'Kodutoo 4', 'Vaade',1);
+			-- kirjete arv = 12
+			if 		(select count(*) from v_klubipartiikogused) = 12 
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" kirjete arv', 'on vale, peaks olema 12', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5, kodutoo_4_jr);
 			end if;
 			-- pisteliselt 3 veeru kontroll
-			if 		exists (select * from information_schema.columns where table_name = 'v_turniiripartiid' and column_name = 'kes_voitis')
-			and 	exists (select * from information_schema.columns where table_name = 'v_turniiripartiid' and column_name = 'partii_id') then
-					-- valge 270
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 270) = 'valge'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on õige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on vale, peaks olema valge', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+			if 		exists (select * from information_schema.columns where table_name = 'v_klubipartiikogused' and column_name = 'partiisid') then
+					select sum(partiisid) into klubidepartiikogustesumma from v_klubipartiikogused;
+					-- partiide kogu summa on 571
+					if 		klubidepartiikogustesumma = 571
+					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'on õige', 'OK', kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
+					elsif 	klubidepartiikogustesumma > 571
+					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'on vale, sul on:'||klubidepartiikogustesumma||', peaks olema vähem', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
+					elsif 	klubidepartiikogustesumma < 571
+					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'on vale, sul on:'||klubidepartiikogustesumma||', peaks olema rohkem', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
 					end if;
-					-- must 271
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 241) = 'must'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on õige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on vale, peaks olema must', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					end if;
-					-- viik 193
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 193) = 'viik'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on õige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on vale, peaks olema viik', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					end if;
-			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" veeru kes voitis andme kontrolli', 'ei saa teha, sest puudub veerg kes_voitis või partii_id', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10*3, kodutoo_4_jr);
+					
+			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_klubipartiikogused" partiide kogusumma', 'ei saa leida, sest puudub veerg partiisid', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused/5*2, kodutoo_4_jr);
 			end if;
-	else 	insert into Staatus values ('Kodutoo 4', 'Vaadet "v_turniiripartiid"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid, kodutoo_4_jr);
+	else 	insert into Staatus values ('Kodutoo 4', 'Vaadet "v_klubipartiikogused"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_klubipartiikogused*0, kodutoo_4_vaade_klubipartiikogused, kodutoo_4_jr);
 	end if;
 end;	
 $$ language plpgsql;	
