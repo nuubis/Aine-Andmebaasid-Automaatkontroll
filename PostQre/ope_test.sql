@@ -25,19 +25,28 @@ kodu_punktid numeric;
 kodu_max_punktid numeric;
 kodutoo_jr int;
 praktikum_jr int;
+praktikum3_oige int;
+praktikum3_saadud_oige int;
+praktikum4_oige int;
+praktikum4_saadud_oige int;
 begin
 	select taisarv into kodutoo_jr from muutujad where nimi = 'kodutoo_jr';
 	select taisarv into praktikum_jr from muutujad where nimi = 'praktikum_jr';
+	select taisarv into praktikum3_oige from muutujad where nimi = 'praktikum3_oige';
+	select taisarv into praktikum4_oige from muutujad where nimi = 'praktikum4_oige';
 	if versioon = 2 then
-		insert into Staatus values ('Praktikum 3', '-', '-', 'Hindepunktid', 1, 1,	praktikum_jr);
+		select count(*) into praktikum3_saadud_oige from staatus where ylesanne = 'Praktikum 3' and olek = 'OK'; 
+		insert into Staatus values ('Praktikum 3', 'Õigesti tehtud: ' || praktikum3_saadud_oige,'Maksimum õiged: '|| praktikum3_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
 	end if;
 	if versioon = 3 then 
-		insert into Staatus values ('Praktikum 4', '-', '-', 'Hindepunktid', 1, 1,	praktikum_jr);
-		kodu_max_punktid := 0.5;
+		select count(*) into praktikum4_saadud_oige from staatus where ylesanne = 'Praktikum 4' and olek = 'OK'; 
+		insert into Staatus values ('Praktikum 4', 'Õigesti tehtud: ' || praktikum4_saadud_oige,'Maksimum õiged: '|| praktikum4_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+		kodu_max_punktid := 1;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 3','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 	if versioon = 4 then 
+		select count(*) from staatus where ylesanne = 'Praktikum 4';
 		kodu_max_punktid := 2;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 4','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
@@ -113,26 +122,34 @@ begin
 	-- Klubid asukoht suurus
 	if versioon = 2 then
 		if		(select character_maximum_length from information_schema.columns c where table_name = 'klubid' and column_name = 'asukoht') = 100
-		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" andmetüüp', 'on oige', 'OK', 0, 0,	praktikum_3_jr);
-		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" andmetüüp', 'on vale, peab olema varchar(100)', 'VIGA', 0, 0,	praktikum_3_jr);
+		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" andmetuup', 'on oige', 'OK', 0, 0,	praktikum_3_jr);
+		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" andmetuup', 'on vale, peab olema varchar(100)', 'VIGA', 0, 0,	praktikum_3_jr);
 		end if;
 	end if;
 	-- Klubid asukoht default asukoht drop
 	if versioon = 2 then
 		if 		exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'asukoht' and column_default is null)
-		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" vaikimisi väärtus', 'on kustutatud', 'OK', 0, 0,	praktikum_3_jr);
-		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" vaikimisi väärtus', 'ei ole kustutatud', 'VIGA', 0, 0,	praktikum_3_jr);
+		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" vaikimisi vaartus', 'on kustutatud', 'OK', 0, 0,	praktikum_3_jr);
+		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" Veeru "Asukoht" vaikimisi vaartus', 'ei ole kustutatud', 'VIGA', 0, 0,	praktikum_3_jr);
 		end if;
 	end if;
 	-- Irys on Kompvek perenimega
-	if 		exists (select * from isikud where eesnimi = 'Irys' and perenimi = 'Kompvek')
-	then 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on õige perenimi', 'OK', 0, 0,	praktikum_3_jr);
-	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on vale perenimi, peab olema Kompvek', 'VIGA', 0, 0,	praktikum_3_jr);
+	if 		exists (select * from information_schema.columns where table_name = 'isikud' and column_name = 'eesnimi') 
+	and 	exists (select * from information_schema.columns where table_name = 'isikud' and column_name = 'perenimi')
+	then
+		if 		exists (select * from isikud where eesnimi = 'Irys' and perenimi = 'Kompvek')
+		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on õige perenimi', 'OK', 0, 0,	praktikum_3_jr);
+		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'on vale perenimi, peab olema Kompvek', 'VIGA', 0, 0,	praktikum_3_jr);
+		end if;
+	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Isikud" Isikul "Irys" ', 'puuduvad veerud eesnimi ja/või perenimi', 'VIGA', 0, 0,	praktikum_3_jr);
 	end if;
 	-- Osav oda klubi olemas
-	if 		exists (select * from klubid where nimi ilike 'osav oda')
-	then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'on olemas', 'OK', 0, 0,	praktikum_3_jr);
-	else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'ei ole olemas', 'VIGA', 0, 0,	praktikum_3_jr);
+	if 		exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'nimi') then
+		if 		exists (select * from klubid where nimi ilike 'osav oda')
+		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'on olemas', 'OK', 0, 0,	praktikum_3_jr);
+		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" ', 'ei ole olemas', 'VIGA', 0, 0,	praktikum_3_jr);
+		end if;
+	else insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Osav Oda" veergu "nimi"', 'ei ole olemas', 'VIGA', 0, 0,	praktikum_3_jr);
 	end if;
 	-- Isikud klubi->klubis
 	call 	check_column('Isikud', 'Klubis', 0, praktikum_3_jr, 'Praktikum 3', 'Tabel', 1);
@@ -482,6 +499,7 @@ end;
 $$ language plpgsql;
 	
 create or replace procedure andmete_taassisestus (versioon int) as $$
+-- , source varchar(1000), tab varchar(50))
 begin 
 	truncate table partiid, turniirid, isikud, klubid, asulad, riigid;
 	
@@ -532,6 +550,6 @@ Siin määrad, mis ülesandeid kontrollitakse. Kõik eelnevad kontrollivad ka ee
 4 - kodutöö 4
 
 */
-call kaivita(2);
+call kaivita(3);
 Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
-Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
+--Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
