@@ -36,17 +36,16 @@ begin
 	select taisarv into praktikum4_oige from muutujad where nimi = 'praktikum4_oige';
 	if versioon = 2 then
 		select count(*) into praktikum3_saadud_oige from staatus where ylesanne = 'Praktikum 3' and olek = 'OK'; 
-		insert into Staatus values ('Praktikum 3', 'Õigesti tehtud: ' || praktikum3_saadud_oige,'Maksimum õiged: '|| praktikum3_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+		insert into Staatus values ('Praktikum 3', 'Oigesti tehtud: ' || praktikum3_saadud_oige,'Maksimum oiged: '|| praktikum3_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
 	end if;
 	if versioon = 3 then 
 		select count(*) into praktikum4_saadud_oige from staatus where ylesanne = 'Praktikum 4' and olek = 'OK'; 
-		insert into Staatus values ('Praktikum 4', 'Õigesti tehtud: ' || praktikum4_saadud_oige,'Maksimum õiged: '|| praktikum4_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+		insert into Staatus values ('Praktikum 4', 'Oigesti tehtud: ' || praktikum4_saadud_oige,'Maksimum oiged: '|| praktikum4_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
 		kodu_max_punktid := 1;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 3','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 	if versioon = 4 then 
-		select count(*) from staatus where ylesanne = 'Praktikum 4';
 		kodu_max_punktid := 2;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 4','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
@@ -167,9 +166,12 @@ begin
 		end if;
 	end if;
 	if 		exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'asula') then
-		if 		(select asula from klubid where nimi = 'Valge Mask') = (select id from asulad where nimi = 'Valga')
-		then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Valge Mask" asukoht ', 'on oige', 'OK', 0, 0,	praktikum_3_jr);
-		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Valge Mask" asukoht ', 'on vale, peab olema Valga', 'VIGA', 0, 0,	praktikum_3_jr);
+		if 		exists (select * from information_schema.columns where table_name = 'asulad' and column_name = 'nimi') then
+			if 		(select asula from klubid where nimi = 'Valge Mask') = (select id from asulad where nimi = 'Valga')
+			then 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Valge Mask" asukoht ', 'on oige', 'OK', 0, 0,	praktikum_3_jr);
+			else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Valge Mask" asukoht ', 'on vale, peab olema Valga', 'VIGA', 0, 0,	praktikum_3_jr);
+			end if;
+		else 	insert into Staatus values ('Praktikum 3', 'Tabel "Klubid" klubi "Valge Mask" asukohta', 'ei leia, sest puudub tabelis "Asulad" veerg "nimi"', 'VIGA', 0, 0,	praktikum_3_jr);
 		end if;
 	end if;
 	-- Siim Susi klubis Laudnikud ja Osav Oda 5 uut liiget
@@ -251,8 +253,8 @@ begin
 	
 	-- välisvõtme fk_klubi_2_asula olemasolu
 	if 		exists (select * from information_schema.table_constraints where table_name = 'klubid' and constraint_type = 'FOREIGN KEY')
-	then 	insert into Staatus values ('Praktikum 4', 'Välisvõti "fk_klubi_2_asula"', 'on olemas', 'OK', 0, 0, praktikum_4_jr);
-	else	insert into Staatus values ('Praktikum 4', 'Välisvõti "fk_klubi_2_asula"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_4_jr);
+	then 	insert into Staatus values ('Praktikum 4', 'Valisvoti "fk_klubi_2_asula"', 'on olemas', 'OK', 0, 0, praktikum_4_jr);
+	else	insert into Staatus values ('Praktikum 4', 'Valisvoti "fk_klubi_2_asula"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_4_jr);
 	end if;
 	
 	-- 5. tabeli turniirid veerg asukoht/toimumiskoht olemasolu puudumine
@@ -325,8 +327,8 @@ begin
 	
 	-- 4. välisvõtme fk_turniir_2_asula kontroll
 	if 		exists (select * from information_schema.table_constraints where table_name = 'turniirid' and constraint_type = 'FOREIGN KEY')
-	then 	insert into Staatus values ('Kodutoo 3', 'Välisvõti "fk_turniir_2_asula"', 'on olemas', 'OK', kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
-	else	insert into Staatus values ('Kodutoo 3', 'Välisvõti "fk_turniir_2_asula"', 'ei ole olemas', 'VIGA', kodutoo_3_valisvoti_turniirid_asulad*0, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
+	then 	insert into Staatus values ('Kodutoo 3', 'Valisvoti "fk_turniir_2_asula"', 'on olemas', 'OK', kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
+	else	insert into Staatus values ('Kodutoo 3', 'Valisvoti "fk_turniir_2_asula"', 'ei ole olemas', 'VIGA', kodutoo_3_valisvoti_turniirid_asulad*0, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
 	end if;
 	
 	-- 5. tabeli turniirid veerg asukoht/toimumiskoht olemasolu puudumine
@@ -467,33 +469,44 @@ $$ language plpgsql;
 
 create or replace procedure mv_vaate_kontroll(kodutoo_4_vaade_partiide_arv_valgetega numeric, kodutoo_4_jr int) as $$ 
 begin 
-	-- Kirjete arv
-	if 		(select count(*) from mv_partiide_arv_valgetega) = 85
-	then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-	else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on vale, peaks olema 85', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+	if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
+		-- Kirjete arv
+		if 		(select count(*) from mv_partiide_arv_valgetega) = 85
+		then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on vale, peaks olema 85', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		end if;
+		
+		-- mängija Tarmo Kooser on olemas
+		if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%eesnimi%') 
+		and 	exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%perenimi%') then 
+			if 		exists (select * from mv_partiide_arv_valgetega where eesnimi = 'Tarmo' and perenimi = 'Kooser')
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mängija "Tarmo Kooser"', 'on olemas', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mängija "Tarmo Kooser"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+			end if;
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mängija "Tarmo Kooser"', 'veergu "eesnimi" ja/või "perenimi" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+		end if;
+		-- min = 0
+		if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%partiisid_valgetega%') then
+			if 		(select min(partiisid_valgetega) from mv_partiide_arv_valgetega) = 0
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'on vale, peaks olema 0', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+			end if;
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'veergu "partiisid_valgetega" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		end if;
+		-- max = 14
+		if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%partiisid_valgetega%') then
+			if 		(select max(partiisid_valgetega) from mv_partiide_arv_valgetega) = 14
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on vale, peaks olema 14', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+			end if;
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'veergu "partiisid_valgetega" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		end if;
+	else 	insert into Staatus values('Kodutoo 4', 'Vaadet "mv_partiide_arv_valgetega"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega, kodutoo_4_jr);
 	end if;
 	
-	-- mängija Tarmo Kooser on olemas
-	if 		exists (select * from mv_partiide_arv_valgetega where eesnimi = 'Tarmo' and perenimi = 'Kooser')
-	then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mängija "Tarmo Kooser"', 'on olemas', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
-	else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mängija "Tarmo Kooser"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
-	end if;
-	
-	-- min = 0
-	if 		(select min(partiisid_valgetega) from mv_partiide_arv_valgetega) = 0
-	then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-	else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'on vale, peaks olema 0', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-	end if;
-	
-	-- max = 14
-	if 		(select max(partiisid_valgetega) from mv_partiide_arv_valgetega) = 14
-	then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on õige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-	else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on vale, peaks olema 14', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-	end if;
-
-	exception 
-		when others then 
-			insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'Õppejõud annab tagasiside! Vaadet pole või veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+	--exception 
+		--when others then 
+			--insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'Õppejõud annab tagasiside! Vaadet pole või veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			
 end;	
 $$ language plpgsql;
@@ -513,14 +526,37 @@ begin
 end;
 $$ LANGUAGE plpgsql;
 
-
-create or replace procedure kaivita (versioon int) as $$
+create or replace procedure tudengi_nimi() as $$
 declare aeg timestamp;
 tudeng int;
-begin 
+e_nimi varchar(100);
+p_nimi varchar(100);
+begin
 	select taisarv into tudeng from muutujad where nimi = 'tudeng';
+	if 		exists (select * from information_schema.columns where table_name = 'inimesed' and column_name = 'sisestatud') then
+			if (select count(*) from inimesed) = 1 then
+				select max(sisestatud) into aeg from inimesed;
+				select eesnimi into e_nimi from inimesed where sisestatud = aeg limit 1;
+				select perenimi into p_nimi from inimesed where sisestatud = aeg limit 1;
+				insert into staatus values ('Tudeng', 	e_nimi, p_nimi, '-', 0, 0, tudeng);
+			else insert into Staatus values ('Tudeng', 'Nime leidmisel', 'tekkis viga!', '-', 0, 0, tudeng);
+			end if;
+	end if;
 	
-	if versioon >= 4 then 
+	
+	exception 
+		when others then 
+			insert into Staatus values ('Tudeng', 'Nime leidmisel', 'tekkis viga!', '-', 0, 0, tudeng);
+			
+
+end;
+$$ LANGUAGE plpgsql;
+
+create or replace procedure kaivita (versioon int) as $$
+
+begin 
+	
+	/*if versioon >= 4 then 
 		call andmete_taassisestus(versioon);
 	end if;
 	if versioon >= 2 then
@@ -529,18 +565,17 @@ begin
 	if versioon >= 3 then
 		call praktikum_4(versioon);
 		call kodutoo_3(versioon); 
-	end if;
+	end if;*/
 	if versioon >= 4 then
 		call kodutoo_4(versioon);
 	end if;
 	
 	call arvuta_punktid(versioon);
 	
-	if 		exists (select * from information_schema.tables where table_name = 'inimesed') then
-			select min(sisestatud) into aeg from inimesed;
-			insert into staatus values ('Tudeng', 	(select eesnimi from inimesed where sisestatud = aeg), 
-				(select perenimi from inimesed where sisestatud = aeg), '-', 0, 0, tudeng);
+	if versioon >= 3 then
+		call tudengi_nimi();
 	end if;
+	
 end;
 $$ LANGUAGE plpgsql;
 /*
@@ -550,6 +585,6 @@ Siin määrad, mis ülesandeid kontrollitakse. Kõik eelnevad kontrollivad ka ee
 4 - kodutöö 4
 
 */
-call kaivita(3);
+call kaivita(4);
 Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
 --Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
