@@ -556,7 +556,7 @@ create or replace procedure kaivita (versioon int) as $$
 
 begin 
 	
-	/*if versioon >= 4 then 
+	if versioon >= 4 then 
 		call andmete_taassisestus(versioon);
 	end if;
 	if versioon >= 2 then
@@ -565,7 +565,7 @@ begin
 	if versioon >= 3 then
 		call praktikum_4(versioon);
 		call kodutoo_3(versioon); 
-	end if;*/
+	end if;
 	if versioon >= 4 then
 		call kodutoo_4(versioon);
 	end if;
