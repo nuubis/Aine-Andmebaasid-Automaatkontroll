@@ -1,14 +1,86 @@
 create or replace procedure kontroll() as $kontroll$
+declare versioon int := 4;
+/*
+Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
+2 - praktikum 3
+3 - praktikum 4 ja kodutoo 3
+4 - kodutoo 4
+7 - praktikum 7
+*/
+/* Jarmisega saad valida, kust kaustas on sul txt failid ja kuhu tekib tulemus.csv fail. */
+folder_path varchar(255) := 'C:\TEMP';
+ 
+/* Jargmisega saad valida, mis delimiteriga tuleb tulemus fail. Kui tahad TAB-iga tulemus faili, siis tee vastav kommenteerimis muudatus järgmisel kahel real.*/
+tulemus_andmed_delimiter varchar(10) := ',';
+--tulemus_andmed_delimiter varchar(10) := E'\t';
+
+/* Jargmised kaks maaravad, mis DELIMITER on sissetulevatel failidel. Default txt on '\t' ja default csv on ',' */
+txt_lugemis_andmed_delimiter varchar(10) := '\t';
+csv_lugemis_andmed_delimiter varchar(10) := ',';
+
+/* Jargmised muutujaid saab kasutada muutujad.csv asemel - HETKEL EI PLAANI - Moodle'i jaoks vaja?
+praktikum_punktid int :=1;
+praktikum_3_jr int :=5;
+praktikum3_oige int :=16;
+praktikum_4_jr int :=10;
+praktikum4_oige int :=8;
+praktikum_jr int :=50;
+kodutoo_3_jr int :=55;
+kodutoo_4_jr int :=60;
+kodutoo_3_turniirid_asula_andmed numeric :=0.2;
+kodutoo_3_turniirid_asula numeric :=0.2;
+kodutoo_3_inimesed_andmed numeric :=0.2;
+kodutoo_3_turniirid_asukoht_kustutamine numeric:=0.2;
+kodutoo_3_valisvoti_turniirid_asulad numeric:=0.2;
+kodutoo_4_vaade_turniiripartiid numeric:=0.5;
+kodutoo_4_vaade_klubipartiikogused numeric:=0.5;
+kodutoo_4_vaade_keskminepartii numeric:=0.5;
+kodutoo_4_vaade_partiide_arv_valgetega numeric:=0.5;
+kodutoo_jr int :=90;
+kodutoo_punktid int :=1;
+tudeng int :=100;
+*/
 begin 
-drop table muutujad;
+
+/* Andmete sisestamisega seotud protseduurid */
+create or replace procedure sisesta_txt_andmed(table_name varchar(100), file_path varchar(255), delimiter_code varchar(50)= '\t') as  $sisesta_andmed$
+declare sqltext varchar(1000);
+begin
+sqltext ='COPY '||table_name||' from '''||file_path||'''DELIMITER E'''||delimiter_code||''' ENCODING ''UTF-8''' ;
+execute sqltext; 
+end;
+$sisesta_andmed$ language plpgsql;
+
+create or replace procedure sisesta_csv_andmed(table_name varchar(100), file_path varchar(255), delimiter_code varchar(50)= ',') as  $sisesta_andmed$
+declare sqltext varchar(1000);
+begin
+sqltext ='COPY '||table_name||' from '''||file_path||'''with (format csv, delimiter'''||delimiter_code||''')' ;
+execute sqltext; 
+end;
+$sisesta_andmed$ language plpgsql;
+
+create or replace procedure valjasta_tulemus(file_path varchar(255), delimiter_code varchar(50)= ',') as  $valjasta_tulemus$
+declare sqltext varchar(1000);
+begin
+sqltext ='Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid 
+From staatus where olek in (''VIGA'',''Hindepunktid'') or ylesanne = ''Tudeng'' order by jr asc) 
+To '''||file_path||'''WITH CSV DELIMITER'''||delimiter_code||'''HEADER' ;
+execute sqltext; 
+end;
+$valjasta_tulemus$ language plpgsql;
+
+/* Tabel muutujad igaks juhuks */
+if exists (select * from information_schema.tables where table_name = 'muutujad') then drop table  muutujad; end if;
 create table muutujad (
 nimi varchar(1000) unique,
 taisarv int,
 komaarv numeric);
 delete from muutujad;
-copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ',');
+call sisesta_csv_andmed('muutujad', folder_path || '\muutujad.csv', csv_lugemis_andmed_delimiter);
+--copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ',');
 
-drop table staatus;
+/* Tabel, kuhu kogutakse tudengi kontrolli tulemus */
+if exists (select * from information_schema.tables where table_name = 'staatus') then drop table  staatus; end if;
 create table Staatus (
 Ylesanne varchar(100),
 Kontrolli_nimi varchar(1000),
@@ -18,9 +90,8 @@ Punktid numeric,
 Max_punktid numeric,
 Jr int,
 Id serial);
-delete from Staatus;
 
-
+/* Protseduur, mis arvutab tudengi punktid praktikumi ja kodutöö eest */
 create or replace procedure arvuta_punktid(versioon int) as $arvuta_punktid$
 declare 
 kodu_punktid numeric; 
@@ -513,17 +584,25 @@ begin
 end;	
 $mv_vaate_kontroll$ language plpgsql;
 	
-create or replace procedure andmete_taassisestus (versioon int) as $andmete_taassisestus$
+create or replace procedure andmete_taassisestus (folder_path varchar(255)) as $andmete_taassisestus$
 -- , source varchar(1000), tab varchar(50))
 begin 
 	truncate table partiid, turniirid, isikud, klubid, asulad, riigid;
+	call sisesta_txt_andmed('asulad', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
+	call sisesta_txt_andmed('klubid', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
+	call sisesta_txt_andmed('turniirid', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
+	call sisesta_txt_andmed('isikud', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
+	call sisesta_txt_andmed('partiid', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
+	call sisesta_txt_andmed('riigid', folder_path || '\asulad.txt', txt_lugemis_andmed_delimiter);
 	
-	copy asulad (id, nimi) from 'C:\TEMP\asulad.txt' DELIMITER E'\t'ENCODING 'UTF-8';
+	/*
+	copy asulad from 'C:\TEMP\asulad.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy klubid from 'C:\TEMP\klubid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy turniirid from 'C:\TEMP\turniirid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy isikud from 'C:\TEMP\isikud.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy partiid from 'C:\TEMP\partiid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy riigid from 'C:\TEMP\riigid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
+	*/
 	update isikud set klubis = null where id in (9,10,8,13,6);
 end;
 $andmete_taassisestus$ LANGUAGE plpgsql;
@@ -554,12 +633,12 @@ begin
 end;
 $tudengi_nimi$ LANGUAGE plpgsql;
 
-create or replace procedure kaivita (versioon int) as $kaivita$
+create or replace procedure kaivita (versioon int, folder_path varchar(255)) as $kaivita$
 
 begin 
 	
-	/*if versioon >= 4 then 
-		call andmete_taassisestus(versioon);
+	if versioon >= 4 then 
+		call andmete_taassisestus(folder_path);
 	end if;
 	if versioon >= 2 then
 		call praktikum_3(versioon);
@@ -567,7 +646,7 @@ begin
 	if versioon >= 3 then
 		call praktikum_4(versioon);
 		call kodutoo_3(versioon); 
-	end if;*/
+	end if;
 	if versioon >= 4 then
 		call kodutoo_4(versioon);
 	end if;
@@ -580,16 +659,11 @@ begin
 	
 end;
 $kaivita$ LANGUAGE plpgsql;
-/*
-Siin määrad, mis ülesandeid kontrollitakse. Kõik eelnevad kontrollivad ka eelmisi.
-2 - praktikum 3
-3 - praktikum 4 ja kodutöö 3
-4 - kodutöö 4
 
-*/
-call kaivita(4);
-Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
---Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
+call kaivita(versioon);
+--Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
+call valjasta_tulemus(folder_path || '\tulemus.csv', tulemus_andmed_delimiter);
 end;
 $kontroll$ LANGUAGE plpgsql;
 call kontroll();
+--Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
