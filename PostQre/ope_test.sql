@@ -1,3 +1,5 @@
+create or replace procedure arvuta_punktid(versioon int) as $kontroll$
+begin 
 drop table muutujad;
 create table muutujad (
 nimi varchar(1000) unique,
@@ -19,7 +21,7 @@ Id serial);
 delete from Staatus;
 
 
-create or replace procedure arvuta_punktid(versioon int) as $$
+create or replace procedure arvuta_punktid(versioon int) as $arvuta_punktid$
 declare 
 kodu_punktid numeric; 
 kodu_max_punktid numeric;
@@ -52,11 +54,11 @@ begin
 	end if;
 
 end;
-$$ language plpgsql;
+$arvuta_punktid$ language plpgsql;
 
 /* Tabeli veeru olemasolu kontroll */
 create or replace procedure check_column(a_table_name varchar(100), a_column_name varchar(100), punktid numeric, 
-	jr int, ylesanne varchar(100), olem varchar(100), olemasolu int) as $$
+	jr int, ylesanne varchar(100), olem varchar(100), olemasolu int) as $check_column$
 	begin
 		if 	olemasolu = 1 then
 			if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name))
@@ -73,11 +75,11 @@ create or replace procedure check_column(a_table_name varchar(100), a_column_nam
 		when others then 
 			insert into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veergu "'||a_column_name||'" ', 'VIGA AUTOMAATKONTROLLIS!', 'VIGA', punktid, punktid, jr);
 	end;
-$$ language plpgsql;
+$check_column$ language plpgsql;
 
 /* Kitsenduste kontroll nimeliselt */
 create or replace procedure check_constraint(a_table_name varchar(100), a_constraint_name varchar(100), punktid numeric, 
-	jr int, ylesanne varchar(100), olem varchar(100), olemasolu int) as $$
+	jr int, ylesanne varchar(100), olem varchar(100), olemasolu int) as $check_constraint$
 	begin
 		if 	olemasolu = 1 then
 			if 		exists (select * from information_schema.table_constraints where table_name = lower(a_table_name) and constraint_name = lower(a_constraint_name))
@@ -95,10 +97,10 @@ create or replace procedure check_constraint(a_table_name varchar(100), a_constr
 		when others then 
 			insert into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Kitsendus "'||a_constraint_name||'" ', 'VIGA AUTOMAATKONTROLLIS!', 'VIGA', punktid, punktid, jr);
 	end;
-$$ language plpgsql;
+$check_constraint$ language plpgsql;
 
 -- Praktikum 3 kontroll. 27ÕN
-create or replace procedure praktikum_3(versioon int) as $$
+create or replace procedure praktikum_3(versioon int) as $praktikum_3$
 declare
 praktikum_3_jr int;
 begin
@@ -200,11 +202,11 @@ begin
 	end if;
 	
 end;	
-$$ language plpgsql;
+$praktikum_3$ language plpgsql;
 
 
 -- Praktikum 4 kontroll. 28ÕN
-create or replace procedure praktikum_4(versioon int) as $$
+create or replace procedure praktikum_4(versioon int) as $praktikum_4$
 declare
 praktikum_4_jr int;
 begin
@@ -264,10 +266,10 @@ begin
 	end if;
 	
 end;	
-$$ language plpgsql;
+$praktikum_4$ language plpgsql;
 
 
-create or replace procedure kodutoo_3(versioon int) as $$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
+create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
 declare 
 kodutoo_3_jr int;
 kodutoo_3_inimesed_andmed numeric;
@@ -343,7 +345,7 @@ begin
 	-- 7. päringu kontroll
 	
 end;	
-$$ language plpgsql;
+$kodutoo_3$ language plpgsql;
 
 
 
