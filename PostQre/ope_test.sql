@@ -1,4 +1,4 @@
-create or replace procedure arvuta_punktid(versioon int) as $kontroll$
+create or replace procedure kontroll() as $kontroll$
 begin 
 drop table muutujad;
 create table muutujad (
@@ -349,7 +349,7 @@ $kodutoo_3$ language plpgsql;
 
 
 
-create or replace procedure kodutoo_4(versioon int) as $$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
+create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
 declare 
 kodutoo_4_jr int;
 kodutoo_4_vaade_turniiripartiid numeric;
@@ -467,9 +467,9 @@ begin
 	-- mv_partiide_arv_valgetega
 	call mv_vaate_kontroll(kodutoo_4_vaade_partiide_arv_valgetega, kodutoo_4_jr);
 end;	
-$$ language plpgsql;	
+$kodutoo_4$ language plpgsql;	
 
-create or replace procedure mv_vaate_kontroll(kodutoo_4_vaade_partiide_arv_valgetega numeric, kodutoo_4_jr int) as $$ 
+create or replace procedure mv_vaate_kontroll(kodutoo_4_vaade_partiide_arv_valgetega numeric, kodutoo_4_jr int) as $mv_vaate_kontroll$ 
 begin 
 	if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
 		-- Kirjete arv
@@ -511,9 +511,9 @@ begin
 			--insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'Õppejõud annab tagasiside! Vaadet pole või veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			
 end;	
-$$ language plpgsql;
+$mv_vaate_kontroll$ language plpgsql;
 	
-create or replace procedure andmete_taassisestus (versioon int) as $$
+create or replace procedure andmete_taassisestus (versioon int) as $andmete_taassisestus$
 -- , source varchar(1000), tab varchar(50))
 begin 
 	truncate table partiid, turniirid, isikud, klubid, asulad, riigid;
@@ -526,9 +526,9 @@ begin
 	copy riigid from 'C:\TEMP\riigid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	update isikud set klubis = null where id in (9,10,8,13,6);
 end;
-$$ LANGUAGE plpgsql;
+$andmete_taassisestus$ LANGUAGE plpgsql;
 
-create or replace procedure tudengi_nimi() as $$
+create or replace procedure tudengi_nimi() as $tudengi_nimi$
 declare aeg timestamp;
 tudeng int;
 e_nimi varchar(100);
@@ -552,9 +552,9 @@ begin
 			
 
 end;
-$$ LANGUAGE plpgsql;
+$tudengi_nimi$ LANGUAGE plpgsql;
 
-create or replace procedure kaivita (versioon int) as $$
+create or replace procedure kaivita (versioon int) as $kaivita$
 
 begin 
 	
@@ -579,7 +579,7 @@ begin
 	end if;
 	
 end;
-$$ LANGUAGE plpgsql;
+$kaivita$ LANGUAGE plpgsql;
 /*
 Siin määrad, mis ülesandeid kontrollitakse. Kõik eelnevad kontrollivad ka eelmisi.
 2 - praktikum 3
@@ -590,3 +590,6 @@ Siin määrad, mis ülesandeid kontrollitakse. Kõik eelnevad kontrollivad ka ee
 call kaivita(4);
 Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
 --Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
+end;
+$kontroll$ LANGUAGE plpgsql;
+call kontroll();
