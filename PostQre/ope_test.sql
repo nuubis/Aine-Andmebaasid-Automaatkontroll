@@ -7,7 +7,12 @@ Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmis
 4 - kodutoo 4
 7 - praktikum 7
 */
-/* Jarmisega saad valida, kust kaustas on sul txt failid ja kuhu tekib tulemus.csv fail. */
+
+/* 
+Jarmisega saad valida, kust kaustas on sul txt failid ja kuhu tekib tulemus.csv fail. 
+OLULINE - vaata, et peale kausta nime poleks kaldkriipsu \ 
+default on - 'C:\TEMP' 
+*/
 folder_path varchar(255) := 'C:\TEMP';
  
 /* Jargmisega saad valida, mis delimiteriga tuleb tulemus fail. Kui tahad TAB-iga tulemus faili, siis tee vastav kommenteerimis muudatus järgmisel kahel real.*/
