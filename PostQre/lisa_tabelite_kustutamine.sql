@@ -13,7 +13,7 @@ begin
 	end if;
 	
 	if exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
-		drop view mv_partiide_arv_valgetega cascade;
+		drop materialized view mv_partiide_arv_valgetega cascade;
 	end if;
 end;
 $$ LANGUAGE plpgsql;
