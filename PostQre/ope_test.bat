@@ -9,8 +9,8 @@ GOTO :EOF
 
 :FoundFile
 copy %src%\%NewestFile% .\male.backup
-psql -U postgres -d andmebaasi_nimi -f lisa_tabelite_kustutamine.sql
-pg_restore -U postgres -d andmebaasi_nimi -c -v male.backup 
-psql -U postgres -d andmebaasi_nimi -f ope_test.sql
+psql -U postgres -d kontroll -f lisa_tabelite_kustutamine.sql
+pg_restore -U postgres -d kontroll -c male.backup 
+psql -U postgres -d kontroll -f ope_test.sql
 copy c:\TEMP\tulemus.csv . /Y
 pause
