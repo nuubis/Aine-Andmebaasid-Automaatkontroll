@@ -432,7 +432,7 @@ begin
 					if 		(select valge_mangija from v_partiidpisi where id = 10) = 'Anna Raha'
 					and 	(select must_mangija from v_partiidpisi where id = 10) = 'Aljona Aljas'
 					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'on vale, peab olema tühik eesnime ja perenime vahel', 'VIGA', 0, 0, praktikum_7_jr);
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'on vale, peab olema ainult tuhik eesnime ja perenime vahel', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'veergu "valge_mangija" ja/või "must_mangija" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
@@ -534,8 +534,18 @@ begin
 			end if;
 	else 	insert into Staatus values ('Praktikum 7', 'Vaadet "v_edetabelid"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 	end if;
+	
 	-- mv_edetabelid
-	call mv_edetabelid_kontroll(praktikum_7_jr);
+	if 		exists (select * from pg_matviews where matviewname = 'mv_edetabelid') then 
+			REFRESH MATERIALIZED VIEW mv_edetabelid;
+			
+			if 		(select count(*) from mv_edetabelid) = 184
+			then	insert into Staatus values('Praktikum 7', 'Vaate "mv_edetabelid" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+			else 	insert into Staatus values('Praktikum 7', 'Vaate "mv_edetabelid" kirjete arv', 'on vale, peaks olema 184', 'VIGA', 0, 0, praktikum_7_jr);
+			end if;
+	else 	insert into Staatus values ('Praktikum 7', 'Vaadet "mv_edetabelid"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_7_jr);	
+	end if;
+	
 	-- v_klubi54
 	if 		exists (select * from information_schema.views where table_name = 'v_klubi54') then
 			
@@ -596,21 +606,6 @@ begin
 	end if;
 end;	
 $praktikum_7$ language plpgsql;
-
-if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'mv_edetabelid_kontroll') then drop procedure mv_edetabelid_kontroll; end if;
-create or replace procedure mv_edetabelid_kontroll(praktikum_7_jr int) as $mv_edetabelid_kontroll$ 
-begin 
-	if 		exists (select * from pg_matviews where matviewname = 'mv_edetabelid') then 
-			REFRESH MATERIALIZED VIEW mv_edetabelid;
-			
-			if 		(select count(*) from mv_edetabelid) = 184
-			then	insert into Staatus values('Praktikum 7', 'Vaate "mv_edetabelid" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-			else 	insert into Staatus values('Praktikum 7', 'Vaate "mv_edetabelid" kirjete arv', 'on vale, peaks olema 184', 'VIGA', 0, 0, praktikum_7_jr);
-			end if;
-		
-	end if;
-end;	
-$mv_edetabelid_kontroll$ language plpgsql;
 
 
 
@@ -860,7 +855,7 @@ begin
 			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on oige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'on vale, peaks olema 14', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			end if;
-		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" miinimum valgete partiide arv', 'veergu "partiisid_valgetega" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" maksimum valgete partiide arv', 'veergu "partiisid_valgetega" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 		end if;
 	else 	insert into Staatus values('Kodutoo 4', 'Vaadet "mv_partiide_arv_valgetega"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega, kodutoo_4_jr);
 	end if;
