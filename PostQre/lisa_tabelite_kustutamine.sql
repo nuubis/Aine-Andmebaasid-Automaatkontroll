@@ -15,6 +15,43 @@ begin
 	if exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
 		drop materialized view mv_partiide_arv_valgetega cascade;
 	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_turniiripartiid') then 
+		drop view v_turniiripartiid cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_isikudklubid') then 
+		drop view v_isikudklubid cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_partiid') then 
+		drop view v_partiid cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_partiidpisi') then 
+		drop view v_partiidpisi cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_punktid') then 
+		drop view v_punktid cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_edetabelid') then 
+		drop view v_edetabelid cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_klubi54') then 
+		drop view v_klubi54 cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_maletaht') then 
+		drop view v_maletaht cascade;
+	end if;
+	
+	if exists (select * from pg_matviews where matviewname = 'mv_edetabelid') then 
+		drop materialized view mv_edetabelid cascade;
+	end if;
+	
 end;
 $$ LANGUAGE plpgsql;
 

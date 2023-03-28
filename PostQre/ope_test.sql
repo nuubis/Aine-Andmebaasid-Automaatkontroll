@@ -394,15 +394,11 @@ begin
 			call check_column('v_partiid', 'turniir', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_partiid', 'algus', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_partiid', 'valge_nimi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'valge_synniaeg', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_partiid', 'valge_klubi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_partiid', 'valge_punkt', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'valge_ranking', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'musta_nimi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'musta_synniaeg', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'musta_klubi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'musta_punkt', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			call check_column('v_partiid', 'musta_ranking', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
+			call check_column('v_partiid', 'must_nimi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
+			call check_column('v_partiid', 'must_klubi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
+			call check_column('v_partiid', 'must_punkt', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			-- kirjete arv = 80
 			if 		(select count(*) from v_partiid) = 299
 			then	insert into Staatus values('Praktikum 7', 'Vaate "v_partiid" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
