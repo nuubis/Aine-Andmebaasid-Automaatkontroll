@@ -1,1 +1,0 @@
-C:\Users\marttika\AppData\Local\DBeaverEE\dbeaver-cli.exe -runTask "@General:kontroll" -nosplash
