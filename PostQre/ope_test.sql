@@ -1,11 +1,14 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 7;
+declare versioon int := 6;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
+0 - praktikum 9 ehk EDU
+
 2 - praktikum 3
 3 - praktikum 4 ja kodutoo 3
 4 - kodutoo 4
 5 - praktikum 7
+6 - kodutöö 5
 */
 
 /* 
@@ -113,12 +116,15 @@ praktikum4_oige int;
 praktikum4_saadud_oige int;
 praktikum7_oige int;
 praktikum7_saadud_oige int;
+edu_oige int;
+edu_saadud_oige int;
 begin
 	select taisarv into kodutoo_jr from muutujad where nimi = 'kodutoo_jr';
 	select taisarv into praktikum_jr from muutujad where nimi = 'praktikum_jr';
 	select taisarv into praktikum3_oige from muutujad where nimi = 'praktikum3_oige';
 	select taisarv into praktikum4_oige from muutujad where nimi = 'praktikum4_oige';
 	select taisarv into praktikum7_oige from muutujad where nimi = 'praktikum7_oige';
+	select taisarv into edu_oige from muutujad where nimi = 'edu_oige';
 	if versioon = 2 then
 		select count(*) into praktikum3_saadud_oige from staatus where ylesanne = 'Praktikum 3' and olek = 'OK'; 
 		insert into Staatus values ('Praktikum 3', 'Oigesti tehtud: ' || praktikum3_saadud_oige,'Maksimum oiged: '|| praktikum3_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
@@ -135,9 +141,18 @@ begin
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 4','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
-	if versioon = 7 then
+	if versioon = 5 then
 		select count(*) into praktikum7_saadud_oige from staatus where ylesanne = 'Praktikum 7' and olek = 'OK'; 
 		insert into Staatus values ('Praktikum 7', 'Oigesti tehtud: ' || praktikum7_saadud_oige,'Maksimum oiged: '|| praktikum7_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+	end if;
+	if versioon = 0 then
+		select count(*) into edu_saadud_oige from staatus where ylesanne = 'Edu andmebaas' and olek = 'OK'; 
+		insert into Staatus values ('Edu andmebaas', 'Oigesti tehtud: ' || edu_saadud_oige,'Maksimum oiged: '|| edu_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+	end if;
+	if versioon = 6 then 
+		kodu_max_punktid := 2;
+		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
+		insert into Staatus values ('Kodutoo 5','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 
 end;
@@ -605,7 +620,195 @@ $praktikum_7$ language plpgsql;
 
 
 
-
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'edu_test') then drop procedure edu_test; end if;
+create or replace procedure edu_test () as $edu_test$
+declare
+edu_jr int;
+begin
+	select taisarv into edu_jr from muutujad where nimi = 'edu_jr';
+	-- tabelite ja kirjete olemasolu
+	-- persons
+	if 		exists (select * from information_schema.tables where table_name = 'persons') then
+			if 		(select count(*) from persons) = 300
+			then 	insert into Staatus values ('Edu andmebaas', 'Tabel "persons" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Tabel "persons" kirjete arv', 'on vale, peab olema 300', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'lecturers' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_person_institute"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_person_institute"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Tabelit "persons"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- courses
+	if 		exists (select * from information_schema.tables where table_name = 'courses') then
+			if 		(select count(*) from courses) = 101
+			then 	insert into Staatus values ('Edu andmebaas', 'Tabel "courses" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Tabel "courses" kirjete arv', 'on vale, peab olema 101, aine "Sissejuhatus andmebaasidesse" on lisamata', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'lecturers' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_course"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_course"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Tabelit "courses"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- registrations
+	if 		exists (select * from information_schema.tables where table_name = 'registrations') then
+			if 		(select count(*) from registrations) = 1213
+			then 	insert into Staatus values ('Edu andmebaas', 'Tabel "registrations" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Tabel "registrations" kirjete arv', 'on vale, peab olema 1213, aine "Sissejuhatus andmebaasidesse" osalejad on lisamata', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'registrations' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_registration_person"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_registration_person"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'registrations' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_registration_courses"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_registration_courses"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+	else 	insert into Staatus values ('Edu andmebaas', 'Tabelit "registrations"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- lecturers
+	if 		exists (select * from information_schema.tables where table_name = 'lecturers') then
+			if 		(select count(*) from lecturers) = 149
+			then 	insert into Staatus values ('Edu andmebaas', 'Tabel "lecturers" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Tabel "lecturers" kirjete arv', 'on vale, peab olema 149', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'lecturers' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_person"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_person"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'lecturers' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_course"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_lecturer_course"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Tabelit "lecturers"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- institutes
+	if 		exists (select * from information_schema.tables where table_name = 'institutes') then
+			if 		(select count(*) from institutes) = 10
+			then 	insert into Staatus values ('Edu andmebaas', 'Tabel "institutes" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Tabel "institutes" kirjete arv', 'on vale, peab olema 10', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'institutes' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_institute_person_dean"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_institute_person_dean"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.table_constraints where table_name = 'institutes' and constraint_type = 'FOREIGN KEY')
+			then 	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_institute_person_vice_dean"', 'on olemas', 'OK', 0, 0, edu_jr);
+			else	insert into Staatus values ('Edu andmebaas', 'Valisvoti "fk_institute_person_vice_dean"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+	else 	insert into Staatus values ('Edu andmebaas', 'Tabelit "institutes"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	
+	-- vaated ja kirjed
+	-- v_oigusteaduskonna_inimesed
+	if 		exists (select * from information_schema.views where table_name = 'v_oigusteaduskonna_inimesed') then
+			if 		(select count(*) from v_oigusteaduskonna_inimesed) = 28
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_oigusteaduskonna_inimesed" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_oigusteaduskonna_inimesed" kirjete arv', 'on vale, peab olema 28', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_oigusteaduskonna_inimesed"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- v_persons_institute
+	if 		exists (select * from information_schema.views where table_name = 'v_persons_institute') then
+			if 		(select count(*) from v_persons_institute) = 300
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_institute" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_institute" kirjete arv', 'on vale, peab olema 300', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_institute"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- v_Institute_deans
+	if 		exists (select * from information_schema.views where table_name = 'v_institute_deans') then
+			if 		(select count(*) from v_institute_deans) = 10
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_institute_deans" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_institute_deans" kirjete arv', 'on vale, peab olema 10', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_institute_deans"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- v_top20Students
+	if 		exists (select * from information_schema.views where table_name = 'v_top20students') then
+			if 		(select count(*) from v_top20students) = 20
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top20students" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top20students" kirjete arv', 'on vale, peab olema 20', 'VIGA', 0, 0, edu_jr);
+			end if;
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top20students"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	
+	-- Täpsemad kontrollid
+	-- v_persons_atleast_4eap
+	if 		exists (select * from information_schema.views where table_name = 'v_persons_atleast_4eap') then
+			if 		(select count(*) from v_persons_atleast_4eap) = 135
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap" kirjete arv', 'on vale, peab olema 135, isik peab esinema ühekordselt', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			call check_column('v_persons_atleast_4eap', 'firstname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			call check_column('v_persons_atleast_4eap', 'lastname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- v_countOfA
+	if 		exists (select * from information_schema.views where table_name = 'v_countofa') then
+			if 		(select count(*) from v_countofa) = 119
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_countOfA" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_countOfA" kirjete arv', 'on vale, peab olema 119', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			call check_column('v_countofa', 'firstname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			call check_column('v_countofa', 'lastname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			call check_column('v_countofa', 'countofa', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			
+			if 		exists (select * from information_schema.columns where table_name = 'v_countofa' and column_name = 'countofa') then
+					if 		(select max(countofa) from v_countofa) = 5
+					then 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on oige', 'OK', 0, 0, edu_jr);
+					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on vale, peab olema 5, kas arvestasid ainult eksamiga aineid', 'VIGA', 0, 0, edu_jr);
+					end if;
+			else	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'ei saa leida, sest puudub veerg "countOfA"', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_countOfA"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+	-- v_top40A
+	if 		exists (select * from information_schema.views where table_name = 'v_top40a') then
+			if 		(select count(*) from v_top40a) = 40
+			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top40A" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top40A" kirjete arv', 'on vale, peab olema 40', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			call check_column('v_top40a', 'firstname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			call check_column('v_top40a', 'lastname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			call check_column('v_top40a', 'countofa', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
+			
+			if 		exists (select * from information_schema.columns where table_name = 'v_top40a' and column_name = 'countofa') then
+					if 		(select max(countofa) from v_top40a) = 6
+					then 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on oige', 'OK', 0, 0, edu_jr);
+					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on vale, peab olema 6, kas arvestasid kõikide ainetega', 'VIGA', 0, 0, edu_jr);
+					end if;
+			else	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'ei saa leida, sest puudub veerg "countOfA"', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+			if 		exists (select * from information_schema.columns where table_name = 'v_top40a' and column_name = 'countofa') then
+					if 		(select min(countofa) from v_top40a) = 4
+					then 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'on oige', 'OK', 0, 0, edu_jr);
+					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'on vale, peab olema 6, kas arvestasid kõikide ainetega', 'VIGA', 0, 0, edu_jr);
+					end if;
+			else	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'ei saa leida, sest puudub veerg "countOfA"', 'VIGA', 0, 0, edu_jr);
+			end if;
+			
+	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top40A"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
+	end if;
+end;
+$edu_test$ LANGUAGE plpgsql;
 
 
 /* Kodutööde kontrollid algavad siit */
@@ -825,17 +1028,17 @@ begin
 		-- Kirjete arv
 		if 		(select count(*) from mv_partiide_arv_valgetega) = 85
 		then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on oige', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
-		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on vale, peaks olema 85', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kirjete arv', 'on vale, peaks olema 85 koos 0 partiidega', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 		end if;
 		
 		-- mangija Tarmo Kooser on olemas
 		if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%eesnimi%') 
 		and 	exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%perenimi%') then 
 			if 		exists (select * from mv_partiide_arv_valgetega where eesnimi = 'Tarmo' and perenimi = 'Kooser')
-			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija "Tarmo Kooser"', 'on olemas', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
-			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija "Tarmo Kooser"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+			then	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija 0 partiiga', '"Tarmo Kooser" on olemas', 'OK', kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+			else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija 0 partiiga', '"Tarmo Kooser" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
 			end if;
-		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija "Tarmo Kooser"', 'veergu "eesnimi" ja/voi "perenimi" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
+		else 	insert into Staatus values('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" mangija 0 partiiga', 'veergu "eesnimi" ja/voi "perenimi" ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5*2, kodutoo_4_jr);
 		end if;
 		-- min = 0
 		if 		exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega' and definition ilike '%partiisid_valgetega%') then
@@ -862,6 +1065,106 @@ begin
 			
 end;	
 $mv_vaate_kontroll$ language plpgsql;
+
+
+
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_5') then drop procedure kodutoo_5; end if;
+create or replace procedure kodutoo_5(versioon int) as $kodutoo_5$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare
+kodutoo_5_jr int;
+kodutoo_5_funk_vanus numeric;
+kodutoo_5_funk_klubiranking numeric;
+kodutoo_5_funk_top10 numeric;
+kodutoo_5_prot_uus_turniir numeric;
+hilisem_kodutoo int;
+v_func_top10_punktid numeric;
+v_func_top10_nimi text;
+sqltext text;
+punktid numeric;
+begin 
+	if 		versioon = 6 then hilisem_kodutoo :=1;
+	else 	hilisem_kodutoo :=0;
+	end if;
+	select taisarv into kodutoo_5_jr from muutujad where nimi = 'kodutoo_5_jr';
+	select komaarv*hilisem_kodutoo into kodutoo_5_funk_vanus from muutujad where nimi = 'kodutoo_5_funk_vanus';
+	select komaarv*hilisem_kodutoo into kodutoo_5_funk_klubiranking from muutujad where nimi = 'kodutoo_5_funk_klubiranking';
+	select komaarv*hilisem_kodutoo into kodutoo_5_funk_top10 from muutujad where nimi = 'kodutoo_5_funk_top10';
+	select komaarv*hilisem_kodutoo into kodutoo_5_prot_uus_turniir from muutujad where nimi = 'kodutoo_5_prot_uus_turniir';
+	
+	-- f_vanus
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then 
+		if 		(select f_vanus('09.09.2000')) = 22
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/2.0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on vale, peab olema 22', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
+		end if;
+		
+		if 		(select f_vanus('01.01.2000')) = 23
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/2.0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on vale, peab olema 23', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
+		end if;
+	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
+	end if;
+	
+	-- f_klubiranking
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then 
+		if 		(select f_klubiranking(54)) = 1279.6
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/2.0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on vale, peab olema 1279.6', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
+		end if;
+		
+		if 		(select f_klubiranking(59)) = 1407.0
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/2.0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on vale, peab olema 1407.0', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
+		end if;
+	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+	end if;
+	
+	-- f_top10
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then 
+		if 		exists (select * from information_schema.views where table_name = 'v_func_top10') then drop view v_func_top10; end if;
+		
+		create or replace view v_func_top10(nimi, punktid) as (select * from f_top10(44));
+		if 		(select count(*) from v_func_top10) = 10
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on oige', 'OK', kodutoo_5_funk_top10/2.0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on vale, peab olema 10', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
+		end if;
+		
+		if 		(select ft.punktid from v_func_top10 ft where ft.nimi = 'Murakas, Maria') = 3.5
+		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria" punktid', 'on oiged', 'OK', kodutoo_5_funk_top10/2.0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria"', 'ei ole oiged', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
+		end if;
+		
+	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
+	end if;
+	
+	-- sp_uus_turniir
+	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then 
+		--delete from turniirid where nimi ='Tartu Meister'; 
+		
+		if 		(select pronargs from pg_catalog.pg_proc where proname = 'sp_uus_turniir') = 4
+		then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" veergude arv', 'on oige', 'OK', kodutoo_5_prot_uus_turniir/5, kodutoo_5_prot_uus_turniir/5, kodutoo_5_jr);
+				
+				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
+				call sp_uus_turniir('Tartu Meister', '02.02.2022',0,'Tartu');
+				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '02.02.2022')
+				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+				end if;	
+				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
+				call sp_uus_turniir('Tartu Meister', '02.02.2022',2,'Tartu');
+				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '04.02.2022')
+				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+				end if;
+		
+		else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" veergude arv', 'on vale, peab olema 4', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/2.0, kodutoo_5_jr);
+		end if;
+	else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'ei ole olemas', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
+	end if;
+end;	
+$kodutoo_5$ language plpgsql;
 	
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
 create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $andmete_taassisestus$
@@ -964,6 +1267,10 @@ if exists (select routine_name from information_schema.routines where routine_ty
 create or replace procedure kaivita (versioon int, folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $kaivita$
 begin 
 	
+	if versioon = 0 then 
+		call edu_test();
+	end if;
+	
 	if versioon >= 4 then 
 		call andmete_taassisestus(folder_path, txt_lugemis_andmed_delimiter);
 	end if;
@@ -979,6 +1286,9 @@ begin
 	end if;
 	if versioon >= 5 then
 		call praktikum_7(versioon);
+	end if;
+	if versioon >= 6 then
+		call kodutoo_5(versioon);
 	end if;
 	
 	call arvuta_punktid(versioon);

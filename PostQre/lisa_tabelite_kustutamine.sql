@@ -52,6 +52,18 @@ begin
 		drop materialized view mv_edetabelid cascade;
 	end if;
 	
+	if exists (select * from information_schema.tables where table_name = 'v_persons_atleast_4eap') then 
+		drop view v_persons_atleast_4eap cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_countofa') then 
+		drop view v_countofa cascade;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_top40a') then 
+		drop view v_top40a cascade;
+	end if;
+	
 end;
 $$ LANGUAGE plpgsql;
 
