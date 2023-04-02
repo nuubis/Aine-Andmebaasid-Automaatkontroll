@@ -101,10 +101,22 @@ begin
 end;
 $$ LANGUAGE plpgsql;
 
+create or replace procedure kustuta_funk_ja_prot () as $$
+begin
+	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then drop procedure sp_uus_turniir; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then drop procedure f_vanus; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then drop procedure f_klubiranking; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then drop procedure f_top10; end if;
+	end if;
+	
+end;
+$$ LANGUAGE plpgsql;
+
 create or replace procedure kustuta () as $$
 begin
 	call kustuta_vaated();
 	call kustuta_tabelid();
+	call kustuta_funk_ja_prot();
 end;
 $$ LANGUAGE plpgsql;
 call kustuta();
