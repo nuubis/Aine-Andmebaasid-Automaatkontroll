@@ -107,7 +107,6 @@ begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then drop procedure f_vanus; end if;
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then drop procedure f_klubiranking; end if;
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then drop procedure f_top10; end if;
-	end if;
 	
 end;
 $$ LANGUAGE plpgsql;

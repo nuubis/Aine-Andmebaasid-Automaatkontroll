@@ -380,6 +380,7 @@ if exists (select routine_name from information_schema.routines where routine_ty
 create or replace procedure praktikum_7(versioon int) as $praktikum_7$
 declare
 praktikum_7_jr int;
+check_count int;
 begin
 	select taisarv into praktikum_7_jr from muutujad where nimi = 'praktikum_7_jr';
 	
@@ -439,30 +440,60 @@ begin
 			-- 10	Anna Raha	1.00000000000000000000	Aljona Aljas	0.00000000000000000000
 			-- Nimekuju kontroll
 			if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'valge_mangija') and
-					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_mangija') then	
+					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_mangija') and
+					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'id') then	
 					if 		(select valge_mangija from v_partiidpisi where id = 10) = 'Anna Raha'
 					and 	(select must_mangija from v_partiidpisi where id = 10) = 'Aljona Aljas'
 					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'on oige', 'OK', 0, 0, praktikum_7_jr);
 					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'on vale, peab olema ainult tuhik eesnime ja perenime vahel', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
-			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'veergu "valge_mangija" ja/või "must_mangija" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
+			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" mangijate nimekuju', 'veergu "valge_mangija" ja/või "must_mangija" ja/või "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
 			
-			-- punktide kontroll 1 ja 0 ning 0.5 ja 0.5
+			-- Valge punktid = 1 
 			if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'valge_punkt') and
-					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_punkt') then	
-					if 		(select valge_punkt from v_partiidpisi where id = 10) = 1
-					and 	(select must_punkt from v_partiidpisi where id = 10) = 0
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge ja musta punktid', 'on oiged', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge ja musta punktid', 'on valed, peab olema 1.0 ja 0.0', 'VIGA', 0, 0, praktikum_7_jr);
+					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'id') then
+					
+					if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'valge_punkt' and data_type='numeric') then
+							
+							if 		(select valge_punkt from v_partiidpisi where id = 10) = 1
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid', 'on oiged', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid', 'on valed, peab olema 1.0', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid kontroll', 'veerg "valge_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
+					end if;
+			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid kontroll', 'veergu "valge_punkt" ja/või "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
+			end if;
+
+			-- musta punktid = 0
+			if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_punkt') and
+					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'id') then
+					
+					if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_punkt' and data_type='numeric') then
+							if 		(select must_punkt from v_partiidpisi where id = 10) = 0
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid', 'on oiged', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid', 'on valed, peab olema 0.0', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid kontroll', 'veerg "must_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 					
-					if 		(select valge_punkt from v_partiidpisi where id = 12) = 0.5
-					and 	(select must_punkt from v_partiidpisi where id = 12) = 0.5
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 13 valge ja musta punktid', 'on oiged', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 valge ja musta punktid', 'on valed, peab olema 0.5 ja 0.5', 'VIGA', 0, 0, praktikum_7_jr);
+			else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid kontroll', 'veergu "must_punkt" ja/või "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
+			end if;
+			
+			-- musta punktid = 0.5
+			if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_punkt') and
+					exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'id') then
+							
+					if 		exists (select * from information_schema.columns where table_name = 'v_partiidpisi' and column_name = 'must_punkt' and data_type='numeric') then
+							
+							if 		(select must_punkt from v_partiidpisi where id = 12) = 0.5
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid', 'on oiged', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid', 'on valed, peab olema 0.5', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 valge ja musta punktid kontroll', 'veerg "must_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
-			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" valge ja musta punktid kontroll', 'veergu "valge_punkt" ja/või "must_punkt" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
+					
+			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid kontroll', 'veergu "must_punkt" ja/või "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
 	else 	insert into Staatus values ('Praktikum 7', 'Vaadet "v_partiidpisi"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 	end if;
@@ -488,15 +519,23 @@ begin
 					exists (select * from information_schema.columns where table_name = 'v_punktid' and column_name = 'partii') then
 					
 					-- Valge
-					if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 76) = 'V'
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on vale, peab olema "V"', 'VIGA', 0, 0, praktikum_7_jr);
+					select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
+					if 		check_count = 1 then
+							if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 76) = 'V'
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on vale, peab olema "V"', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 					
 					-- Must
-					if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 85) = 'M'
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on vale, peab olema "M"', 'VIGA', 0, 0, praktikum_7_jr);
+					select count(*) into check_count from v_punktid where partii = 299 and mangija = 85;
+					if 		check_count = 1 then
+							if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 85) = 'M'
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on vale, peab olema "M"', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_punktid" partii 299 mangijate varvid kontroll', 'veergu "partii" ja/või "mangija" ja/või "varv" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
@@ -506,21 +545,32 @@ begin
 					exists (select * from information_schema.columns where table_name = 'v_punktid' and column_name = 'partii') then
 					
 					-- 0.5
-					if 		(select punkt from v_punktid where partii = 299 and mangija = 76) = 0.5
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt', 'on vale, peab olema 0.5', 'VIGA', 0, 0, praktikum_7_jr);
+					select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
+					if 		check_count = 1 then
+							if 		(select punkt from v_punktid where partii = 299 and mangija = 76) = 0.5
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt', 'on vale, peab olema 0.5', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 					
 					-- 0
-					if 		(select punkt from v_punktid where partii = 11 and mangija = 91) = 0
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt', 'on vale, peab olema 0', 'VIGA', 0, 0, praktikum_7_jr);
+					select count(*) into check_count from v_punktid where partii = 11 and mangija = 91;
+					if 		check_count = 1 then
+							if 		(select punkt from v_punktid where partii = 11 and mangija = 91) = 0
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt', 'on vale, peab olema 0', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
-					
 					-- 1
-					if 		(select punkt from v_punktid where partii = 1 and mangija = 150) = 1
-					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 1 mangija 150 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 1 mangija 150 punkt', 'on vale, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
+					select count(*) into check_count from v_punktid where partii = 1 and mangija = 150;
+					if 		check_count = 1 then
+							if 		(select punkt from v_punktid where partii = 1 and mangija = 150) = 1
+							then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 1 mangija 150 punkt', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 1 mangija 150 punkt', 'on vale, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
+							end if;
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_punktid" partiis mangija punkti kontroll', 'veergu "partii" ja/või "mangija" ja/või "punkt" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
@@ -903,6 +953,7 @@ klubidepartiikogustesumma int;
 kodutoo_4_vaade_keskminepartii numeric;
 kodutoo_4_vaade_partiide_arv_valgetega numeric;
 hilisem_kodutoo int;
+count_check int;
 begin 
 	if 		versioon = 4 then hilisem_kodutoo :=1;
 	else 	hilisem_kodutoo :=0;
@@ -932,19 +983,31 @@ begin
 			if 		exists (select * from information_schema.columns where table_name = 'v_turniiripartiid' and column_name = 'kes_voitis')
 			and 	exists (select * from information_schema.columns where table_name = 'v_turniiripartiid' and column_name = 'partii_id') then
 					-- valge 270
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 270) = 'valge'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on vale, peaks olema valge', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					end if;
+					select count(*) into count_check from v_turniiripartiid where partii_id = 270;
+					if 		(count_check) = 1 then
+							if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 270) = 'valge'
+							then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv', 'on vale, peaks olema valge', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							end if;
+					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 270, kes voitis varv kontroll', 'tulemuseks on '|| count_check ||' kirjet, peab olema 1', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+					end if; 	
 					-- must 271
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 241) = 'must'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on vale, peaks olema must', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+					select count(*) into count_check from v_turniiripartiid where partii_id = 241;
+					if 		(count_check) = 1 then
+							if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 241) = 'must'
+							then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv', 'on vale, peaks olema must', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							end if;
+					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 241, kes voitis varv kontroll', 'tulemuseks on '|| count_check ||' kirjet, peab olema 1', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
 					end if;
 					-- viik 193
-					if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 193) = 'viik'
-					then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
-					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on vale, peaks olema viik', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+					select count(*) into count_check from v_turniiripartiid where partii_id = 193;
+					if 		(count_check) = 1 then
+							if 		(select lower(kes_voitis) from v_turniiripartiid where partii_id = 193) = 'viik'
+							then 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on oige', 'OK', kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv', 'on vale, peaks olema viik', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
+							end if;
+					else 	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" partii 193, kes voitis varv kontroll', 'tulemuseks on '|| count_check ||' kirjet, peab olema 1', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10, kodutoo_4_jr);
 					end if;
 			else	insert into Staatus values('Kodutoo 4', 'Vaate "v_turniiripartiid" veeru kes voitis', 'ei saa kontrollida, sest puudub veerg "kes_voitis" voi "partii_id"', 'VIGA', kodutoo_4_vaade_turniiripartiid*0, kodutoo_4_vaade_turniiripartiid/10*3, kodutoo_4_jr);
 			end if;
@@ -1190,11 +1253,14 @@ begin
 	--Klubid
 	if exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'asula') then 
 		if exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'asukoht') then
-			ALTER TABLE public.klubid ALTER COLUMN asukoht DROP NOT NULL;
+			ALTER TABLE klubid ALTER COLUMN asukoht DROP NOT NULL;
 		end if;
 		call sisesta_txt_andmed('klubid', folder_path || '\klubid.txt', '(id, nimi, asula)',txt_lugemis_andmed_delimiter);
-	else
+	elsif exists (select * from information_schema.columns where table_name = 'klubid' and column_name = 'asukoht') then
 		call sisesta_txt_andmed('klubid', folder_path || '\klubid.txt', '(id, nimi, asukoht)',txt_lugemis_andmed_delimiter);
+	else 
+		alter table klubid add column asula_test int;
+		call sisesta_txt_andmed('klubid', folder_path || '\klubid.txt', '(id, nimi, asula_test)',txt_lugemis_andmed_delimiter);
 	end if;
 	
 	-- Turniirid
