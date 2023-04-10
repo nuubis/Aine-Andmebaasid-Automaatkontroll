@@ -563,33 +563,39 @@ begin
 					
 					if 		(select check_column_datatype('v_punktid','mangija','int%')) = 1 then
 							if 		(select check_column_datatype('v_punktid','partii','int%')) = 1 then
+									if 		(select check_column_datatype('v_punktid','varv','varchar%')) = 1 or
+									 		(select check_column_datatype('v_punktid','varv','text')) = 1 then		
 											
-									-- Valge
-									select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
-									if 		check_count = 1 then
-											if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 76) = 'V'
-											then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-											else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on vale, peab olema "V"', 'VIGA', 0, 0, praktikum_7_jr);
+											-- Valge
+											select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
+											if 		check_count = 1 then
+													if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 76) = 'V'
+													then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+													else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv', 'on vale, peab olema "V"', 'VIGA', 0, 0, praktikum_7_jr);
+													end if;
+											else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 											end if;
-									else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
-									end if;
-									
-									-- Must
-									select count(*) into check_count from v_punktid where partii = 299 and mangija = 85;
-									if 		check_count = 1 then
-											if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 85) = 'M'
-											then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
-											else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on vale, peab olema "M"', 'VIGA', 0, 0, praktikum_7_jr);
+											
+											-- Must
+											select count(*) into check_count from v_punktid where partii = 299 and mangija = 85;
+											if 		check_count = 1 then
+													if 		(select upper(varv) from v_punktid where partii = 299 and mangija = 85) = 'M'
+													then 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
+													else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv', 'on vale, peab olema "M"', 'VIGA', 0, 0, praktikum_7_jr);
+													end if;
+											else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 											end if;
-									else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
+									else 	
+											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'veeru "varv" andmetuup on vale, peab olema "varchar"', 'VIGA', 0, 0, praktikum_7_jr);
+											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv kontroll', 'veeru "varv" andmetuup on vale, peab olema "varchar"', 'VIGA', 0, 0, praktikum_7_jr);
 									end if;
 							else 	
-									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'veeru "partii" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv kontroll', 'veeru "partii" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'veeru "partii" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv kontroll', 'veeru "partii" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
 							end if;
 					else 	
-							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'veeru "mangija" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv kontroll', 'veeru "mangija" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 varv kontroll', 'veeru "mangija" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 85 varv kontroll', 'veeru "mangija" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;		
 									
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_punktid" partii 299 mangijate varvid kontroll', 'veergu "partii" ja/voi "mangija" ja/voi "varv" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
@@ -632,19 +638,19 @@ begin
 											else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 											end if;
 									else 	
-											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "partii" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "partii" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "partii" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "partii" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "partii" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+											insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "partii" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
 									end if;
 							else 	
-									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "punkt" andmetüüp on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
-									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "punkt" andmetüüp on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
-									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "punkt" andmetüüp on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
+									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "punkt" andmetuup on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
+									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "punkt" andmetuup on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
+									insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "punkt" andmetuup on vale, peab olema "numeric"', 'VIGA', 0, 0, praktikum_7_jr);
 							end if;
 					else 	
-							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "mangija" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "mangija" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
-							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "mangija" andmetüüp on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 299 mangija 76 punkt kontroll', 'veeru "mangija" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 91 punkt kontroll', 'veeru "mangija" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
+							insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" partii 11 mangija 150 punkt kontroll', 'veeru "mangija" andmetuup on vale, peab olema "integer"', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 			
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_punktid" partiis mangija punkti kontroll', 'veergu "partii" ja/voi "mangija" ja/voi "punkt" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
@@ -735,7 +741,7 @@ begin
 					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_maletaht" klubi id', 'on oige', 'OK', 0, 0, praktikum_7_jr);
 					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_maletaht" klubi id', 'on vale, peaks olema 56', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
-			else	insert into Staatus values ('Praktikum 7', 'Vaate "v_klubi54" klubi id kontroll', 'veergu "klubis" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
+			else	insert into Staatus values ('Praktikum 7', 'Vaate "v_maletaht" klubi id kontroll', 'veergu "klubis" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
 					
 	else 	insert into Staatus values ('Praktikum 7', 'Vaadet "v_maletaht"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_7_jr);
@@ -1315,9 +1321,6 @@ begin
 	if exists (select * from information_schema.tables where table_name = 'asulad') then 
 		if (select count(*) from asulad) > 0 then truncate table asulad cascade; end if;
 	end if;
-	if exists (select * from information_schema.tables where table_name = 'riigid') then
-		if (select count(*) from riigid) > 0 then truncate table riigid; end if;
-	end if;
 	
 	--truncate table partiid, turniirid, isikud, klubid, asulad, riigid;
 	-- Asulad andmed
@@ -1361,11 +1364,6 @@ begin
 	
 	-- Partiid
 	call sisesta_txt_andmed('partiid', folder_path || '\partiid.txt', '(turniir, algushetk, lopphetk, valge, must, valge_tulemus, must_tulemus, id)',txt_lugemis_andmed_delimiter);
-	
-	-- Riigid
-	if exists (select * from information_schema.tables where table_name = 'riigid') then
-		--call sisesta_txt_andmed('riigid', folder_path || '\riigid.txt', '',txt_lugemis_andmed_delimiter);
-	end if;
 	
 	/*
 	copy asulad from 'C:\TEMP\asulad.txt' DELIMITER E'\t'ENCODING 'UTF-8';
