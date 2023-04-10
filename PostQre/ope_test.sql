@@ -165,13 +165,13 @@ create or replace procedure check_column(a_table_name varchar(100), a_column_nam
 	begin
 		if 	olemasolu = 1 then
 			if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name))
-			then	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veerg "'||a_column_name||'" ', 'on olemas', 'OK', punktid, punktid, jr);
-			else 	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veerg "'||a_column_name||'" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, jr);
+			then	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" veerg "'||a_column_name||'" ', 'on olemas', 'OK', punktid, punktid, jr);
+			else 	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" veerg "'||a_column_name||'" ', 'ei ole olemas', 'VIGA', punktid*0, punktid, jr);
 			end if;
 		else
 			if 		not exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name))
-			then	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veerg "'||a_column_name||'" ', 'on kustutatud', 'OK', punktid, punktid, jr);
-			else 	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veerg "'||a_column_name||'" ', 'ei ole kustutatud', 'VIGA', punktid*0, punktid, jr);
+			then	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" veerg "'||a_column_name||'" ', 'on kustutatud', 'OK', punktid, punktid, jr);
+			else 	insert 	into Staatus values (ylesanne, olem ||' "'||a_table_name||'" veerg "'||a_column_name||'" ', 'ei ole kustutatud', 'VIGA', punktid*0, punktid, jr);
 			end if;
 		end if;
 	exception 
