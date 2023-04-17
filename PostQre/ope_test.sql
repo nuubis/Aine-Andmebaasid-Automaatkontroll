@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 5;
+declare versioon int := 6;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -8,7 +8,7 @@ Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmis
 3 - praktikum 4 ja kodutoo 3
 4 - kodutoo 4
 5 - praktikum 7
-6 - kodutöö 5
+6 - kodutoo 5
 */
 
 /* 
@@ -18,7 +18,7 @@ default on - 'C:\TEMP'
 */
 folder_path varchar(255) := 'C:\TEMP';
  
-/* Jargmisega saad valida, mis delimiteriga tuleb tulemus fail. Kui tahad TAB-iga tulemus faili, siis tee vastav kommenteerimis muudatus järgmisel kahel real.*/
+/* Jargmisega saad valida, mis delimiteriga tuleb tulemus fail. Kui tahad TAB-iga tulemus faili, siis tee vastav kommenteerimis muudatus jargmisel kahel real.*/
 tulemus_andmed_delimiter varchar(10) := ',';
 --tulemus_andmed_delimiter varchar(10) := E'\t';
 
@@ -102,7 +102,7 @@ Max_punktid numeric,
 Jr int,
 Id serial);
 
-/* Protseduur, mis arvutab tudengi punktid praktikumi ja kodutöö eest */
+/* Protseduur, mis arvutab tudengi punktid praktikumi ja kodutoo eest */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'arvuta_punktid') then drop procedure arvuta_punktid; end if;
 create or replace procedure arvuta_punktid(versioon int) as $arvuta_punktid$
 declare 
@@ -180,7 +180,7 @@ create or replace procedure check_column(a_table_name varchar(100), a_column_nam
 	end;
 $check_column$ language plpgsql;
 
-/* Tabeli veeru andmetüübi kontroll */
+/* Tabeli veeru andmetuubi kontroll */
 if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_exists') then drop function check_column_exists; end if;
 create or replace function check_column_exists(a_table_name varchar(100), a_column_name varchar(100)) returns int as $check_column_exists$
 declare vastus int;
@@ -194,7 +194,7 @@ end;
 $check_column_exists$ language plpgsql;
 
 
-/* Tabeli veeru andmetüübi kontroll */
+/* Tabeli veeru andmetuubi kontroll */
 if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_datatype') then drop function check_column_datatype; end if;
 create or replace function check_column_datatype(a_table_name varchar(100), a_column_name varchar(100), a_datatype varchar(100)) returns int as $check_column_datatype$
 declare vastus int;
@@ -231,7 +231,7 @@ create or replace procedure check_constraint(a_table_name varchar(100), a_constr
 	end;
 $check_constraint$ language plpgsql;
 
--- Praktikum 3 kontroll. 27ÕN
+-- Praktikum 3 kontroll. 27oN
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_3') then drop procedure praktikum_3; end if;
 create or replace procedure praktikum_3(versioon int) as $praktikum_3$
 declare
@@ -337,7 +337,7 @@ end;
 $praktikum_3$ language plpgsql;
 
 
--- Praktikum 4 kontroll. 28ÕN
+-- Praktikum 4 kontroll. 28oN
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_4') then drop procedure praktikum_4; end if;
 create or replace procedure praktikum_4(versioon int) as $praktikum_4$
 declare
@@ -386,7 +386,7 @@ begin
 	else	insert into Staatus values ('Praktikum 4', 'Tabel "Klubid" andmed', 'veergu "Asula" ei ole olemas', 'VIGA', 0, 0, praktikum_4_jr);
 	end if;
 	
-	-- välisvõtme fk_klubi_2_asula olemasolu
+	-- valisvotme fk_klubi_2_asula olemasolu
 	if 		exists (select * from information_schema.table_constraints where table_name = 'klubid' and constraint_type = 'FOREIGN KEY')
 	then 	insert into Staatus values ('Praktikum 4', 'Valisvoti "fk_klubi_2_asula"', 'on olemas', 'OK', 0, 0, praktikum_4_jr);
 	else	insert into Staatus values ('Praktikum 4', 'Valisvoti "fk_klubi_2_asula"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_4_jr);
@@ -402,7 +402,7 @@ end;
 $praktikum_4$ language plpgsql;
 
 
--- Praktikum 7 kontroll. 31ÕN, 56 õiget veergudest ja andmetest
+-- Praktikum 7 kontroll. 31oN, 56 oiget veergudest ja andmetest
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_7') then drop procedure praktikum_7; end if;
 create or replace procedure praktikum_7(versioon int) as $praktikum_7$
 declare
@@ -449,7 +449,7 @@ begin
 			end if;
 	else 	insert into Staatus values ('Praktikum 7', 'Vaadet "v_partiid"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 	end if;
-	-- v_partiidpisi olemasolu, veerud, andmetekogus, mõni üksik andme kontroll
+	-- v_partiidpisi olemasolu, veerud, andmetekogus, moni uksik andme kontroll
 	if 		exists (select * from information_schema.views where table_name = 'v_partiidpisi') then
 			
 			-- veergude olemasolu
@@ -496,7 +496,7 @@ begin
 									end if;
 							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 							end if;
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid kontroll', 'veerg "valge_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid kontroll', 'veerg "valge_punkt" on vale andmetuubiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 valge punktid kontroll', 'veergu "valge_punkt" ja/voi "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
@@ -514,7 +514,7 @@ begin
 									end if;
 							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 							end if;
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid kontroll', 'veerg "must_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid kontroll', 'veerg "must_punkt" on vale andmetuubiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 					
 			else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 10 musta punktid kontroll', 'veergu "must_punkt" ja/voi "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
@@ -533,7 +533,7 @@ begin
 									end if;
 							else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid', 'tulemuseks on '|| check_count ||' kirjet, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
 							end if;
-					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid kontroll', 'veerg "must_punkt" on vale andmetüübiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
+					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid kontroll', 'veerg "must_punkt" on vale andmetuubiga, peab olema numeric', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
 					
 			else 	insert into Staatus values ('Praktikum 7', 'Vaate "v_partiidpisi" partii 12 musta punktid kontroll', 'veergu "must_punkt" ja/voi "id" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
@@ -556,7 +556,7 @@ begin
 			else 	insert into Staatus values('Praktikum 7', 'Vaate "v_punktid" kirjete arv', 'on vale, peaks olema 598', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
 			
-			-- mängija id, värvi ja punkti kontroll
+			-- mangija id, varvi ja punkti kontroll
 			if 		(select check_column_exists('v_punktid','mangija'))=1 and
 					(select check_column_exists('v_punktid','varv'))=1 and
 					(select check_column_exists('v_punktid','partii'))=1 then
@@ -875,12 +875,12 @@ begin
 	else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_top20students"', 'ei ole olemas', 'VIGA', 0, 0, edu_jr);
 	end if;
 	
-	-- Täpsemad kontrollid
+	-- Tapsemad kontrollid
 	-- v_persons_atleast_4eap
 	if 		exists (select * from information_schema.views where table_name = 'v_persons_atleast_4eap') then
 			if 		(select count(*) from v_persons_atleast_4eap) = 135
 			then 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap" kirjete arv', 'on oige', 'OK', 0, 0, edu_jr);
-			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap" kirjete arv', 'on vale, peab olema 135, isik peab esinema ühekordselt', 'VIGA', 0, 0, edu_jr);
+			else 	insert into Staatus values ('Edu andmebaas', 'Vaade "v_persons_atleast_4eap" kirjete arv', 'on vale, peab olema 135, isik peab esinema uhekordselt', 'VIGA', 0, 0, edu_jr);
 			end if;
 			
 			call check_column('v_persons_atleast_4eap', 'firstname', 0, edu_jr, 'Edu andmebaas', 'Vaade',1);
@@ -923,7 +923,7 @@ begin
 			if 		(select check_column_exists('v_top40a','countofa'))=1 then
 					if 		(select max(countofa) from v_top40a) = 6
 					then 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on oige', 'OK', 0, 0, edu_jr);
-					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on vale, peab olema 6, kas arvestasid kõikide ainetega', 'VIGA', 0, 0, edu_jr);
+					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'on vale, peab olema 6, kas arvestasid koikide ainetega', 'VIGA', 0, 0, edu_jr);
 					end if;
 			else	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" maksimum vaartus', 'ei saa leida, sest puudub veerg "countOfA"', 'VIGA', 0, 0, edu_jr);
 			end if;
@@ -931,7 +931,7 @@ begin
 			if 		(select check_column_exists('v_top40a','countofa'))=1 then
 					if 		(select min(countofa) from v_top40a) = 4
 					then 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'on oige', 'OK', 0, 0, edu_jr);
-					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'on vale, peab olema 6, kas arvestasid kõikide ainetega', 'VIGA', 0, 0, edu_jr);
+					else 	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'on vale, peab olema 6, kas arvestasid koikide ainetega', 'VIGA', 0, 0, edu_jr);
 					end if;
 			else	insert into Staatus values ('Edu andmebaas', 'Veeru "countOfA" miinimum vaartus', 'ei saa leida, sest puudub veerg "countOfA"', 'VIGA', 0, 0, edu_jr);
 			end if;
@@ -942,10 +942,10 @@ end;
 $edu_test$ LANGUAGE plpgsql;
 
 
-/* Kodutööde kontrollid algavad siit */
+/* Kodutoode kontrollid algavad siit */
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_3') then drop procedure kodutoo_3; end if;
-create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
+create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ul. 0.5p, 6 ul. 0.75p, 7.ul 0.75p 
 declare 
 kodutoo_3_jr int;
 kodutoo_3_inimesed_andmed numeric;
@@ -971,7 +971,7 @@ begin
 			else	insert into Staatus values ('Kodutoo 3', 'Tabel "Inimesed" andmed', 'on puudu', 'VIGA', kodutoo_3_inimesed_andmed*0, kodutoo_3_inimesed_andmed/5*2, kodutoo_3_jr);
 			end if;
 			
-			-- primaarvõtme olemasolu
+			-- primaarvotme olemasolu
 			if 		(select count(*) from information_schema.table_constraints where table_name = 'inimesed' and constraint_type = 'PRIMARY KEY') > 0
 			then 	insert into Staatus values ('Kodutoo 3', 'Tabel "Inimesed" primaarvoti', 'on olemas', 'OK', kodutoo_3_inimesed_andmed/5, kodutoo_3_inimesed_andmed/5, kodutoo_3_jr);
 			else	insert into Staatus values ('Kodutoo 3', 'Tabel "Inimesed" primaarvoti', 'on puudu', 'VIGA', kodutoo_3_inimesed_andmed*0, kodutoo_3_inimesed_andmed/5, kodutoo_3_jr);
@@ -1003,7 +1003,7 @@ begin
 	else	insert into Staatus values ('Kodutoo 3', 'Tabel "Turniirid" andmed', 'veergu "Asula" ei ole olemas', 'VIGA', kodutoo_3_turniirid_asula*0, kodutoo_3_turniirid_asula, kodutoo_3_jr);
 	end if;
 	
-	-- 4. välisvõtme fk_turniir_2_asula kontroll
+	-- 4. valisvotme fk_turniir_2_asula kontroll
 	if 		exists (select * from information_schema.table_constraints where table_name = 'turniirid' and constraint_type = 'FOREIGN KEY')
 	then 	insert into Staatus values ('Kodutoo 3', 'Valisvoti "fk_turniir_2_asula"', 'on olemas', 'OK', kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
 	else	insert into Staatus values ('Kodutoo 3', 'Valisvoti "fk_turniir_2_asula"', 'ei ole olemas', 'VIGA', kodutoo_3_valisvoti_turniirid_asulad*0, kodutoo_3_valisvoti_turniirid_asulad, kodutoo_3_jr);
@@ -1016,16 +1016,16 @@ begin
 	end if;
 	
 	
-	-- 6. päringu kontroll
+	-- 6. paringu kontroll
 	
-	-- 7. päringu kontroll
+	-- 7. paringu kontroll
 	
 end;	
 $kodutoo_3$ language plpgsql;
 
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_4') then drop procedure kodutoo_4; end if;
-create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1-5. ül. 0.5p, 6 ül. 0.75p, 7.ül 0.75p 
+create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1-5. ul. 0.5p, 6 ul. 0.75p, 7.ul 0.75p 
 declare 
 kodutoo_4_jr int;
 kodutoo_4_vaade_turniiripartiid numeric;
@@ -1205,7 +1205,7 @@ begin
 	
 	--exception 
 		--when others then 
-			--insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'Õppejõud annab tagasiside! Vaadet pole voi veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+			--insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'oppejoud annab tagasiside! Vaadet pole voi veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			
 end;	
 $mv_vaate_kontroll$ language plpgsql;
@@ -1223,8 +1223,6 @@ kodutoo_5_funk_klubiranking numeric;
 kodutoo_5_funk_top10 numeric;
 kodutoo_5_prot_uus_turniir numeric;
 hilisem_kodutoo int;
-v_func_top10_punktid numeric;
-v_func_top10_nimi text;
 sqltext text;
 punktid numeric;
 begin 
@@ -1238,6 +1236,24 @@ begin
 	select komaarv*hilisem_kodutoo into kodutoo_5_prot_uus_turniir from muutujad where nimi = 'kodutoo_5_prot_uus_turniir';
 	
 	-- f_vanus
+	call function_vanus(kodutoo_5_funk_vanus, kodutoo_5_jr);
+	
+	-- f_klubiranking
+	call function_klubiranking(kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+	
+	-- f_top10
+	call function_top10(kodutoo_5_funk_top10, kodutoo_5_jr);
+	
+	-- sp_uus_turniir
+	call procedure_uus_turniir(kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+end;	
+$kodutoo_5$ language plpgsql;
+
+
+-- f_vanus
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_vanus') then drop procedure function_vanus; end if;
+create or replace procedure function_vanus(kodutoo_5_funk_vanus numeric, kodutoo_5_jr int) as $function_vanus$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then 
 		if 		(select f_vanus('09.09.2000')) = 22
 		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/2.0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
@@ -1251,7 +1267,17 @@ begin
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
 	end if;
 	
-	-- f_klubiranking
+	exception 
+		when others then
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
+end;	
+$function_vanus$ language plpgsql;
+
+
+-- f_klubiranking
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubiranking') then drop procedure function_klubiranking; end if;
+create or replace procedure function_klubiranking(kodutoo_5_funk_klubiranking numeric, kodutoo_5_jr int) as $function_klubiranking$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then 
 		if 		(select f_klubiranking(54)) = 1279.6
 		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/2.0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
@@ -1265,7 +1291,20 @@ begin
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
 	end if;
 	
-	-- f_top10
+	exception 
+		when others then
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+end;	
+$function_klubiranking$ language plpgsql;
+
+
+-- f_top10
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_top10') then drop procedure function_top10; end if;
+create or replace procedure function_top10(kodutoo_5_funk_top10 numeric, kodutoo_5_jr int) as $function_top10$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare
+v_func_top10_punktid numeric;
+v_func_top10_nimi text;
+begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then 
 		if 		exists (select * from information_schema.views where table_name = 'v_func_top10') then drop view v_func_top10; end if;
 		
@@ -1283,7 +1322,18 @@ begin
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
 	end if;
 	
-	-- sp_uus_turniir
+	exception 
+		when others then
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
+end;	
+$function_top10$ language plpgsql;
+
+
+
+-- sp_uus_turniir
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'procedure_uus_turniir') then drop procedure procedure_uus_turniir; end if;
+create or replace procedure procedure_uus_turniir(kodutoo_5_prot_uus_turniir numeric, kodutoo_5_jr int) as $procedure_uus_turniir$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then 
 		--delete from turniirid where nimi ='Tartu Meister'; 
 		
@@ -1291,14 +1341,14 @@ begin
 		then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" veergude arv', 'on oige', 'OK', kodutoo_5_prot_uus_turniir/5, kodutoo_5_prot_uus_turniir/5, kodutoo_5_jr);
 				
 				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
-				call sp_uus_turniir('Tartu Meister', '02.02.2022',0,'Tartu');
+				call sp_uus_turniir('Tartu Meister', '02.02.2022',1,'Tartu');
 				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '02.02.2022')
 				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
 				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
 				end if;	
 				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
 				call sp_uus_turniir('Tartu Meister', '02.02.2022',2,'Tartu');
-				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '04.02.2022')
+				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '03.02.2022')
 				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
 				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
 				end if;
@@ -1307,9 +1357,14 @@ begin
 		end if;
 	else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'ei ole olemas', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
 	end if;
-end;	
-$kodutoo_5$ language plpgsql;
 	
+	exception 
+		when others then 
+			insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
+end;	
+$procedure_uus_turniir$ language plpgsql;
+
+
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
 create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $andmete_taassisestus$
 begin 
