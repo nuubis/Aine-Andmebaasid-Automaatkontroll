@@ -1,5 +1,26 @@
 create or replace procedure kustuta_vaated() as $$
 begin
+
+	if exists (select * from pg_matviews where matviewname = 'mv_edetabelid') then 
+		drop materialized view mv_edetabelid;
+	end if;
+	
+	if exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
+		drop materialized view mv_partiide_arv_valgetega;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_edetabelid') then 
+		drop view v_edetabelid;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_partiidpisi') then 
+		drop view v_partiidpisi;
+	end if;
+	
+	if exists (select * from information_schema.tables where table_name = 'v_partiid') then 
+		drop view v_partiid;
+	end if;
+	
 	if exists (select * from information_schema.tables where table_name = 'v_turniiripartiid') then 
 		drop view v_turniiripartiid cascade;
 	end if;
@@ -12,10 +33,6 @@ begin
 		drop view v_keskminepartii cascade;
 	end if;
 	
-	if exists (select * from pg_matviews where matviewname = 'mv_partiide_arv_valgetega') then 
-		drop materialized view mv_partiide_arv_valgetega cascade;
-	end if;
-	
 	if exists (select * from information_schema.tables where table_name = 'v_turniiripartiid') then 
 		drop view v_turniiripartiid cascade;
 	end if;
@@ -24,20 +41,8 @@ begin
 		drop view v_isikudklubid cascade;
 	end if;
 	
-	if exists (select * from information_schema.tables where table_name = 'v_partiid') then 
-		drop view v_partiid cascade;
-	end if;
-	
-	if exists (select * from information_schema.tables where table_name = 'v_partiidpisi') then 
-		drop view v_partiidpisi cascade;
-	end if;
-	
 	if exists (select * from information_schema.tables where table_name = 'v_punktid') then 
 		drop view v_punktid cascade;
-	end if;
-	
-	if exists (select * from information_schema.tables where table_name = 'v_edetabelid') then 
-		drop view v_edetabelid cascade;
 	end if;
 	
 	if exists (select * from information_schema.tables where table_name = 'v_klubi54') then 
@@ -48,9 +53,7 @@ begin
 		drop view v_maletaht cascade;
 	end if;
 	
-	if exists (select * from pg_matviews where matviewname = 'mv_edetabelid') then 
-		drop materialized view mv_edetabelid cascade;
-	end if;
+	
 	
 	if exists (select * from information_schema.tables where table_name = 'v_persons_atleast_4eap') then 
 		drop view v_persons_atleast_4eap cascade;
@@ -103,10 +106,11 @@ $$ LANGUAGE plpgsql;
 
 create or replace procedure kustuta_funk_ja_prot () as $$
 begin
-	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then drop procedure sp_uus_turniir; end if;
-	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then drop procedure f_vanus; end if;
-	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then drop procedure f_klubiranking; end if;
-	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then drop procedure f_top10; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then drop procedure sp_uus_turniir cascade; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus(date)') then drop function f_vanus cascade; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus(varchar)') then drop function f_vanus cascade; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then drop function f_klubiranking cascade; end if;
+	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then drop function f_top10 cascade; end if;
 	
 end;
 $$ LANGUAGE plpgsql;
@@ -118,4 +122,6 @@ begin
 	call kustuta_funk_ja_prot();
 end;
 $$ LANGUAGE plpgsql;
+SET client_min_messages TO WARNING;
 call kustuta();
+SET client_min_messages TO NOTICE;

@@ -669,7 +669,7 @@ begin
 			call check_column('v_edetabelid', 'klubi', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_edetabelid', 'turniir', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
 			call check_column('v_edetabelid', 'punkte', 0, praktikum_7_jr, 'Praktikum 7', 'Vaade',1);
-			-- kirjete arv = 80
+			-- kirjete arv =184
 			if 		(select count(*) from v_edetabelid) = 184
 			then	insert into Staatus values('Praktikum 7', 'Vaate "v_edetabelid" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_7_jr);
 			else 	insert into Staatus values('Praktikum 7', 'Vaate "v_edetabelid" kirjete arv', 'on vale, peaks olema 184', 'VIGA', 0, 0, praktikum_7_jr);
@@ -1269,7 +1269,7 @@ begin
 	
 	exception 
 		when others then
-			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
 end;	
 $function_vanus$ language plpgsql;
 
@@ -1293,7 +1293,7 @@ begin
 	
 	exception 
 		when others then
-			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
 end;	
 $function_klubiranking$ language plpgsql;
 
@@ -1314,7 +1314,7 @@ begin
 		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on vale, peab olema 10', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
 		end if;
 		
-		if 		(select ft.punktid from v_func_top10 ft where ft.nimi = 'Murakas, Maria') = 3.5
+		if 		(select ft.punktid from v_func_top10 ft where ft.nimi like 'Murakas%') = 3.5
 		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria" punktid', 'on oiged', 'OK', kodutoo_5_funk_top10/2.0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
 		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria"', 'ei ole oiged', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
 		end if;
@@ -1324,7 +1324,7 @@ begin
 	
 	exception 
 		when others then
-			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
+			insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
 end;	
 $function_top10$ language plpgsql;
 
@@ -1360,7 +1360,7 @@ begin
 	
 	exception 
 		when others then 
-			insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'Kontrollis tekkis viga! Õppejõud peab vaatama!', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
+			insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
 end;	
 $procedure_uus_turniir$ language plpgsql;
 
