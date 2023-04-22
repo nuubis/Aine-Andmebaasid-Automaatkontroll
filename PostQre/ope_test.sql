@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 6;
+declare versioon int := 7;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -9,6 +9,8 @@ Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmis
 4 - kodutoo 4
 5 - praktikum 7
 6 - kodutoo 5
+7 - praktikum 10
+8 - kodutoo 6
 */
 
 /* 
@@ -118,12 +120,15 @@ praktikum7_oige int;
 praktikum7_saadud_oige int;
 edu_oige int;
 edu_saadud_oige int;
+praktikum10_oige int;
+praktikum10_saadud_oige int;
 begin
 	select taisarv into kodutoo_jr from muutujad where nimi = 'kodutoo_jr';
 	select taisarv into praktikum_jr from muutujad where nimi = 'praktikum_jr';
 	select taisarv into praktikum3_oige from muutujad where nimi = 'praktikum3_oige';
 	select taisarv into praktikum4_oige from muutujad where nimi = 'praktikum4_oige';
 	select taisarv into praktikum7_oige from muutujad where nimi = 'praktikum7_oige';
+	select taisarv into praktikum10_oige from muutujad where nimi = 'praktikum10_oige';
 	select taisarv into edu_oige from muutujad where nimi = 'edu_oige';
 	if versioon = 2 then
 		select count(*) into praktikum3_saadud_oige from staatus where ylesanne = 'Praktikum 3' and olek = 'OK'; 
@@ -153,6 +158,15 @@ begin
 		kodu_max_punktid := 2;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 5','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
+	end if;
+	if versioon = 7 then
+		select count(*) into praktikum10_saadud_oige from staatus where ylesanne = 'Praktikum 10' and olek = 'OK'; 
+		insert into Staatus values ('Praktikum 10', 'Oigesti tehtud: ' || praktikum10_saadud_oige,'Maksimum oiged: '|| praktikum10_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
+	end if;
+	if versioon = 8 then 
+		kodu_max_punktid := 2;
+		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
+		insert into Staatus values ('Kodutoo 6','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
 	end if;
 
 end;
@@ -749,8 +763,6 @@ begin
 end;	
 $praktikum_7$ language plpgsql;
 
-
-
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'edu_test') then drop procedure edu_test; end if;
 create or replace procedure edu_test () as $edu_test$
 declare
@@ -940,6 +952,418 @@ begin
 	end if;
 end;
 $edu_test$ LANGUAGE plpgsql;
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_10') then drop procedure praktikum_10; end if;
+create or replace procedure praktikum_10(versioon int) as $praktikum_10$ 
+declare 
+praktikum_10_jr int;
+begin
+	select taisarv into praktikum_10_jr from muutujad where nimi = 'praktikum_10_jr';
+	
+	call function_mangija_punktid_turniiril(praktikum_10_jr);
+	call function_infopump(praktikum_10_jr);
+	call function_klubisuurus(praktikum_10_jr);
+	call function_nimi(praktikum_10_jr);
+	call function_mangija_koormus(praktikum_10_jr);
+	call function_mangija_voite_turniiril(praktikum_10_jr);
+	call function_mangija_viike_turniiril(praktikum_10_jr);
+	call function_mangija_kaotusi_turniiril(praktikum_10_jr);
+	call function_voit_viik_kaotus(praktikum_10_jr);
+	call function_klubiparimad(praktikum_10_jr);
+	call procedure_uus_isik(praktikum_10_jr);
+end;	
+$praktikum_10$ language plpgsql;
+
+
+-- f_mangija_punktid_turniiril
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_punktid_turniiril') then drop procedure function_mangija_punktid_turniiril; end if;
+create or replace procedure function_mangija_punktid_turniiril(praktikum_10_jr int) as $function_mangija_punktid_turniiril$ 
+declare 
+arg_count int;
+begin
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_mangija_punktid_turniiril') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_mangija_punktid_turniiril';
+		if 		arg_count = 2 then 
+			
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			if 		(select * from f_mangija_punktid_turniiril(92,42)) = 5.5 
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril" mangija "92" turniiril "42" punktid', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril" mangija "92" turniiril "42" punktid', 'ei ole oige, peab olema 5.5', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril" argumentide arv', 'ei ole oige, peab olema 2', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;	
+	exception 
+			when others then 
+				insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_punktid_turniiril"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;
+$function_mangija_punktid_turniiril$ language plpgsql;
+
+-- f_infopump
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_infopump') then drop procedure function_infopump; end if;
+create or replace procedure function_infopump(praktikum_10_jr int) as $function_infopump$ 
+declare 
+arg_count int;
+begin
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_infopump') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_infopump';
+		if 		arg_count = 0 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		exists (select * from information_schema.views where table_name = 'check_infopump') then drop view check_infopump; end if;
+			create or replace view check_infopump as select * from f_infopump();
+			
+			if 		(select count(*) from check_infopump) = 105
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump" kirjete arv', 'ei ole oige, peab olema 105', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump" argumentide arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;	
+	
+	if 		exists (select * from information_schema.views where table_name = 'check_infopump') then drop view check_infopump; end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_infopump"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+			if 		exists (select * from information_schema.views where table_name = 'check_infopump') then drop view check_infopump; end if;
+end;	
+$function_infopump$ language plpgsql;
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubisuurus') then drop procedure function_klubisuurus; end if;
+create or replace procedure function_klubisuurus(praktikum_10_jr int) as $function_klubisuurus$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubisuurus') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_klubisuurus';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_klubisuurus(54)) = 5
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus" klubi "54" suurus', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus" klubi "54" suurus', 'ei ole oige, peab olema 5', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubisuurus"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_klubisuurus$ language plpgsql;
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_nimi') then drop procedure function_nimi; end if;
+create or replace procedure function_nimi(praktikum_10_jr int) as $function_nimi$ 
+declare 
+arg_count int;
+begin
+	
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_nimi') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_nimi';
+		if 		arg_count = 2 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_nimi('test', 'kesk')) = 'kesk, test'
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi" tulemus', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi" tulemus', 'ei ole oige', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi" argumentide arv', 'ei ole oige, peab olema 2', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_nimi"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_nimi$ language plpgsql;
+
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_koormus') then drop procedure function_mangija_koormus; end if;
+create or replace procedure function_mangija_koormus(praktikum_10_jr int) as $function_mangija_koormus$ 
+declare 
+arg_count int;
+begin
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_mangija_koormus') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_mangija_koormus';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_mangija_koormus(73)) = 18
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus" mangija "73" koormus', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus" mangija "73" koormus', 'ei ole oige, peab olema 18', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_koormus"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_mangija_koormus$ language plpgsql;
+
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_voite_turniiril') then drop procedure function_mangija_voite_turniiril; end if;
+create or replace procedure function_mangija_voite_turniiril(praktikum_10_jr int) as $function_mangija_voite_turniiril$ 
+declare 
+arg_count int;
+begin
+	
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_mangija_voite_turniiril') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_mangija_voite_turniiril';
+		if 		arg_count = 2 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_mangija_voite_turniiril(197,43)) = 3
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" mangija "197" turniiril "43" voitude arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" mangija "197" turniiril "43" voitude arv', 'ei ole oige, peab olema 3', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+			if 		(select * from f_mangija_voite_turniiril(75,44)) = 0
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" mangija "75" turniiril "44" voitude arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" mangija "75" turniiril "44" voitude arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril" argumentide arv', 'ei ole oige, peab olema 2', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_voite_turniiril"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_mangija_voite_turniiril$ language plpgsql;
+
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_viike_turniiril') then drop procedure function_mangija_viike_turniiril; end if;
+create or replace procedure function_mangija_viike_turniiril(praktikum_10_jr int) as $function_mangija_viike_turniiril$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_mangija_viike_turniiril') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_mangija_viike_turniiril';
+		if 		arg_count = 2 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_mangija_viike_turniiril(197,43)) = 1
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" mangija "197" turniiril "43" viikide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" mangija "197" turniiril "43" viikide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+			if 		(select * from f_mangija_viike_turniiril(75,44)) = 0
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" mangija "75" turniiril "44" viikide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" mangija "75" turniiril "44" viikide arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril" argumentide arv', 'ei ole oige, peab olema 2', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_viike_turniiril"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_mangija_viike_turniiril$ language plpgsql;
+
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_kaotusi_turniiril') then drop procedure function_mangija_kaotusi_turniiril; end if;
+create or replace procedure function_mangija_kaotusi_turniiril(praktikum_10_jr int) as $function_mangija_kaotusi_turniiril$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_mangija_kaotusi_turniiril') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_mangija_kaotusi_turniiril';
+		if 		arg_count = 2 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			if 		(select * from f_mangija_kaotusi_turniiril(197,43)) = 0
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" mangija "197" turniiril "43" kaotusi arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" mangija "197" turniiril "43" kaotusi arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+			if 		(select * from f_mangija_kaotusi_turniiril(75,44)) = 2
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" mangija "75" turniiril "44" kaotusi arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" mangija "75" turniiril "44" kaotusi arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril" argumentide arv', 'ei ole oige, peab olema 2', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_mangija_kaotusi_turniiril"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+end;	
+$function_mangija_kaotusi_turniiril$ language plpgsql;
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubiparimad') then drop procedure function_klubiparimad; end if;
+create or replace procedure function_klubiparimad(praktikum_10_jr int) as $function_klubiparimad$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiparimad') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_klubiparimad';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			create or replace view check_klubiparimad as select * from f_klubiparimad('Areng');
+			
+			if 		(select count(*) from check_klubiparimad) = 3
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" kirjete arv', 'ei ole oige, peab olema 3', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+			
+			if 		(select check_column_exists('check_klubiparimad','isik')) = 1 then
+				if 		(select isik from check_klubiparimad where isik = 'Pőder, Priit') = 'Pőder, Priit'
+				then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangija "Põder, Priit"', 'on olemas', 'OK', 0, 0, praktikum_10_jr);
+				else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangija "Põder, Priit"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+				end if;
+				
+				if 		(select check_column_exists('check_klubiparimad','punktisumma')) = 1 then
+					if 		(select punktisumma from check_klubiparimad where isik = 'Pőder, Priit') = 4.5
+					then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangija "Põder, Priit" punktid', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+					else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangija "Põder, Priit" punktid', 'ei ole oige, peab olema 4.5', 'VIGA', 0, 0, praktikum_10_jr);
+					end if;
+				else	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangija "Põder, Priit" punkte', 'ei saa leida, sest puudub veerg "punktisumma"', 'VIGA', 0, 0, praktikum_10_jr);
+				end if;
+			else	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" klubi "Areng" mangijat "Põder, Priit"', 'ei saa leida, sest puudub veerg "isik"', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	if 		exists (select * from information_schema.views where table_name = 'check_klubiparimad') then drop view check_klubiparimad; end if;
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_klubiparimad"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+			if 		exists (select * from information_schema.views where table_name = 'check_klubiparimad') then drop view check_klubiparimad; end if;
+end;	
+$function_klubiparimad$ language plpgsql;
+
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_voit_viik_kaotus') then drop procedure function_voit_viik_kaotus; end if;
+create or replace procedure function_voit_viik_kaotus(praktikum_10_jr int) as $function_voit_viik_kaotus$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_voit_viik_kaotus') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'f_voit_viik_kaotus';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			create or replace view check_voit_viik_kaotus as select * from f_voit_viik_kaotus(44);
+			
+			if 		(select count(*) from check_voit_viik_kaotus) = 63
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" kirjete arv', 'ei ole oige, peab olema 63', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+			
+			if 		(select check_column_exists('check_voit_viik_kaotus','id')) = 1 and
+					(select check_column_exists('check_voit_viik_kaotus','voite')) = 1 and 
+					(select check_column_exists('check_voit_viik_kaotus','viike')) = 1 and
+					(select check_column_exists('check_voit_viik_kaotus','kaotusi')) = 1 then
+					
+					if 		(select voite from check_voit_viik_kaotus where id = 193) = 1
+					then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" voitude arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+					else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" voitude arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+					end if;
+					
+					if 		(select viike from check_voit_viik_kaotus where id = 193) = 1
+					then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" viikide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+					else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" viikide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+					end if;
+					
+					if 		(select kaotusi from check_voit_viik_kaotus where id = 193) = 0
+					then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" kaotusi arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+					else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" kaotusi arv', 'ei ole oige, peab olema 0', 'VIGA', 0, 0, praktikum_10_jr);
+					end if;
+				
+				
+			else	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" mangija "Heli Jalg" turniiril "44" kontroll', 'ei saa leida, sest puuduvad veerud "id", "voite", "viike", "kaotusi"', 'VIGA', 0, 0, praktikum_10_jr);
+			end if;
+		else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	if 		exists (select * from information_schema.views where table_name = 'check_voit_viik_kaotus') then drop view check_voit_viik_kaotus; end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+			if 		exists (select * from information_schema.views where table_name = 'check_voit_viik_kaotus') then drop view check_voit_viik_kaotus; end if;
+end;	
+$function_voit_viik_kaotus$ language plpgsql;
+
+-- copy
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'procedure_uus_isik') then drop procedure procedure_uus_isik; end if;
+create or replace procedure procedure_uus_isik(praktikum_10_jr int) as $procedure_uus_isik$ 
+declare 
+arg_count int;
+begin
+
+	if 	exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_isik') then
+		
+		select pronargs into arg_count from pg_proc where proname = 'sp_uus_isik';
+		if 		arg_count = 3 then 
+			insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik" argumentide arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			
+			call sp_uus_isik('Test', 'Kesk', 4);
+			if 		exists (select * from isikud where eesnimi = 'Test' and perenimi = 'Kesk')
+			then 	insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik" lisatud isik', 'on olemas', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik" lisatud isik', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+			end if; 
+				
+		else 	insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik" argumentide arv', 'ei ole oige, peab olema 3', 'VIGA', 0, 0, praktikum_10_jr);
+		end if;
+	else 	insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_10_jr);
+	end if;
+	
+	delete from isikud where eesnimi = 'Test' and perenimi = 'Kesk';
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 10', 'Protseduur "sp_uus_isik"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_10_jr);
+			delete from isikud where eesnimi = 'Test' and perenimi = 'Kesk';
+end;	
+$procedure_uus_isik$ language plpgsql;
 
 
 /* Kodutoode kontrollid algavad siit */
@@ -1365,6 +1789,10 @@ end;
 $procedure_uus_turniir$ language plpgsql;
 
 
+
+
+
+
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
 create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $andmete_taassisestus$
 begin 
@@ -1412,9 +1840,13 @@ begin
 	if exists (select * from information_schema.columns where table_name = 'isikud' and column_name = 'klubis') then 
 		call sisesta_txt_andmed('isikud', folder_path || '\isikud.txt', '(id, eesnimi, perenimi, isikukood, klubis, synniaeg, sugu, ranking)',txt_lugemis_andmed_delimiter);
 		update isikud set klubis = null where id in (9,10,8,13,6);
-	else 
+	elsif  exists (select * from information_schema.columns where table_name = 'isikud' and column_name = 'klubi') then 
 		call sisesta_txt_andmed('isikud', folder_path || '\isikud.txt', '(id, eesnimi, perenimi, isikukood, klubi, synniaeg, sugu, ranking)',txt_lugemis_andmed_delimiter);
 		update isikud set klubi = null where id in (9,10,8,13,6);
+	else
+		alter table isikud add column klubis int;
+		call sisesta_txt_andmed('isikud', folder_path || '\isikud.txt', '(id, eesnimi, perenimi, isikukood, klubis, synniaeg, sugu, ranking)',txt_lugemis_andmed_delimiter);
+		update isikud set klubis = null where id in (9,10,8,13,6);
 	end if;
 	
 	-- Partiid
@@ -1484,7 +1916,12 @@ begin
 	if versioon >= 6 then
 		call kodutoo_5(versioon);
 	end if;
-	
+	if versioon >= 7 then
+		call praktikum_10(versioon);
+	end if;
+	if versioon >= 8 then
+		call kodutoo_6(versioon);
+	end if;
 	call arvuta_punktid(versioon);
 	
 	if versioon >= 3 then
