@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 7;
+declare versioon int := 8;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -303,7 +303,9 @@ begin
 	-- Partiid kokkuvote kustutatud
 	call 	check_column('Partiid', 'Kokkuvote', 0, praktikum_3_jr, 'Praktikum 3', 'Tabel', 0);
 	-- Turniirid kitsendus ajakontroll
-	call 	check_constraint('Turniirid', 'ajakontroll', 0, praktikum_3_jr, 'Praktikum 3', 'Tabel', 1);
+	if versioon < 8 then 
+		call 	check_constraint('Turniirid', 'ajakontroll', 0, praktikum_3_jr, 'Praktikum 3', 'Tabel', 1);
+	end if;
 	-- Partiid kitsendus ajakontroll
 	call 	check_constraint('Partiid', 'ajakontroll', 0, praktikum_3_jr, 'Praktikum 3', 'Tabel', 1);
 	-- Klubi Valge Mask valgas
@@ -1292,8 +1294,8 @@ begin
 			create or replace view check_voit_viik_kaotus as select * from f_voit_viik_kaotus(44);
 			
 			if 		(select count(*) from check_voit_viik_kaotus) = 63
-			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
-			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" kirjete arv', 'ei ole oige, peab olema 63', 'VIGA', 0, 0, praktikum_10_jr);
+			then 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" turniiril "44" kirjete arv', 'on oige', 'OK', 0, 0, praktikum_10_jr);
+			else 	insert into Staatus values('Praktikum 10', 'Funktsioon "f_voit_viik_kaotus" turniiril "44" kirjete arv', 'ei ole oige, peab olema 63', 'VIGA', 0, 0, praktikum_10_jr);
 			end if;
 			
 			if 		(select check_column_exists('check_voit_viik_kaotus','id')) = 1 and
@@ -1669,7 +1671,7 @@ begin
 	call function_top10(kodutoo_5_funk_top10, kodutoo_5_jr);
 	
 	-- sp_uus_turniir
-	call procedure_uus_turniir(kodutoo_5_funk_klubiranking, kodutoo_5_jr);
+	call procedure_uus_turniir(kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
 end;	
 $kodutoo_5$ language plpgsql;
 
@@ -1677,16 +1679,25 @@ $kodutoo_5$ language plpgsql;
 -- f_vanus
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_vanus') then drop procedure function_vanus; end if;
 create or replace procedure function_vanus(kodutoo_5_funk_vanus numeric, kodutoo_5_jr int) as $function_vanus$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare 
+arg_count int;
 begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_vanus') then 
-		if 		(select f_vanus('09.09.2000')) = 22
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/2.0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on vale, peab olema 22', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
-		end if;
-		
-		if 		(select f_vanus('01.01.2000')) = 23
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/2.0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on vale, peab olema 23', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/2.0, kodutoo_5_jr);
+		select pronargs into arg_count from pg_proc where proname = 'f_vanus';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" argumentide arv', 'on oige', 'OK', kodutoo_5_funk_vanus/5, kodutoo_5_funk_vanus/5, kodutoo_5_jr);
+			
+			if 		(select f_vanus('09.09.2000')) = 22
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/5*2, kodutoo_5_funk_vanus/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "09.09.2000" vanus', 'on vale, peab olema 22', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/5*2, kodutoo_5_jr);
+			end if;
+			
+			if 		(select f_vanus('01.01.2000')) = 23
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on oige', 'OK', kodutoo_5_funk_vanus/5*2, kodutoo_5_funk_vanus/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" kuupaeva "01.01.2000" vanus', 'on vale, peab olema 23', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus/5*2, kodutoo_5_jr);
+			end if;
+			
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_vanus" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', kodutoo_5_funk_vanus/5*0, kodutoo_5_funk_vanus/5, kodutoo_5_jr);
 		end if;
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_vanus"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_vanus*0, kodutoo_5_funk_vanus, kodutoo_5_jr);
 	end if;
@@ -1701,16 +1712,25 @@ $function_vanus$ language plpgsql;
 -- f_klubiranking
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubiranking') then drop procedure function_klubiranking; end if;
 create or replace procedure function_klubiranking(kodutoo_5_funk_klubiranking numeric, kodutoo_5_jr int) as $function_klubiranking$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare 
+arg_count int;
 begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_klubiranking') then 
-		if 		(select f_klubiranking(54)) = 1279.6
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/2.0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on vale, peab olema 1279.6', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
-		end if;
-		
-		if 		(select f_klubiranking(59)) = 1407.0
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/2.0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on vale, peab olema 1407.0', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/2.0, kodutoo_5_jr);
+		select pronargs into arg_count from pg_proc where proname = 'f_klubiranking';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" argumentide arv', 'on oige', 'OK', kodutoo_5_funk_klubiranking/5, kodutoo_5_funk_klubiranking/5, kodutoo_5_jr);
+			
+			if 		(select f_klubiranking(54)) = 1279.6
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/5*2, kodutoo_5_funk_klubiranking/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "54" mangijate keskmine ranking', 'on vale, peab olema 1279.6', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/5*2, kodutoo_5_jr);
+			end if;
+			
+			if 		(select f_klubiranking(59)) = 1407.0
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on oige', 'OK', kodutoo_5_funk_klubiranking/5*2, kodutoo_5_funk_klubiranking/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" klubi "59" mangijate keskmine ranking', 'on vale, peab olema 1407.0', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/5*2, kodutoo_5_jr);
+			end if;
+			
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_klubiranking" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking/5, kodutoo_5_jr);
 		end if;
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_klubiranking"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_klubiranking*0, kodutoo_5_funk_klubiranking, kodutoo_5_jr);
 	end if;
@@ -1728,21 +1748,28 @@ create or replace procedure function_top10(kodutoo_5_funk_top10 numeric, kodutoo
 declare
 v_func_top10_punktid numeric;
 v_func_top10_nimi text;
+arg_count int;
 begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'f_top10') then 
-		if 		exists (select * from information_schema.views where table_name = 'v_func_top10') then drop view v_func_top10; end if;
+		select pronargs into arg_count from pg_proc where proname = 'f_top10';
+		if 		arg_count = 1 then 
+			insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" argumentide arv', 'on oige', 'OK', kodutoo_5_funk_top10/5, kodutoo_5_funk_top10/5, kodutoo_5_jr);
+			
+			if 		exists (select * from information_schema.views where table_name = 'v_func_top10') then drop view v_func_top10; end if;
 		
-		create or replace view v_func_top10(nimi, punktid) as (select * from f_top10(44));
-		if 		(select count(*) from v_func_top10) = 10
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on oige', 'OK', kodutoo_5_funk_top10/2.0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on vale, peab olema 10', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
+			create or replace view v_func_top10(nimi, punktid) as (select * from f_top10(44));
+			if 		(select count(*) from v_func_top10) = 10
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on oige', 'OK', kodutoo_5_funk_top10/5*2, kodutoo_5_funk_top10/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" kirjete arv', 'on vale, peab olema 10', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/5*2, kodutoo_5_jr);
+			end if;
+			
+			if 		(select ft.punktid from v_func_top10 ft where ft.nimi like 'Murakas%') = 3.5
+			then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria" punktid', 'on oiged', 'OK', kodutoo_5_funk_top10/5*2, kodutoo_5_funk_top10/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria"', 'ei ole oiged', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/5*2, kodutoo_5_jr);
+			end if;
+			
+		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" argumentide arv', 'ei ole oige, peab olema 1', 'VIGA', kodutoo_5_funk_top10/5*0, kodutoo_5_funk_top10/5, kodutoo_5_jr);
 		end if;
-		
-		if 		(select ft.punktid from v_func_top10 ft where ft.nimi like 'Murakas%') = 3.5
-		then 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria" punktid', 'on oiged', 'OK', kodutoo_5_funk_top10/2.0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
-		else 	insert into Staatus values('Kodutoo 5', 'Funktsioon "f_top10" turniiril "44" mangija "Murakas, Maria"', 'ei ole oiged', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10/2.0, kodutoo_5_jr);
-		end if;
-		
 	else 	insert into Staatus values('Kodutoo 5', 'Funktsiooni "f_top10"', 'ei ole olemas', 'VIGA', kodutoo_5_funk_top10*0, kodutoo_5_funk_top10, kodutoo_5_jr);
 	end if;
 	
@@ -1757,27 +1784,29 @@ $function_top10$ language plpgsql;
 -- sp_uus_turniir
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'procedure_uus_turniir') then drop procedure procedure_uus_turniir; end if;
 create or replace procedure procedure_uus_turniir(kodutoo_5_prot_uus_turniir numeric, kodutoo_5_jr int) as $procedure_uus_turniir$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare
+arg_count int;
 begin
 	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then 
 		--delete from turniirid where nimi ='Tartu Meister'; 
-		
-		if 		(select pronargs from pg_catalog.pg_proc where proname = 'sp_uus_turniir') = 4
-		then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" veergude arv', 'on oige', 'OK', kodutoo_5_prot_uus_turniir/5, kodutoo_5_prot_uus_turniir/5, kodutoo_5_jr);
+		select pronargs into arg_count from pg_proc where proname = 'sp_uus_turniir';
+		if 		arg_count = 4 then 
+			insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" argumentide arv', 'on oige', 'OK', kodutoo_5_prot_uus_turniir/5, kodutoo_5_prot_uus_turniir/5, kodutoo_5_jr);
 				
-				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
-				call sp_uus_turniir('Tartu Meister', '02.02.2022',1,'Tartu');
-				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '02.02.2022')
-				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
-				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
-				end if;	
-				if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
-				call sp_uus_turniir('Tartu Meister', '02.02.2022',2,'Tartu');
-				if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '03.02.2022')
-				then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
-				else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
-				end if;
-		
-		else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" veergude arv', 'on vale, peab olema 4', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/2.0, kodutoo_5_jr);
+			if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
+			call sp_uus_turniir('Tartu Meister', '02.02.2022',1,'Tartu');
+			if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '02.02.2022')
+			then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "0"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+			end if;	
+			if 		exists (select * from turniirid where nimi = 'Tartu Meister') then delete from turniirid where nimi ='Tartu Meister'; end if;
+			call sp_uus_turniir('Tartu Meister', '02.02.2022',2,'Tartu');
+			if exists 	(select * from turniirid where nimi = 'Tartu Meister' and loppkuupaev = '03.02.2022')
+			then 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'on olemas ja oigete kuupaevadega', 'OK', kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+			else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"  uus turniir kuupaevaga "02.02.2022" ja paevade arvuga "2"', 'ei olemas voi on valed kuupaevad', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir/5*2, kodutoo_5_jr);
+			end if;
+			
+		else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir" argumentide arv', 'ei ole oige, peab olema 4', 'VIGA', kodutoo_5_prot_uus_turniir/5*0, kodutoo_5_prot_uus_turniir/5, kodutoo_5_jr);
 		end if;
 	else 	insert into Staatus values('Kodutoo 5', 'Protseduur "sp_uus_turniir"', 'ei ole olemas', 'VIGA', kodutoo_5_prot_uus_turniir*0, kodutoo_5_prot_uus_turniir, kodutoo_5_jr);
 	end if;
@@ -1789,8 +1818,158 @@ end;
 $procedure_uus_turniir$ language plpgsql;
 
 
+-- kodutöö 6
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_6') then drop procedure kodutoo_6; end if;
+create or replace procedure kodutoo_6(versioon int) as $kodutoo_6$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare
+kodutoo_6_jr int;
+kodutoo_6_ix_riiginimi numeric;
+kodutoo_6_ix_suurus numeric;
+kodutoo_6_tg_partiiaeg numeric;
+kodutoo_6_tg_klubi_olemasolu numeric;
+hilisem_kodutoo int;
+sqltext text;
+punktid numeric;
+begin 
+	if 		versioon = 8 then hilisem_kodutoo :=1;
+	else 	hilisem_kodutoo :=0;
+	end if;
+	select taisarv into kodutoo_6_jr from muutujad where nimi = 'kodutoo_6_jr';
+	select komaarv*hilisem_kodutoo into kodutoo_6_ix_riiginimi from muutujad where nimi = 'kodutoo_6_ix_riiginimi';
+	select komaarv*hilisem_kodutoo into kodutoo_6_ix_suurus from muutujad where nimi = 'kodutoo_6_ix_suurus';
+	select komaarv*hilisem_kodutoo into kodutoo_6_tg_partiiaeg from muutujad where nimi = 'kodutoo_6_tg_partiiaeg';
+	select komaarv*hilisem_kodutoo into kodutoo_6_tg_klubi_olemasolu from muutujad where nimi = 'kodutoo_6_tg_klubi_olemasolu';
+	
+	-- ix_riiginimi
+	if 		exists (select * from pg_indexes where indexname = 'ix_riiginimi')
+	then 	insert into Staatus values('Kodutoo 6', 'Indeks "ix_riiginimi"', 'on olemas', 'OK', kodutoo_6_ix_riiginimi, kodutoo_6_ix_riiginimi, kodutoo_6_jr);
+	else 	insert into Staatus values('Kodutoo 6', 'Indeks "ix_riiginimi"', 'ei olemas', 'VIGA', kodutoo_6_ix_riiginimi*0, kodutoo_6_ix_riiginimi, kodutoo_6_jr);
+	end if;
+	-- ix_suurus
+	if 		exists (select * from pg_indexes where indexname = 'ix_suurus')
+	then 	insert into Staatus values('Kodutoo 6', 'Indeks "ix_suurus"', 'on olemas', 'OK', kodutoo_6_ix_suurus, kodutoo_6_ix_suurus, kodutoo_6_jr);
+	else 	insert into Staatus values('Kodutoo 6', 'Indeks "ix_suurus"', 'ei olemas', 'VIGA', kodutoo_6_ix_suurus*0, kodutoo_6_ix_suurus, kodutoo_6_jr);
+	end if;
+	
+	-- tg_partiiaeg
+	call trigger_partiiaeg(kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+	
+	-- tg_klubi_olemasolu
+	call trigger_klubi_olemasolu(kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+end;	
+$kodutoo_6$ language plpgsql;
 
 
+-- tg_partiiaeg
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_partiiaeg') then drop procedure trigger_partiiaeg; end if;
+create or replace procedure trigger_partiiaeg(kodutoo_6_tg_partiiaeg numeric, kodutoo_6_jr int) as $trigger_partiiaeg$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare
+mangija_1 int;
+mangija_2 int;
+begin
+
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg') then
+		ALTER TABLE partiid DISABLE TRIGGER ALL;
+		ALTER TABLE partiid ENABLE TRIGGER tg_partiiaeg;
+		-- update
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg' and event_manipulation = 'UPDATE') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" event "UPDATE"', 'on olemas', 'OK', kodutoo_6_tg_partiiaeg/10, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" event "UPDATE"', 'ei olemas', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		end if;
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" event "INSERT"', 'on olemas', 'OK', kodutoo_6_tg_partiiaeg/10, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" event "INSERT"', 'ei olemas', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		end if;
+		-- before
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg' and action_timing = 'BEFORE') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" kaivitusaeg "BEFORE"', 'on olemas', 'OK', kodutoo_6_tg_partiiaeg/10, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" kaivitusaeg "BEFORE"', 'ei olemas', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg/10, kodutoo_6_jr);
+		end if;
+		
+		if 	exists (select id from isikud where eesnimi = 'Man' and perenimi = 'Ka') then delete from isikud where eesnimi = 'Man' and perenimi = 'Ka'; end if;
+		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Man', 'Ka');
+		select id into mangija_1 from isikud where eesnimi = 'Man' and perenimi = 'Ka';
+		
+		if 	exists (select id from isikud where eesnimi = 'Kan' and perenimi = 'Ma') then delete from isikud where eesnimi = 'Kan' and perenimi = 'Ma'; end if;
+		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Kan', 'Ma');
+		select id into mangija_2 from isikud where eesnimi = 'Kan' and perenimi = 'Ma';
+		
+		insert into partiid values (44,'2023-04-22 17:45:24.000','2023-03-22 17:45:24.000',mangija_1,mangija_2,2,0, nextval('serial_registration'));
+		
+		if 		(select lopphetk from partiid where valge = mangija_1 and must = mangija_2) is null
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" partii lisamisel', 'on lopphetk oige', 'OK', kodutoo_6_tg_partiiaeg/10*7, kodutoo_6_tg_partiiaeg/10*7, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" partii lisamisel', 'ei ole lopphetk oige, peab olema NULL', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg/10*7, kodutoo_6_jr);
+		end if;
+	
+	else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg"', 'ei ole olemas', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+	end if;
+
+	exception 
+		when others then 
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+end;	
+$trigger_partiiaeg$ language plpgsql;
+
+
+-- tg_klubi_olemasolu
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_klubi_olemasolu') then drop procedure trigger_klubi_olemasolu; end if;
+create or replace procedure trigger_klubi_olemasolu(kodutoo_6_tg_klubi_olemasolu numeric, kodutoo_6_jr int) as $trigger_klubi_olemasolu$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+declare 
+klubi_id int;
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu') then
+		ALTER TABLE isikud DISABLE TRIGGER ALL;
+		ALTER TABLE isikud ENABLE TRIGGER tg_klubi_olemasolu;
+		-- update
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and event_manipulation = 'UPDATE') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		end if;
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		end if;
+		-- before
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and action_timing = 'AFTER') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		end if;
+		
+		-- klubi Klubitud
+		if 		exists (select * from klubid where nimi ilike 'Klubitud') 
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" klubi "Klubitud"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" klubi "Klubitud"', 'ei ole olemas, lisatakse', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+				insert into klubid(nimi) values ('Klubitud');
+		end if;
+		select id into klubi_id from klubid where nimi = 'Klubitud';
+		
+		if 	exists (select id from isikud where eesnimi = 'Kan' and perenimi = 'Ma') then delete from isikud where eesnimi = 'Kan' and perenimi = 'Ma'; end if;
+		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Kan', 'Ma');
+		
+		if 		(select check_column_exists('isikud','klubis'))=1 then 
+			if 		(select klubis from isikud where eesnimi = 'Kan' and perenimi = 'Ma') = klubi_id
+			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			end if;
+		elsif 	(select check_column_exists('isikud','klubi'))=1 then 
+			if 		(select klubi from isikud where eesnimi = 'Kan' and perenimi = 'Ma') = klubi_id
+			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			end if;
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi kontroll', 'ei saa teha, sest puudub veerg "klubi" või "klubis"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+		end if;
+	
+	else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu"', 'ei ole olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+	end if;
+
+	--exception 
+		--when others then 
+			--insert into Staatus values('Kodutoo 5', 'Triger "tg_klubi_olemasolu"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+end;	
+$trigger_klubi_olemasolu$ language plpgsql;
 
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
@@ -1931,9 +2110,20 @@ begin
 end;
 $kaivita$ LANGUAGE plpgsql;
 SET client_min_messages TO WARNING;
+if exists (select * from pg_catalog.pg_sequences where sequencename = 'serial_registration') then drop sequence serial_registration; end if;
+CREATE SEQUENCE serial_registration START 3000;
+
+ALTER TABLE isikud DISABLE TRIGGER ALL;
+ALTER TABLE klubid DISABLE TRIGGER ALL;
+ALTER TABLE partiid DISABLE TRIGGER ALL;
+ALTER TABLE turniirid DISABLE TRIGGER ALL;
 call kaivita(versioon, folder_path, txt_lugemis_andmed_delimiter);
 --Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
 call valjasta_tulemus(folder_path || '\tulemus.csv', tulemus_andmed_delimiter);
+ALTER TABLE isikud ENABLE TRIGGER ALL;
+ALTER TABLE klubid ENABLE TRIGGER ALL;
+ALTER TABLE partiid ENABLE TRIGGER ALL;
+ALTER TABLE turniirid ENABLE TRIGGER ALL;
 SET client_min_messages TO NOTICE;
 end;
 $kontroll$ LANGUAGE plpgsql;
