@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 8;
+declare versioon int := 9;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -11,6 +11,7 @@ Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmis
 6 - kodutoo 5
 7 - praktikum 10
 8 - kodutoo 6
+9 - praktikum 11
 */
 
 /* 
@@ -122,6 +123,8 @@ edu_oige int;
 edu_saadud_oige int;
 praktikum10_oige int;
 praktikum10_saadud_oige int;
+praktikum11_oige int;
+praktikum11_saadud_oige int;
 begin
 	select taisarv into kodutoo_jr from muutujad where nimi = 'kodutoo_jr';
 	select taisarv into praktikum_jr from muutujad where nimi = 'praktikum_jr';
@@ -129,6 +132,7 @@ begin
 	select taisarv into praktikum4_oige from muutujad where nimi = 'praktikum4_oige';
 	select taisarv into praktikum7_oige from muutujad where nimi = 'praktikum7_oige';
 	select taisarv into praktikum10_oige from muutujad where nimi = 'praktikum10_oige';
+	select taisarv into praktikum11_oige from muutujad where nimi = 'praktikum11_oige';
 	select taisarv into edu_oige from muutujad where nimi = 'edu_oige';
 	if versioon = 2 then
 		select count(*) into praktikum3_saadud_oige from staatus where ylesanne = 'Praktikum 3' and olek = 'OK'; 
@@ -167,6 +171,10 @@ begin
 		kodu_max_punktid := 2;
 		select sum(punktid) into kodu_punktid from staatus where ylesanne like ('Kodutoo%');
 		insert into Staatus values ('Kodutoo 6','-','-', 'Hindepunktid', kodu_punktid, kodu_max_punktid, kodutoo_jr);
+	end if;
+	if versioon = 9 then
+		select count(*) into praktikum11_saadud_oige from staatus where ylesanne = 'Praktikum 11' and olek = 'OK'; 
+		insert into Staatus values ('Praktikum 11', 'Oigesti tehtud: ' || praktikum11_saadud_oige,'Maksimum oiged: '|| praktikum11_oige, 'Hindepunktid', 1, 1,	praktikum_jr);
 	end if;
 
 end;
@@ -753,10 +761,13 @@ begin
 			end if;
 			
 			if 		(select check_column_exists('v_maletaht','klubis'))=1 then
+				if 		(select count(distinct klubis) from v_maletaht) = 1 then 
 					if 	(select distinct klubis from v_maletaht) = 56
 					then 	insert into Staatus values('Praktikum 7', 'Vaate "v_maletaht" klubi id', 'on oige', 'OK', 0, 0, praktikum_7_jr);
 					else 	insert into Staatus values('Praktikum 7', 'Vaate "v_maletaht" klubi id', 'on vale, peaks olema 56', 'VIGA', 0, 0, praktikum_7_jr);
 					end if;
+				else	insert into Staatus values ('Praktikum 7', 'Vaate "v_maletaht" klubi id kontroll', 'klubisid on liiga palju, peab olema 1', 'VIGA', 0, 0, praktikum_7_jr);
+				end if;
 			else	insert into Staatus values ('Praktikum 7', 'Vaate "v_maletaht" klubi id kontroll', 'veergu "klubis" pole olemas', 'VIGA', 0, 0, praktikum_7_jr);
 			end if;
 					
@@ -1368,10 +1379,326 @@ end;
 $procedure_uus_isik$ language plpgsql;
 
 
+
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_11') then drop procedure praktikum_11; end if;
+create or replace procedure praktikum_11(versioon int) as $praktikum_11$ 
+declare 
+praktikum_11_jr int;
+begin
+	select taisarv into praktikum_11_jr from muutujad where nimi = 'praktikum_11_jr';
+	call trigger_ajakontroll(praktikum_11_jr);
+	call trigger_riigid(praktikum_11_jr);
+	call trigger_ajakontroll1(praktikum_11_jr);
+	call trigger_kustuta_klubi(praktikum_11_jr);
+	call trigger_partiiaeg1(praktikum_11_jr);
+end;	
+$praktikum_11$ language plpgsql;
+
+
+-- tg_ajakontroll
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_ajakontroll') then drop procedure trigger_ajakontroll; end if;
+create or replace procedure trigger_ajakontroll(praktikum_11_jr int) as $trigger_ajakontroll$
+declare 
+jarg_id int;
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll') then
+		ALTER TABLE partiid DISABLE TRIGGER ALL;
+		ALTER TABLE partiid ENABLE TRIGGER tg_ajakontroll;
+		
+		-- update
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and event_manipulation = 'UPDATE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "UPDATE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "UPDATE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "INSERT"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "INSERT"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- before
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and action_timing = 'AFTER') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" kaivitusaeg "AFTER"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, '2005-01-12 08:05:00.000', 73, 92, 1, 1, jarg_id); 
+		--– ei tohi lisada, saate kontrollida (vaadake alguaega!) 
+		if 		not exists (SELECT * FROM partiid WHERE id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" samal ajal toimuv partii lisamine', 'ei onnestunud', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" samal ajal toimuv partii lisamine', 'onnestus, aga ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, '2005-01-12 08:05:00.000', 201, 189, 1, 1, jarg_id);
+		if 		exists (SELECT * FROM partiid WHERE id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" erineval ajal toimuv partii lisamine', 'onnestus', 'OK', 0, 0, praktikum_11_jr);
+				delete from partiid WHERE id = jarg_id;
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" erineval ajal toimuv partii lisamine', 'ei onnestunud, aga peaks', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+	else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_11_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" Kontrollimiseks kasuta: ', 'INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, 2005-01-12 08:05:00.000, 73, 92, 1, 1, jarg_id);', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" Kontrollimiseks kasuta: ', 'INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, 2005-01-12 08:05:00.000, 201, 189, 1, 1, jarg_id);', 'VIGA', 0, 0, praktikum_11_jr);
+end;	
+$trigger_ajakontroll$ language plpgsql;	
+
+
+
+-- tg_riigid
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_riigid') then drop procedure trigger_riigid; end if;
+create or replace procedure trigger_riigid(praktikum_11_jr int) as $trigger_riigid$
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_riigid') then
+		ALTER TABLE riigid DISABLE TRIGGER ALL;
+		ALTER TABLE riigid ENABLE TRIGGER tg_riigid;
+		
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_riigid' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" event "INSERT"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" event "INSERT"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- before
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_riigid' and action_timing = 'BEFORE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" kaivitusaeg "BEFORE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" kaivitusaeg "BEFORE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		insert into riigid (id, nimi, pealinn) values (nextval('serial_registration'), 'Bulgaria1', 'Sofia');
+		
+		if 		(select count(*) from riigid where nimi = 'Bulgaria') = 1
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" riigi "Bulgaaria" lisamine', 'ei onnestunud', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" riigi "Bulgaaria" lisamine', 'onnestus, aga ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from riigid where id >= 3000;
+		end if;
+		
+		insert into riigid (id, nimi, pealinn) values (nextval('serial_registration'),'Test', 'Sofia');
+		if 		(select count(*) from riigid where nimi = 'Bulgaria') = 1
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" riigi "Test" lisamine', 'ei onnestunud', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" riigi "Test" lisamine', 'onnestus, aga ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from riigid where id >= 3000;
+		end if;		
+		
+	else 	insert into Staatus values('Praktikum 11', 'Triger "tg_riigid"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_11_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 11', 'Triger "tg_riigid"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" kontrollimiseks kasuta:', 'insert into riigid (id, nimi, pealinn) values (nextval(''serial_registration''), ''Bulgaria1'', ''Sofia'');', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_riigid" kontrollimiseks kasuta:', 'insert into riigid (id, nimi, pealinn) values (nextval(''serial_registration''),''Test'', ''Sofia'');', 'VIGA', 0, 0, praktikum_11_jr);
+end;	
+$trigger_riigid$ language plpgsql;	
+
+-- tg_ajakontroll1
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_ajakontroll1') then drop procedure trigger_ajakontroll1; end if;
+create or replace procedure trigger_ajakontroll1(praktikum_11_jr int) as $trigger_ajakontroll1$
+declare 
+jarg_id int;
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll1') then
+		ALTER TABLE partiid DISABLE TRIGGER ALL;
+		ALTER TABLE isikud DISABLE TRIGGER ALL;
+		ALTER TABLE partiid ENABLE TRIGGER tg_ajakontroll1;
+		
+		-- update
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and event_manipulation = 'UPDATE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "UPDATE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "UPDATE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "INSERT"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" event "INSERT"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- after
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_ajakontroll' and action_timing = 'AFTER') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" kaivitusaeg "AFTER"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, '2005-01-12 08:05:00.000', 73, 92, 1, 1, jarg_id); 
+		--– ei tohi lisada, saate kontrollida (vaadake alguaega!) 
+		if 		not exists (SELECT * FROM partiid WHERE id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" samal ajal toimuv partii lisamine', 'ei onnestunud', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" samal ajal toimuv partii lisamine', 'onnestus, aga ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, '2005-01-12 08:05:00.000', 201, 189, 1, 1, jarg_id);
+		if 		exists (SELECT * FROM partiid WHERE id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" erineval ajal toimuv partii lisamine', 'onnestus', 'OK', 0, 0, praktikum_11_jr);
+				delete from partiid WHERE id = jarg_id;
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll" erineval ajal toimuv partii lisamine', 'ei onnestunud, aga peaks', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		
+	else 	insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll1"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_11_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll1" kontrollimiseks kasuta: ', 'INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, 2005-01-12 08:05:00.000, 73, 92, 1, 1, jarg_id);', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll1" kontrollimiseks kasuta: ', 'INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, 2005-01-12 08:05:00.000, 201, 189, 1, 1, jarg_id);', 'VIGA', 0, 0, praktikum_11_jr);
+end;	
+$trigger_ajakontroll1$ language plpgsql;	
+
+-- tg_kustuta_klubi
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_kustuta_klubi') then drop procedure trigger_kustuta_klubi; end if;
+create or replace procedure trigger_kustuta_klubi(praktikum_11_jr int) as $trigger_kustuta_klubi$
+declare 
+jarg_id int;
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_kustuta_klubi') then
+		ALTER TABLE klubid DISABLE TRIGGER ALL;
+		ALTER TABLE klubid ENABLE TRIGGER tg_kustuta_klubi;
+		
+		-- DELETE
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_kustuta_klubi' and event_manipulation = 'DELETE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" event "DELETE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" event "DELETE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- after
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_kustuta_klubi' and action_timing = 'AFTER') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" kaivitusaeg "AFTER"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		INSERT INTO Asulad VALUES (nextval('serial_registration'), 'Rakvere');
+		INSERT INTO Klubid (nimi, asula) VALUES ('Klubi Kustutamiseks', (select id from asulad where nimi = 'Rakvere'));
+		DELETE FROM klubid WHERE nimi='Klubi Kustutamiseks';
+		
+		if 		not exists (select * from asulad where nimi = 'Rakvere')
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" asula kustumine koos ainsa klubiga', 'onnestus', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" asula kustumine koos ainsa klubiga', 'ei onnestunud, aga peaks', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		INSERT INTO Asulad VALUES (nextval('serial_registration'), 'Tapa');
+		INSERT INTO Klubid (nimi, asula) VALUES ('Uus_1', (select id from asulad where nimi = 'Tapa'));
+		INSERT INTO Klubid (nimi, asula) VALUES ('Uus_2', (select id from asulad where nimi = 'Tapa'));
+		DELETE FROM klubid WHERE nimi='Uus_1';
+		
+		if 		exists (select * from asulad where nimi = 'Tapa')
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" asula kustumine, kus on veel klubisid', 'ei onnestunud', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" asula kustumine, kus on veel klubisid', 'onnestus, aga ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		
+	else 	insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_11_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_11_jr);
+			insert into Staatus values('Praktikum 11', 'Triger "tg_kustuta_klubi" kontrollimiseks kasuta:', 
+			'INSERT INTO Asulad VALUES (nextval(''serial_registration''), ''Tapa'');
+			INSERT INTO Klubid (nimi, asula) VALUES (''Uus_1'', (select id from asulad where nimi = ''Tapa''));', 'VIGA', 0, 0, praktikum_11_jr);
+end;	
+$trigger_kustuta_klubi$ language plpgsql;	
+
+
+-- tg_partiiaeg1
+if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_partiiaeg1') then drop procedure trigger_partiiaeg1; end if;
+create or replace procedure trigger_partiiaeg1(praktikum_11_jr int) as $trigger_partiiaeg1$
+declare 
+jarg_id int;
+begin
+	
+	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg1') then
+		ALTER TABLE partiid DISABLE TRIGGER ALL;
+		ALTER TABLE partiid ENABLE TRIGGER tg_partiiaeg1;
+		
+		-- update
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg1' and event_manipulation = 'UPDATE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" event "UPDATE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" event "UPDATE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- insert
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg1' and event_manipulation = 'INSERT') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" event "INSERT"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" event "INSERT"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		-- before
+		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg1' and action_timing = 'BEFORE') 
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" kaivitusaeg "BEFORE"', 'on olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" kaivitusaeg "BEFORE"', 'ei olemas', 'VIGA', 0, 0, praktikum_11_jr);
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" kontrollimiseks kasuta:', '', 'VIGA', 0, 0, praktikum_11_jr);
+		jarg_id := nextval('serial_registration');
+		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'INSERT INTO Partiid(turniir, algushetk, valge, must, id) VALUES (41, ''2005-01-10 08:04'', 2,6,'|| jarg_id||');', 'VIGA', 0, 0, praktikum_11_jr);
+		jarg_id := nextval('serial_registration');
+		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'INSERT INTO Partiid(turniir, algushetk, valge, must, id) VALUES (41, ''2005-01-22 08:04'', 2,6,'|| jarg_id||');', 'VIGA', 0, 0, praktikum_11_jr);
+		jarg_id := nextval('serial_registration');
+		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'INSERT INTO Partiid(turniir, algushetk, lopphetk, valge, must, id) VALUES (41, ''2005-01-12 08:04'', ''2005-01-22 09:10'', 2,6,'|| jarg_id||');', 'VIGA', 0, 0, praktikum_11_jr);
+		jarg_id := nextval('serial_registration');
+		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'INSERT INTO Partiid(turniir, algushetk, lopphetk, valge, must, id) VALUES (41, ''2005-01-12 08:04'', ''2005-01-01 09:10'', 2,6,'|| jarg_id||');', 'VIGA', 0, 0, praktikum_11_jr);
+
+		/*SET client_min_messages TO ERROR;
+		jarg_id := nextval('serial_registration');
+		INSERT INTO Partiid(turniir, algushetk, valge, must, id) VALUES (41, '2005-01-10 08:04', 2,6, jarg_id);
+		if 		not exists (select p.algushetk, p.lopphetk, t.alguskuupaev, t.loppkuupaev  from partiid p join turniirid t on t.id = p.turniir where p.id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii algab enne turniiri algust', 'ei ole olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii algab enne turniiri algust', 'on olemas, ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO Partiid(turniir, algushetk, valge, must, id) VALUES (41, '2005-01-22 08:04', 2,6, jarg_id);
+		if 		not exists (select p.algushetk, p.lopphetk, t.alguskuupaev, t.loppkuupaev  from partiid p join turniirid t on t.id = p.turniir where p.id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii algab peale turniiri loppu', 'ei ole olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii algab peale turniiri loppu', 'on olemas, ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO Partiid(turniir, algushetk, lopphetk, valge, must, id) VALUES (41, '2005-01-12 08:04', '2005-01-22 09:10', 2,6, jarg_id);
+		if 		not exists (select p.algushetk, p.lopphetk, t.alguskuupaev, t.loppkuupaev  from partiid p join turniirid t on t.id = p.turniir where p.id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii loppeb peale turniiri loppu', 'ei ole olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii loppeb peale turniiri loppu', 'on olemas, ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		
+		jarg_id := nextval('serial_registration');
+		INSERT INTO Partiid(turniir, algushetk, lopphetk, valge, must, id) VALUES (41, '2005-01-12 08:04', '2005-01-01 09:10', 2,6, jarg_id);
+		if 		not exists (select p.algushetk, p.lopphetk, t.alguskuupaev, t.loppkuupaev  from partiid p join turniirid t on t.id = p.turniir where p.id = jarg_id)
+		then 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii loppeb enne turniiri algust', 'ei ole olemas', 'OK', 0, 0, praktikum_11_jr);
+		else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1" uus partii loppeb enne turniiri algust', 'on olemas, ei tohiks', 'VIGA', 0, 0, praktikum_11_jr);
+				delete from partiid where id = jarg_id;
+		end if;
+		SET client_min_messages TO WARNING;*/
+		
+		
+	else 	insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'ei ole olemas', 'VIGA', 0, 0, praktikum_11_jr);
+	end if;
+	
+	exception 
+		when others then 
+			insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', 0, 0, praktikum_11_jr);
+end;	
+$trigger_partiiaeg1$ language plpgsql;	
+
+
+
+
+
 /* Kodutoode kontrollid algavad siit */
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_3') then drop procedure kodutoo_3; end if;
-create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ul. 0.5p, 6 ul. 0.75p, 7.ul 0.75p 
+create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ul. 1p, 6 ul. 0.5p, 7.ul 0.5p 
 declare 
 kodutoo_3_jr int;
 kodutoo_3_inimesed_andmed numeric;
@@ -1451,7 +1778,7 @@ $kodutoo_3$ language plpgsql;
 
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_4') then drop procedure kodutoo_4; end if;
-create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1-5. ul. 0.5p, 6 ul. 0.75p, 7.ul 0.75p 
+create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1 - 0.5p, 2 - 0.5p, 3 - 0.5p, 4 - 0.5p,
 declare 
 kodutoo_4_jr int;
 kodutoo_4_vaade_turniiripartiid numeric;
@@ -1629,9 +1956,9 @@ begin
 	else 	insert into Staatus values('Kodutoo 4', 'Vaadet "mv_partiide_arv_valgetega"', 'ei ole olemas', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega, kodutoo_4_jr);
 	end if;
 	
-	--exception 
-		--when others then 
-			--insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'oppejoud annab tagasiside! Vaadet pole voi veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
+	exception 
+		when others then 
+			insert into Staatus values ('Kodutoo 4', 'Vaate "mv_partiide_arv_valgetega" kontrollides tekkis viga', 'oppejoud annab tagasiside! Vaadet pole voi veerge pole!', 'VIGA', kodutoo_4_vaade_partiide_arv_valgetega*0, kodutoo_4_vaade_partiide_arv_valgetega/5, kodutoo_4_jr);
 			
 end;	
 $mv_vaate_kontroll$ language plpgsql;
@@ -1787,6 +2114,7 @@ create or replace procedure procedure_uus_turniir(kodutoo_5_prot_uus_turniir num
 declare
 arg_count int;
 begin
+	ALTER TABLE turniirid DISABLE TRIGGER ALL;
 	if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sp_uus_turniir') then 
 		--delete from turniirid where nimi ='Tartu Meister'; 
 		select pronargs into arg_count from pg_proc where proname = 'sp_uus_turniir';
@@ -1820,7 +2148,7 @@ $procedure_uus_turniir$ language plpgsql;
 
 -- kodutöö 6
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_6') then drop procedure kodutoo_6; end if;
-create or replace procedure kodutoo_6(versioon int) as $kodutoo_6$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+create or replace procedure kodutoo_6(versioon int) as $kodutoo_6$ -- punktid kokku 2p: 1 - 0.2, 2 - 0.2, 3 - 0.8, 4 - 0.8
 declare
 kodutoo_6_jr int;
 kodutoo_6_ix_riiginimi numeric;
@@ -1862,7 +2190,7 @@ $kodutoo_6$ language plpgsql;
 
 -- tg_partiiaeg
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_partiiaeg') then drop procedure trigger_partiiaeg; end if;
-create or replace procedure trigger_partiiaeg(kodutoo_6_tg_partiiaeg numeric, kodutoo_6_jr int) as $trigger_partiiaeg$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+create or replace procedure trigger_partiiaeg(kodutoo_6_tg_partiiaeg numeric, kodutoo_6_jr int) as $trigger_partiiaeg$
 declare
 mangija_1 int;
 mangija_2 int;
@@ -1870,6 +2198,7 @@ begin
 
 	if 	exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg') then
 		ALTER TABLE partiid DISABLE TRIGGER ALL;
+		--ALTER TABLE isikud DISABLE TRIGGER ALL;
 		ALTER TABLE partiid ENABLE TRIGGER tg_partiiaeg;
 		-- update
 		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_partiiaeg' and event_manipulation = 'UPDATE') 
@@ -1908,13 +2237,15 @@ begin
 	exception 
 		when others then 
 			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" Kontrollimiseks kasuta: ', 'insert into partiid values (44,''2023-04-22 17:45:24.000'',''2023-03-22 17:45:24.000'','||mangija_1||','||mangija_2||',2,0, nextval(''serial_registration''));', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+
 end;	
 $trigger_partiiaeg$ language plpgsql;
 
 
 -- tg_klubi_olemasolu
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_klubi_olemasolu') then drop procedure trigger_klubi_olemasolu; end if;
-create or replace procedure trigger_klubi_olemasolu(kodutoo_6_tg_klubi_olemasolu numeric, kodutoo_6_jr int) as $trigger_klubi_olemasolu$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
+create or replace procedure trigger_klubi_olemasolu(kodutoo_6_tg_klubi_olemasolu numeric, kodutoo_6_jr int) as $trigger_klubi_olemasolu$ 
 declare 
 klubi_id int;
 begin
@@ -1924,50 +2255,49 @@ begin
 		ALTER TABLE isikud ENABLE TRIGGER tg_klubi_olemasolu;
 		-- update
 		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and event_manipulation = 'UPDATE') 
-		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
-		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "UPDATE"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
 		end if;
 		-- insert
 		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and event_manipulation = 'INSERT') 
-		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
-		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" event "INSERT"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
 		end if;
 		-- before
 		if 		exists (select trigger_name from information_schema.triggers where trigger_name = 'tg_klubi_olemasolu' and action_timing = 'AFTER') 
-		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
-		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" kaivitusaeg "AFTER"', 'ei olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8, kodutoo_6_jr);
 		end if;
 		
 		-- klubi Klubitud
-		if 		exists (select * from klubid where nimi ilike 'Klubitud') 
-		then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" klubi "Klubitud"', 'on olemas', 'OK', kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
-		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" klubi "Klubitud"', 'ei ole olemas, lisatakse', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10, kodutoo_6_jr);
+		if 		not exists (select * from klubid where nimi ilike 'Klubitud') then 	
 				insert into klubid(nimi) values ('Klubitud');
 		end if;
 		select id into klubi_id from klubid where nimi = 'Klubitud';
 		
-		if 	exists (select id from isikud where eesnimi = 'Kan' and perenimi = 'Ma') then delete from isikud where eesnimi = 'Kan' and perenimi = 'Ma'; end if;
-		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Kan', 'Ma');
+		if 	exists (select id from isikud where eesnimi = 'Lan' and perenimi = 'Na') then delete from isikud where eesnimi = 'Kan' and perenimi = 'Ma'; end if;
+		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Lan', 'Na');
 		
 		if 		(select check_column_exists('isikud','klubis'))=1 then 
-			if 		(select klubis from isikud where eesnimi = 'Kan' and perenimi = 'Ma') = klubi_id
-			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
-			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			if 		(select klubis from isikud where eesnimi = 'Lan' and perenimi = 'Na') = klubi_id
+			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_jr);
+			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_jr);
 			end if;
 		elsif 	(select check_column_exists('isikud','klubi'))=1 then 
-			if 		(select klubi from isikud where eesnimi = 'Kan' and perenimi = 'Ma') = klubi_id
-			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
-			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+			if 		(select klubi from isikud where eesnimi = 'Lan' and perenimi = 'Na') = klubi_id
+			then 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'on oige', 'OK', kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_jr);
+			else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi', 'ei ole oige, peab olema "' || klubi_id ||'"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_jr);
 			end if;
-		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi kontroll', 'ei saa teha, sest puudub veerg "klubi" või "klubis"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/10*6, kodutoo_6_jr);
+		else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" isiku lisamisel klubi kontroll', 'ei saa teha, sest puudub veerg "klubi" või "klubis"', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu/8*5, kodutoo_6_jr);
 		end if;
 	
 	else 	insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu"', 'ei ole olemas', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
 	end if;
 
-	--exception 
-		--when others then 
-			--insert into Staatus values('Kodutoo 5', 'Triger "tg_klubi_olemasolu"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+	exception 
+		when others then 
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" Kontrollimiseks kasuta: ', 'insert into isikud (id, eesnimi, perenimi) values (nextval(''serial_registration''),''Kan'', ''Ma'');', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
 end;	
 $trigger_klubi_olemasolu$ language plpgsql;
 
@@ -2039,7 +2369,6 @@ begin
 	copy partiid from 'C:\TEMP\partiid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	copy riigid from 'C:\TEMP\riigid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
 	*/
-	
 end;
 $andmete_taassisestus$ LANGUAGE plpgsql;
 
@@ -2101,6 +2430,9 @@ begin
 	if versioon >= 8 then
 		call kodutoo_6(versioon);
 	end if;
+	if versioon >= 9 then
+		call praktikum_11(versioon);
+	end if;
 	call arvuta_punktid(versioon);
 	
 	if versioon >= 3 then
@@ -2117,6 +2449,7 @@ ALTER TABLE isikud DISABLE TRIGGER ALL;
 ALTER TABLE klubid DISABLE TRIGGER ALL;
 ALTER TABLE partiid DISABLE TRIGGER ALL;
 ALTER TABLE turniirid DISABLE TRIGGER ALL;
+ALTER TABLE riigid DISABLE TRIGGER ALL;
 call kaivita(versioon, folder_path, txt_lugemis_andmed_delimiter);
 --Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
 call valjasta_tulemus(folder_path || '\tulemus.csv', tulemus_andmed_delimiter);
@@ -2124,6 +2457,7 @@ ALTER TABLE isikud ENABLE TRIGGER ALL;
 ALTER TABLE klubid ENABLE TRIGGER ALL;
 ALTER TABLE partiid ENABLE TRIGGER ALL;
 ALTER TABLE turniirid ENABLE TRIGGER ALL;
+ALTER TABLE riigid ENABLE TRIGGER ALL;
 SET client_min_messages TO NOTICE;
 end;
 $kontroll$ LANGUAGE plpgsql;
