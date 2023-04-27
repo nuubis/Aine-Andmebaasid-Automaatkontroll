@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 9;
+declare versioon int := 8;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -2237,7 +2237,7 @@ begin
 	exception 
 		when others then 
 			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
-			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" Kontrollimiseks kasuta: ', 'insert into partiid values (44,''2023-04-22 17:45:24.000'',''2023-03-22 17:45:24.000'','||mangija_1||','||mangija_2||',2,0, nextval(''serial_registration''));', 'VIGA', kodutoo_6_tg_partiiaeg*0, kodutoo_6_tg_partiiaeg, kodutoo_6_jr);
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_partiiaeg" Kontrollimiseks kasuta: ', 'insert into partiid values (44,''2023-04-22 17:45:24.000'',''2023-03-22 17:45:24.000'','||mangija_1||','||mangija_2||',2,0, nextval(''serial_registration''));', 'VIGA', 0, 0, kodutoo_6_jr);
 
 end;	
 $trigger_partiiaeg$ language plpgsql;
@@ -2271,11 +2271,11 @@ begin
 		
 		-- klubi Klubitud
 		if 		not exists (select * from klubid where nimi ilike 'Klubitud') then 	
-				insert into klubid(nimi) values ('Klubitud');
+				insert into klubid(id, nimi) values (nextval('serial_registration'),'Klubitud');
 		end if;
 		select id into klubi_id from klubid where nimi = 'Klubitud';
 		
-		if 	exists (select id from isikud where eesnimi = 'Lan' and perenimi = 'Na') then delete from isikud where eesnimi = 'Kan' and perenimi = 'Ma'; end if;
+		if 	exists (select id from isikud where eesnimi = 'Lan' and perenimi = 'Na') then delete from isikud where eesnimi = 'Lan' and perenimi = 'Na'; end if;
 		insert into isikud (id, eesnimi, perenimi) values (nextval('serial_registration'),'Lan', 'Na');
 		
 		if 		(select check_column_exists('isikud','klubis'))=1 then 
@@ -2297,13 +2297,13 @@ begin
 	exception 
 		when others then 
 			insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu"', 'Kontrollis tekkis viga! Oppejoud peab vaatama!', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
-			insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" Kontrollimiseks kasuta: ', 'insert into isikud (id, eesnimi, perenimi) values (nextval(''serial_registration''),''Kan'', ''Ma'');', 'VIGA', kodutoo_6_tg_klubi_olemasolu*0, kodutoo_6_tg_klubi_olemasolu, kodutoo_6_jr);
+			insert into Staatus values('Kodutoo 6', 'Triger "tg_klubi_olemasolu" Kontrollimiseks kasuta: ', 'insert into isikud (id, eesnimi, perenimi) values (nextval(''serial_registration''),''Kan'', ''Ma'');', 'VIGA', 0, 0, kodutoo_6_jr);
 end;	
 $trigger_klubi_olemasolu$ language plpgsql;
 
 
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
-create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $andmete_taassisestus$
+create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50), versioon int) as $andmete_taassisestus$
 begin 
 	truncate table klubid, partiid, isikud, turniirid  cascade;
 	/*if (select count(*) from partiid) > 0 then truncate table partiid cascade; end if;
@@ -2332,6 +2332,7 @@ begin
 		alter table klubid add column asula_test int;
 		call sisesta_txt_andmed('klubid', folder_path || '\klubid.txt', '(id, nimi, asula_test)',txt_lugemis_andmed_delimiter);
 	end if;
+	if versioon >= 8 then insert into klubid(id,nimi) values (nextval('serial_registration'),'Klubitud'); end if;
 	
 	-- Turniirid
 	if exists (select * from information_schema.columns where table_name = 'turniirid' and column_name = 'asula') then 
@@ -2406,7 +2407,7 @@ begin
 	end if;
 	
 	if versioon >= 4 then 
-		call andmete_taassisestus(folder_path, txt_lugemis_andmed_delimiter);
+		call andmete_taassisestus(folder_path, txt_lugemis_andmed_delimiter, versioon);
 	end if;
 	if versioon >= 2 then
 		call praktikum_3(versioon);

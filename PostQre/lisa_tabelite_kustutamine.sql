@@ -2,7 +2,7 @@ create or replace procedure kustuta () as $$
 DECLARE
    sql_e text;
 BEGIN
-
+	SET client_min_messages TO WARNING;
 	for sql_e in 
    		SELECT 'DROP TABLE ' || p.tablename || ' cascade;' 
    		FROM pg_catalog.pg_tables p
@@ -50,6 +50,7 @@ BEGIN
    	loop
    		execute sql_e;
    	end loop;
+	SET client_min_messages TO NOTICE;
 end;
 $$ LANGUAGE plpgsql;
 call kustuta();
