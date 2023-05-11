@@ -29,28 +29,6 @@ tulemus_andmed_delimiter varchar(10) := ',';
 txt_lugemis_andmed_delimiter varchar(10) := '\t';
 csv_lugemis_andmed_delimiter varchar(10) := ',';
 
-/* Jargmised muutujaid saab kasutada muutujad.csv asemel - HETKEL EI PLAANI - Moodle'i jaoks vaja?
-praktikum_punktid int :=1;
-praktikum_3_jr int :=5;
-praktikum3_oige int :=16;
-praktikum_4_jr int :=10;
-praktikum4_oige int :=8;
-praktikum_jr int :=50;
-kodutoo_3_jr int :=55;
-kodutoo_4_jr int :=60;
-kodutoo_3_turniirid_asula_andmed numeric :=0.2;
-kodutoo_3_turniirid_asula numeric :=0.2;
-kodutoo_3_inimesed_andmed numeric :=0.2;
-kodutoo_3_turniirid_asukoht_kustutamine numeric:=0.2;
-kodutoo_3_valisvoti_turniirid_asulad numeric:=0.2;
-kodutoo_4_vaade_turniiripartiid numeric:=0.5;
-kodutoo_4_vaade_klubipartiikogused numeric:=0.5;
-kodutoo_4_vaade_keskminepartii numeric:=0.5;
-kodutoo_4_vaade_partiide_arv_valgetega numeric:=0.5;
-kodutoo_jr int :=90;
-kodutoo_punktid int :=1;
-tudeng int :=100;
-*/
 begin 
 
 /* Andmete sisestamisega seotud protseduurid */
@@ -83,7 +61,7 @@ execute sqltext;
 end;
 $valjasta_tulemus$ language plpgsql;
 
-/* Tabel muutujad igaks juhuks */
+/* Tabel muutujad vajalike kontrollandmete hoidmiseks  */
 if exists (select * from information_schema.tables where table_name = 'muutujad') then drop table  muutujad; end if;
 create table muutujad (
 nimi varchar(1000) unique,
@@ -633,7 +611,7 @@ begin
 							if 		(select check_column_datatype('v_punktid','punkt','numeric')) = 1 then
 									if 		(select check_column_datatype('v_punktid','partii','int%')) = 1 then
 											
-											-- 0.5
+											-- vaate v_punktid partii 299 mangija 76 punktid: 0.5
 											select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
 											if 		check_count = 1 then
 													if 		(select punkt from v_punktid where partii = 299 and mangija = 76) = 0.5
@@ -966,7 +944,7 @@ begin
 end;
 $edu_test$ LANGUAGE plpgsql;
 
-
+-- praktikum 10
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_10') then drop procedure praktikum_10; end if;
 create or replace procedure praktikum_10(versioon int) as $praktikum_10$ 
 declare 
