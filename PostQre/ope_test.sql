@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 11;
+declare versioon int := 0;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -2445,12 +2445,15 @@ CREATE SEQUENCE serial_registration START 3000;
 /* Trigerite väljalülitamine, et ei segaks automaatkontrolli tööd */
 ALTER TABLE staatus DISABLE TRIGGER ALL;
 ALTER TABLE muutujad DISABLE TRIGGER ALL;
-ALTER TABLE isikud DISABLE TRIGGER ALL;
-ALTER TABLE klubid DISABLE TRIGGER ALL;
-ALTER TABLE partiid DISABLE TRIGGER ALL;
-ALTER TABLE turniirid DISABLE TRIGGER ALL;
-if exists (select * from information_schema.tables where table_name = 'asulad') then 
-ALTER TABLE riigid DISABLE TRIGGER ALL;
+
+if versioon != 0 then
+	ALTER TABLE isikud DISABLE TRIGGER ALL;
+	ALTER TABLE klubid DISABLE TRIGGER ALL;
+	ALTER TABLE partiid DISABLE TRIGGER ALL;
+	ALTER TABLE turniirid DISABLE TRIGGER ALL;
+	if exists (select * from information_schema.tables where table_name = 'asulad') then 
+	ALTER TABLE riigid DISABLE TRIGGER ALL;
+	end if;
 end if;
 
 /* Kõikide kontrollide käivitamine vastavalt versioonile */
@@ -2460,12 +2463,13 @@ call kaivita(versioon, folder_path, txt_lugemis_andmed_delimiter);
 call valjasta_tulemus(folder_path || '\tulemus.csv', tulemus_andmed_delimiter);
 
 /* Trigerite taas käiviamine */
-ALTER TABLE isikud ENABLE TRIGGER ALL;
-ALTER TABLE klubid ENABLE TRIGGER ALL;
-ALTER TABLE partiid ENABLE TRIGGER ALL;
-ALTER TABLE turniirid ENABLE TRIGGER ALL;
-ALTER TABLE riigid ENABLE TRIGGER ALL;
-
+if versioon != 0 then
+	ALTER TABLE isikud ENABLE TRIGGER ALL;
+	ALTER TABLE klubid ENABLE TRIGGER ALL;
+	ALTER TABLE partiid ENABLE TRIGGER ALL;
+	ALTER TABLE turniirid ENABLE TRIGGER ALL;
+	ALTER TABLE riigid ENABLE TRIGGER ALL;
+end if;
 /* Andmebaasi teadete sisselülitamine */
 SET client_min_messages TO NOTICE;
 end;
