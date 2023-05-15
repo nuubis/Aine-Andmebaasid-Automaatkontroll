@@ -1,5 +1,5 @@
 create or replace procedure kontroll() as $kontroll$
-declare versioon int := 8;
+declare versioon int := 11;
 /*
 Siin maarad, mis ylesandeid kontrollitakse. Koik eelnevad kontrollivad ka eelmisi.
 0 - praktikum 9 ehk EDU
@@ -32,6 +32,7 @@ csv_lugemis_andmed_delimiter varchar(10) := ',';
 begin 
 
 /* Andmete sisestamisega seotud protseduurid */
+/* Sisesta txt failist andmed */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sisesta_txt_andmed') then drop procedure sisesta_txt_andmed; end if;
 create or replace procedure sisesta_txt_andmed(table_name varchar(100), file_path varchar(255), veerud varchar(255)='', delimiter_code varchar(50)= '\t') as  $sisesta_andmed$
 declare sqltext varchar(1000);
@@ -41,6 +42,7 @@ execute sqltext;
 end;
 $sisesta_andmed$ language plpgsql;
 
+/* Sisesra csv failist andmed */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'sisesta_csv_andmed') then drop procedure sisesta_csv_andmed; end if;
 create or replace procedure sisesta_csv_andmed(table_name varchar(100), file_path varchar(255), delimiter_code varchar(50)= ',') as  $sisesta_andmed$
 declare sqltext varchar(1000);
@@ -50,6 +52,7 @@ execute sqltext;
 end;
 $sisesta_andmed$ language plpgsql;
 
+/* Väljasta tagasiside tulemusfaili */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'valjasta_tulemus') then drop procedure valjasta_tulemus; end if;
 create or replace procedure valjasta_tulemus(file_path varchar(255), delimiter_code varchar(50)= ',') as  $valjasta_tulemus$
 declare sqltext varchar(1000);
@@ -69,9 +72,8 @@ taisarv int,
 komaarv numeric);
 delete from muutujad;
 call sisesta_csv_andmed('muutujad', folder_path || '\muutujad.csv', csv_lugemis_andmed_delimiter);
---copy muutujad from 'C:\TEMP\muutujad.csv' with (format csv, delimiter ',');
 
-/* Tabel, kuhu kogutakse tudengi kontrolli tulemus */
+/* Tabel Staatus, kuhu kogutakse tudengi kontrollide tulemus */
 if exists (select * from information_schema.tables where table_name = 'staatus') then drop table  staatus; end if;
 create table Staatus (
 Ylesanne varchar(100),
@@ -83,6 +85,35 @@ Max_punktid numeric,
 Jr int,
 Id serial);
 
+/* Eelkontrollide funktsioonid */
+/* Tabeli veeru olemasolu eelkontroll */
+if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_exists') then drop function check_column_exists; end if;
+create or replace function check_column_exists(a_table_name varchar(100), a_column_name varchar(100)) returns int as $check_column_exists$
+declare vastus int;
+begin
+	if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name))
+	then	vastus := 1;
+	else 	vastus := 0;
+	end if;
+	return vastus;
+end;
+$check_column_exists$ language plpgsql;
+
+
+/* Tabeli veeru andmetuubi eelkontroll */
+if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_datatype') then drop function check_column_datatype; end if;
+create or replace function check_column_datatype(a_table_name varchar(100), a_column_name varchar(100), a_datatype varchar(100)) returns int as $check_column_datatype$
+declare vastus int;
+begin
+	if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name) and data_type like a_datatype)
+	then	vastus := 1;
+	else 	vastus := 0;
+	end if;
+	return vastus;
+end;
+$check_column_datatype$ language plpgsql;
+
+/* KOntrollide abiprotseduurid */
 /* Protseduur, mis arvutab tudengi punktid praktikumi ja kodutoo eest */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'arvuta_punktid') then drop procedure arvuta_punktid; end if;
 create or replace procedure arvuta_punktid(versioon int) as $arvuta_punktid$
@@ -158,6 +189,7 @@ begin
 end;
 $arvuta_punktid$ language plpgsql;
 
+
 /* Tabeli veeru olemasolu kontroll */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'check_column') then drop procedure check_column; end if;
 create or replace procedure check_column(a_table_name varchar(100), a_column_name varchar(100), punktid numeric, 
@@ -179,33 +211,6 @@ create or replace procedure check_column(a_table_name varchar(100), a_column_nam
 			insert into Staatus values (ylesanne, olem ||' "'||a_table_name||'" Veergu "'||a_column_name||'" ', 'VIGA AUTOMAATKONTROLLIS!', 'VIGA', punktid, punktid, jr);
 	end;
 $check_column$ language plpgsql;
-
-/* Tabeli veeru andmetuubi kontroll */
-if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_exists') then drop function check_column_exists; end if;
-create or replace function check_column_exists(a_table_name varchar(100), a_column_name varchar(100)) returns int as $check_column_exists$
-declare vastus int;
-begin
-	if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name))
-	then	vastus := 1;
-	else 	vastus := 0;
-	end if;
-	return vastus;
-end;
-$check_column_exists$ language plpgsql;
-
-
-/* Tabeli veeru andmetuubi kontroll */
-if exists (select routine_name from information_schema.routines where routine_type = 'FUNCTION' and routine_name = 'check_column_datatype') then drop function check_column_datatype; end if;
-create or replace function check_column_datatype(a_table_name varchar(100), a_column_name varchar(100), a_datatype varchar(100)) returns int as $check_column_datatype$
-declare vastus int;
-begin
-	if 		exists (select * from information_schema.columns where table_name = lower(a_table_name) and column_name = lower(a_column_name) and data_type like a_datatype)
-	then	vastus := 1;
-	else 	vastus := 0;
-	end if;
-	return vastus;
-end;
-$check_column_datatype$ language plpgsql;
 
 
 /* Kitsenduste kontroll nimeliselt */
@@ -231,7 +236,10 @@ create or replace procedure check_constraint(a_table_name varchar(100), a_constr
 	end;
 $check_constraint$ language plpgsql;
 
--- Praktikum 3 kontroll. 27oN
+
+
+/* Praktikumitööde kontrollid praktikumi ülemprotseduuride kaupa */
+-- Praktikum 3 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_3') then drop procedure praktikum_3; end if;
 create or replace procedure praktikum_3(versioon int) as $praktikum_3$
 declare
@@ -339,7 +347,7 @@ end;
 $praktikum_3$ language plpgsql;
 
 
--- Praktikum 4 kontroll. 28oN
+-- Praktikum 4 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_4') then drop procedure praktikum_4; end if;
 create or replace procedure praktikum_4(versioon int) as $praktikum_4$
 declare
@@ -404,7 +412,7 @@ end;
 $praktikum_4$ language plpgsql;
 
 
--- Praktikum 7 kontroll. 31oN, 56 oiget veergudest ja andmetest
+-- Praktikum 7 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_7') then drop procedure praktikum_7; end if;
 create or replace procedure praktikum_7(versioon int) as $praktikum_7$
 declare
@@ -611,7 +619,7 @@ begin
 							if 		(select check_column_datatype('v_punktid','punkt','numeric')) = 1 then
 									if 		(select check_column_datatype('v_punktid','partii','int%')) = 1 then
 											
-											-- vaate v_punktid partii 299 mangija 76 punktid: 0.5
+											-- 0.5
 											select count(*) into check_count from v_punktid where partii = 299 and mangija = 76;
 											if 		check_count = 1 then
 													if 		(select punkt from v_punktid where partii = 299 and mangija = 76) = 0.5
@@ -754,6 +762,8 @@ begin
 end;	
 $praktikum_7$ language plpgsql;
 
+
+-- Praktikum 9 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'edu_test') then drop procedure edu_test; end if;
 create or replace procedure edu_test () as $edu_test$
 declare
@@ -944,7 +954,8 @@ begin
 end;
 $edu_test$ LANGUAGE plpgsql;
 
--- praktikum 10
+
+-- praktikum 10 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_10') then drop procedure praktikum_10; end if;
 create or replace procedure praktikum_10(versioon int) as $praktikum_10$ 
 declare 
@@ -952,6 +963,7 @@ praktikum_10_jr int;
 begin
 	select taisarv into praktikum_10_jr from muutujad where nimi = 'praktikum_10_jr';
 	
+	-- Funktsioonide ja protseduuride kontrollid
 	call function_mangija_punktid_turniiril(praktikum_10_jr);
 	call function_infopump(praktikum_10_jr);
 	call function_klubisuurus(praktikum_10_jr);
@@ -1027,7 +1039,7 @@ begin
 end;	
 $function_infopump$ language plpgsql;
 
-
+-- f_klubisuurus
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubisuurus') then drop procedure function_klubisuurus; end if;
 create or replace procedure function_klubisuurus(praktikum_10_jr int) as $function_klubisuurus$ 
 declare 
@@ -1057,6 +1069,7 @@ end;
 $function_klubisuurus$ language plpgsql;
 
 
+-- f_nimi
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_nimi') then drop procedure function_nimi; end if;
 create or replace procedure function_nimi(praktikum_10_jr int) as $function_nimi$ 
 declare 
@@ -1086,7 +1099,7 @@ end;
 $function_nimi$ language plpgsql;
 
 
-
+-- f_mangija_koormus
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_koormus') then drop procedure function_mangija_koormus; end if;
 create or replace procedure function_mangija_koormus(praktikum_10_jr int) as $function_mangija_koormus$ 
 declare 
@@ -1115,7 +1128,7 @@ end;
 $function_mangija_koormus$ language plpgsql;
 
 
-
+-- f_mangija_voite_turniiril
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_voite_turniiril') then drop procedure function_mangija_voite_turniiril; end if;
 create or replace procedure function_mangija_voite_turniiril(praktikum_10_jr int) as $function_mangija_voite_turniiril$ 
 declare 
@@ -1150,7 +1163,7 @@ end;
 $function_mangija_voite_turniiril$ language plpgsql;
 
 
-
+-- f_mangija_viike_turniiril
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_viike_turniiril') then drop procedure function_mangija_viike_turniiril; end if;
 create or replace procedure function_mangija_viike_turniiril(praktikum_10_jr int) as $function_mangija_viike_turniiril$ 
 declare 
@@ -1185,7 +1198,7 @@ end;
 $function_mangija_viike_turniiril$ language plpgsql;
 
 
-
+--f_mangija_kaotusi_turniiril
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_mangija_kaotusi_turniiril') then drop procedure function_mangija_kaotusi_turniiril; end if;
 create or replace procedure function_mangija_kaotusi_turniiril(praktikum_10_jr int) as $function_mangija_kaotusi_turniiril$ 
 declare 
@@ -1221,6 +1234,7 @@ end;
 $function_mangija_kaotusi_turniiril$ language plpgsql;
 
 
+-- f_klubiparimad
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_klubiparimad') then drop procedure function_klubiparimad; end if;
 create or replace procedure function_klubiparimad(praktikum_10_jr int) as $function_klubiparimad$ 
 declare 
@@ -1269,6 +1283,7 @@ end;
 $function_klubiparimad$ language plpgsql;
 
 
+-- f_voit_viik_kaotus
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'function_voit_viik_kaotus') then drop procedure function_voit_viik_kaotus; end if;
 create or replace procedure function_voit_viik_kaotus(praktikum_10_jr int) as $function_voit_viik_kaotus$ 
 declare 
@@ -1324,7 +1339,7 @@ begin
 end;	
 $function_voit_viik_kaotus$ language plpgsql;
 
--- copy
+-- sp_uus_isik
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'procedure_uus_isik') then drop procedure procedure_uus_isik; end if;
 create or replace procedure procedure_uus_isik(praktikum_10_jr int) as $procedure_uus_isik$ 
 declare 
@@ -1357,13 +1372,15 @@ end;
 $procedure_uus_isik$ language plpgsql;
 
 
-
+-- Praktikum 11 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'praktikum_11') then drop procedure praktikum_11; end if;
 create or replace procedure praktikum_11(versioon int) as $praktikum_11$ 
 declare 
 praktikum_11_jr int;
 begin
 	select taisarv into praktikum_11_jr from muutujad where nimi = 'praktikum_11_jr';
+	
+	-- Trigerite kontrollid
 	call trigger_ajakontroll(praktikum_11_jr);
 	call trigger_riigid(praktikum_11_jr);
 	call trigger_ajakontroll1(praktikum_11_jr);
@@ -1476,7 +1493,8 @@ begin
 end;	
 $trigger_riigid$ language plpgsql;	
 
--- tg_ajakontroll1
+
+-- tg_ajakontroll_1
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_ajakontroll1') then drop procedure trigger_ajakontroll1; end if;
 create or replace procedure trigger_ajakontroll1(praktikum_11_jr int) as $trigger_ajakontroll1$
 declare 
@@ -1531,6 +1549,7 @@ begin
 			insert into Staatus values('Praktikum 11', 'Triger "tg_ajakontroll1" kontrollimiseks kasuta: ', 'INSERT INTO partiid (turniir, algushetk, valge, must, valge_tulemus, must_tulemus, id) VALUES (41, 2005-01-12 08:05:00.000, 201, 189, 1, 1, jarg_id);', 'VIGA', 0, 0, praktikum_11_jr);
 end;	
 $trigger_ajakontroll1$ language plpgsql;	
+
 
 -- tg_kustuta_klubi
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'trigger_kustuta_klubi') then drop procedure trigger_kustuta_klubi; end if;
@@ -1625,6 +1644,7 @@ begin
 		jarg_id := nextval('serial_registration');
 		insert into Staatus values('Praktikum 11', 'Triger "tg_partiiaeg1"', 'INSERT INTO Partiid(turniir, algushetk, lopphetk, valge, must, id) VALUES (41, ''2005-01-12 08:04'', ''2005-01-01 09:10'', 2,6,'|| jarg_id||');', 'VIGA', 0, 0, praktikum_11_jr);
 
+		/* Trgigeri loomuse tõttu ei saa järgmisi kontrolle katsetada */
 		/*SET client_min_messages TO ERROR;
 		jarg_id := nextval('serial_registration');
 		INSERT INTO Partiid(turniir, algushetk, valge, must, id) VALUES (41, '2005-01-10 08:04', 2,6, jarg_id);
@@ -1673,10 +1693,10 @@ $trigger_partiiaeg1$ language plpgsql;
 
 
 
-/* Kodutoode kontrollid algavad siit */
-
+/* Kodutööde kontrollid algavad siit */
+-- Kodutoo 3
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_3') then drop procedure kodutoo_3; end if;
-create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1-5. ul. 1p, 6 ul. 0.5p, 7.ul 0.5p 
+create or replace procedure kodutoo_3(versioon int) as $kodutoo_3$ -- punktid kokku 2p: 1 kuni 5. ül - 1p, 6 - 0.5p, 7 - 0.5p 
 declare 
 kodutoo_3_jr int;
 kodutoo_3_inimesed_andmed numeric;
@@ -1755,6 +1775,7 @@ end;
 $kodutoo_3$ language plpgsql;
 
 
+-- Kodutoo 4
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_4') then drop procedure kodutoo_4; end if;
 create or replace procedure kodutoo_4(versioon int) as $kodutoo_4$ -- punktid kokku 2p: 1 - 0.5p, 2 - 0.5p, 3 - 0.5p, 4 - 0.5p,
 declare 
@@ -1895,6 +1916,8 @@ begin
 end;	
 $kodutoo_4$ language plpgsql;	
 
+
+-- kodutoo 4 materiaalse vaate kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'mv_vaate_kontroll') then drop procedure mv_vaate_kontroll; end if;
 create or replace procedure mv_vaate_kontroll(kodutoo_4_vaade_partiide_arv_valgetega numeric, kodutoo_4_jr int) as $mv_vaate_kontroll$ 
 begin 
@@ -1943,8 +1966,7 @@ $mv_vaate_kontroll$ language plpgsql;
 
 
 
-
-
+-- kodutoo 5 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_5') then drop procedure kodutoo_5; end if;
 create or replace procedure kodutoo_5(versioon int) as $kodutoo_5$ -- punktid kokku 2p: 1 - 0.5, 2 - 0.5, 3 - 0.5, 4 - 0.5
 declare
@@ -2124,7 +2146,7 @@ end;
 $procedure_uus_turniir$ language plpgsql;
 
 
--- kodutöö 6
+-- kodutöö 6 kontroll
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kodutoo_6') then drop procedure kodutoo_6; end if;
 create or replace procedure kodutoo_6(versioon int) as $kodutoo_6$ -- punktid kokku 2p: 1 - 0.2, 2 - 0.2, 3 - 0.8, 4 - 0.8
 declare
@@ -2280,19 +2302,15 @@ end;
 $trigger_klubi_olemasolu$ language plpgsql;
 
 
+/* Andmete kustutamine ja vaheandmete sisestamine */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'andmete_taassisestus') then drop procedure andmete_taassisestus; end if;
 create or replace procedure andmete_taassisestus (folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50), versioon int) as $andmete_taassisestus$
 begin 
 	truncate table klubid, partiid, isikud, turniirid  cascade;
-	/*if (select count(*) from partiid) > 0 then truncate table partiid cascade; end if;
-	if (select count(*) from isikud) > 0 then truncate table isikud cascade; end if;
-	if (select count(*) from turniirid) > 0 then truncate table turniirid cascade; end if;
-	if (select count(*) from klubid) > 0 then truncate table klubid cascade; end if;*/
 	if exists (select * from information_schema.tables where table_name = 'asulad') then 
 		if (select count(*) from asulad) > 0 then truncate table asulad cascade; end if;
 	end if;
 	
-	--truncate table partiid, turniirid, isikud, klubid, asulad, riigid;
 	-- Asulad andmed
 	if exists (select * from information_schema.tables where table_name = 'asulad') then
 		call sisesta_txt_andmed('asulad', folder_path || '\asulad.txt', '',txt_lugemis_andmed_delimiter);
@@ -2340,17 +2358,11 @@ begin
 	-- Partiid
 	call sisesta_txt_andmed('partiid', folder_path || '\partiid.txt', '(turniir, algushetk, lopphetk, valge, must, valge_tulemus, must_tulemus, id)',txt_lugemis_andmed_delimiter);
 	
-	/*
-	copy asulad from 'C:\TEMP\asulad.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	copy klubid from 'C:\TEMP\klubid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	copy turniirid from 'C:\TEMP\turniirid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	copy isikud from 'C:\TEMP\isikud.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	copy partiid from 'C:\TEMP\partiid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	copy riigid from 'C:\TEMP\riigid.txt' DELIMITER E'\t'ENCODING 'UTF-8';
-	*/
 end;
 $andmete_taassisestus$ LANGUAGE plpgsql;
 
+
+/* Tudengi nime väljastamine */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'tudengi_nimi') then drop procedure tudengi_nimi; end if;
 create or replace procedure tudengi_nimi() as $tudengi_nimi$
 declare aeg timestamp;
@@ -2376,6 +2388,8 @@ begin
 end;
 $tudengi_nimi$ LANGUAGE plpgsql;
 
+
+/* Protseduur kaivita */
 if exists (select routine_name from information_schema.routines where routine_type = 'PROCEDURE' and routine_name = 'kaivita') then drop procedure kaivita; end if;
 create or replace procedure kaivita (versioon int, folder_path varchar(255), txt_lugemis_andmed_delimiter varchar(50)) as $kaivita$
 begin 
@@ -2420,25 +2434,45 @@ begin
 	
 end;
 $kaivita$ LANGUAGE plpgsql;
+
+/* Andmebaasi teadete väljalülitamine */
 SET client_min_messages TO WARNING;
+
+/* Abimuutuja loomine andmete sisestamiseks */
 if exists (select * from pg_catalog.pg_sequences where sequencename = 'serial_registration') then drop sequence serial_registration; end if;
 CREATE SEQUENCE serial_registration START 3000;
 
+/* Trigerite väljalülitamine, et ei segaks automaatkontrolli tööd */
+ALTER TABLE staatus DISABLE TRIGGER ALL;
+ALTER TABLE muutujad DISABLE TRIGGER ALL;
 ALTER TABLE isikud DISABLE TRIGGER ALL;
 ALTER TABLE klubid DISABLE TRIGGER ALL;
 ALTER TABLE partiid DISABLE TRIGGER ALL;
 ALTER TABLE turniirid DISABLE TRIGGER ALL;
+if exists (select * from information_schema.tables where table_name = 'asulad') then 
 ALTER TABLE riigid DISABLE TRIGGER ALL;
+end if;
+
+/* Kõikide kontrollide käivitamine vastavalt versioonile */
 call kaivita(versioon, folder_path, txt_lugemis_andmed_delimiter);
---Copy (Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc) To 'C:\TEMP\tulemus.csv' With CSV DELIMITER ',' HEADER;
+
+/* Tulemuse väljastamine */
 call valjasta_tulemus(folder_path || '\tulemus.csv', tulemus_andmed_delimiter);
+
+/* Trigerite taas käiviamine */
 ALTER TABLE isikud ENABLE TRIGGER ALL;
 ALTER TABLE klubid ENABLE TRIGGER ALL;
 ALTER TABLE partiid ENABLE TRIGGER ALL;
 ALTER TABLE turniirid ENABLE TRIGGER ALL;
 ALTER TABLE riigid ENABLE TRIGGER ALL;
+
+/* Andmebaasi teadete sisselülitamine */
 SET client_min_messages TO NOTICE;
 end;
 $kontroll$ LANGUAGE plpgsql;
+
+/* Automaatkontrollide käivitamine */
 call kontroll();
+
+/* Päring, mida saab kasutada Dbeaveris tulemuse vaatamiseks kasutada */
 --Select ylesanne, kontrolli_nimi, tagasiside, olek, punktid, max_punktid From staatus where olek in ('VIGA','Hindepunktid') or ylesanne = 'Tudeng' order by jr asc;
