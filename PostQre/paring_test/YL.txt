@@ -1,0 +1,12 @@
+select *from laulud l 
+where pealkiri like '%Love%'
+and koht_finaalis <= 10
+order by koht_finaalis asc;
+select * from voistlused v 
+where length(v.linn)>=7 
+and right(linn,1)!='n';
+select count(pealkiri) from laulud l 
+where punktid_finaalis > 100
+and pealkiri like '% %';
+select count(nimi) as "riikide arv", avg(rahvaarv) as "keskmine rahvaarv" from riigid r 
+where left(nimi, 1) = 'L';

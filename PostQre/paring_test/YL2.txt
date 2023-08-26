@@ -1,0 +1,3 @@
+select * from voistlused v 
+where length(v.linn)>=7 
+and right(linn,1)!='n';

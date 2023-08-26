@@ -1,0 +1,3 @@
+select count(pealkiri) from laulud l 
+where punktid_finaalis > 100
+and pealkiri like '% %';

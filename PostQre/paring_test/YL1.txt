@@ -1,0 +1,4 @@
+select *from laulud l 
+where pealkiri like '%Love%'
+and koht_finaalis <= 10
+order by koht_finaalis asc;

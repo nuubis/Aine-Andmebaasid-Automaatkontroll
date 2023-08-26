@@ -1,0 +1,2 @@
+select count(nimi) as "riikide arv", avg(rahvaarv) as "keskmine rahvaarv" from riigid r 
+where left(nimi, 1) = 'L';
